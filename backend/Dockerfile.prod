@@ -1,0 +1,27 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install system dependencies
+# gcc and libpq are necessary for building psycopg2 securely
+RUN apt-get update && apt-get install -y \
+    gcc \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy python dependencies
+COPY requirements.txt .
+
+# Install dependencies without cache to save space
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy backend source code
+COPY . .
+
+# Expose port 8000
+EXPOSE 8000
+
+# Start Uvicorn safely without the --reload flag for production performance
+# Recommends standard production workers using Gunicorn process manager in larger environments,
+# but bare Uvicorn is perfectly robust for our deployed containers paired with Caddy.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--proxy-headers", "--forwarded-allow-ips", "*"]

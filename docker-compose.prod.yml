@@ -1,0 +1,79 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infrastructure/caddy/Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - rpg_prod_network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=
+      - API_INTERNAL_URL=http://backend:8000
+    depends_on:
+      - backend
+    networks:
+      - rpg_prod_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      # Map the upload directory so user images persist across container restarts
+      - backend_uploads:/app/static/uploads
+    environment:
+      # In production, this must point to either the internal db container 
+      # or a managed database like DO Managed PostgreSQL
+      - DATABASE_URL=postgresql+asyncpg://postgres:1234@db:5432/rpg_db
+      - ENVIRONMENT=production
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - rpg_prod_network
+
+  db:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=rpg_db
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - rpg_prod_network
+
+volumes:
+  postgres_prod_data:
+  backend_uploads:
+  caddy_data:
+  caddy_config:
+
+networks:
+  rpg_prod_network:
+    driver: bridge

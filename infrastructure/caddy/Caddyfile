@@ -1,0 +1,24 @@
+# Caddyfile for Reframe Psychology Group Production
+# This file handles automatic HTTPS via Let's Encrypt and routes requests.
+
+# Replace your-domain-here.com with the actual VPS IP or domain name.
+your-domain-here.com {
+    
+    # Compress responses for better performance
+    encode gzip zstd
+
+    # Route API requests to the FastAPI backend container while preserving /api/v1.
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+
+    # Uploaded CMS media is served by FastAPI from the persistent uploads volume.
+    handle /static/* {
+        reverse_proxy backend:8000
+    }
+
+    # Route everything else to the Next.js frontend container
+    handle {
+        reverse_proxy frontend:3000
+    }
+}
