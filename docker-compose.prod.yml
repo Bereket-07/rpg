@@ -9,7 +9,8 @@ services:
     ports:
       - "3006:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=https://your-domain-here.com/api/v1
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://164.92.127.224/api/v1}
+      - API_INTERNAL_URL=http://backend:8000
     depends_on:
       - backend
     networks:
