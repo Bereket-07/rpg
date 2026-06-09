@@ -8,12 +8,14 @@ services:
     restart: always
     ports:
       - "3006:3000"
+    env_file:
+      - ./backend/.env          # shares GOOGLE_*, GEMINI_API_KEY, AUTHORIZED_EMAILS, etc.
     environment:
+      # These override / extend anything from env_file above
       - NEXT_PUBLIC_API_URL=http://164.92.127.224/api/v1
       - API_INTERNAL_URL=http://backend:8000
       - NEXTAUTH_SECRET=super_secret_dev_key_change_in_production_12345
       - NEXTAUTH_URL=http://164.92.127.224
-      - GEMINI_API_KEY=PASTE_YOUR_GEMINI_KEY_HERE
     depends_on:
       - backend
     networks:
