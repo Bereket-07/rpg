@@ -13,6 +13,7 @@ services:
       - API_INTERNAL_URL=http://backend:8000
       - NEXTAUTH_SECRET=super_secret_dev_key_change_in_production_12345
       - NEXTAUTH_URL=http://164.92.127.224
+      - GEMINI_API_KEY=PASTE_YOUR_GEMINI_KEY_HERE
     depends_on:
       - backend
     networks:
