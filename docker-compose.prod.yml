@@ -1,30 +1,15 @@
-services:
-  caddy:
-    image: caddy:2-alpine
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./infrastructure/caddy/Caddyfile:/etc/caddy/Caddyfile
-      - caddy_data:/data
-      - caddy_config:/config
-    depends_on:
-      - frontend
-      - backend
-    networks:
-      - rpg_prod_network
+version: '3.8'
 
+services:
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
     restart: always
     ports:
-      - "3000:3000"
+      - "3006:3000"
     environment:
-      - NEXT_PUBLIC_API_URL=
-      - API_INTERNAL_URL=http://backend:8000
+      - NEXT_PUBLIC_API_URL=https://your-domain-here.com/api/v1
     depends_on:
       - backend
     networks:
@@ -36,13 +21,11 @@ services:
       dockerfile: Dockerfile.prod
     restart: always
     ports:
-      - "8000:8000"
+      - "8006:8000"
     volumes:
       # Map the upload directory so user images persist across container restarts
       - backend_uploads:/app/static/uploads
     environment:
-      # In production, this must point to either the internal db container 
-      # or a managed database like DO Managed PostgreSQL
       - DATABASE_URL=postgresql+asyncpg://postgres:1234@db:5432/rpg_db
       - ENVIRONMENT=production
     depends_on:
@@ -71,8 +54,6 @@ services:
 volumes:
   postgres_prod_data:
   backend_uploads:
-  caddy_data:
-  caddy_config:
 
 networks:
   rpg_prod_network:

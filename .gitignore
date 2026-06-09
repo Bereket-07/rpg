@@ -70,3 +70,5 @@ desktop.ini
 # Codex / local agent state
 .agents/
 .codex/
+frontend/.git-backup
+frontend/.git-backup/
