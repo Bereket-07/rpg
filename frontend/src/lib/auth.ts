@@ -69,12 +69,15 @@ async function getBackendTokenForGoogleUser(email: string, name: string): Promis
 }
 
 // ── NextAuth config ──────────────────────────────────────────────────────────
-export const authOptions: NextAuthOptions = {
-    providers: [
-        // ── Google OAuth ────────────────────────────────────────────────────
+// ── Build provider list ─────────────────────────────────────────────────────
+const providers: NextAuthOptions["providers"] = [];
+
+// Only enable Google if credentials are configured
+if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    providers.push(
         GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
             authorization: {
                 params: {
                     prompt: "select_account",
@@ -82,7 +85,12 @@ export const authOptions: NextAuthOptions = {
                     scope: "openid email profile",
                 },
             },
-        }),
+        })
+    );
+}
+
+export const authOptions: NextAuthOptions = {
+    providers: [
 
         // ── Email / Password ────────────────────────────────────────────────
         CredentialsProvider({
@@ -94,7 +102,6 @@ export const authOptions: NextAuthOptions = {
             async authorize(credentials) {
                 if (!credentials?.username || !credentials?.password) return null;
                 try {
-                    console.log("[NextAuth] Attempting login for email:", credentials.username);
                     const res = await fetch(`${getApiUrl()}/api/v1/auth/login`, {
                         method: "POST",
                         headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -103,11 +110,9 @@ export const authOptions: NextAuthOptions = {
                             password: credentials.password,
                         }),
                     });
-                    console.log("[NextAuth] Login response status:", res.status);
                     const data = await res.json();
-                    console.log("[NextAuth] Login response data:", JSON.stringify(data));
                     if (res.ok && data.access_token) {
-                        const userObj = {
+                        return {
                             id: data.user_info.id.toString(),
                             name: data.user_info.name || data.user_info.email.split("@")[0],
                             email: data.user_info.email,
@@ -115,18 +120,14 @@ export const authOptions: NextAuthOptions = {
                             accessToken: data.access_token,
                             must_change_password: data.user_info.must_change_password,
                         };
-                        console.log("[NextAuth] Login successful. User object:", JSON.stringify(userObj));
-                        return userObj;
                     }
-                    console.log("[NextAuth] Login failed: status not OK or missing access_token");
                     return null;
-                } catch (err: any) {
-                    console.error("[NextAuth] Exception inside authorize:", err.message || err);
-                    if (err.stack) console.error(err.stack);
+                } catch {
                     return null;
                 }
             },
         }),
+        ...providers,
     ],
 
     callbacks: {
