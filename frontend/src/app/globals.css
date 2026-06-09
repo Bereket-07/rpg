@@ -1,0 +1,195 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    /* Base Background (Soft warm cream) and Foreground (Dark Slate) */
+    --background: 20 30% 98%;
+    --foreground: 210 25% 15%;
+
+    /* Card & Popover */
+    --card: 0 0% 100%;
+    --card-foreground: 210 25% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 25% 15%;
+
+    /* Primary: Deep Brand Teal */
+    --primary: 190 40% 50%;
+    --primary-foreground: 20 30% 98%;
+
+    /* Secondary: Natural Slate Accent */
+    --secondary: 210 10% 40%;
+    --secondary-foreground: 20 30% 98%;
+
+    /* Muted & Accent */
+    --muted: 20 20% 94%;
+    --muted-foreground: 210 10% 45%;
+    --accent: 190 30% 94%;
+    --accent-foreground: 210 25% 15%;
+
+    /* States */
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 20 30% 98%;
+
+    /* Borders & Inputs */
+    --border: 210 10% 90%;
+    --input: 210 10% 90%;
+
+    --ring: 210 60% 50%;
+
+    /* Chart Data Colors */
+    --chart-1: 210 60% 50%;
+    --chart-2: 152 40% 45%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+
+    --radius: 0.5rem;
+  }
+  .dark {
+    /* For Dark Mode, utilizing deeper blues and charcoals */
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Primary: Brightened Soft Calming Blue for dark background */
+    --primary: 210 60% 60%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    /* Secondary: Brightened Soft Natural Green */
+    --secondary: 152 40% 55%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 210 60% 60%;
+
+    --chart-1: 210 60% 60%;
+    --chart-2: 152 40% 55%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+/* ─── Global Mobile & UX Polish ───────────────────────────────────────────── */
+
+/* Smooth scrolling + remove tap highlight on mobile */
+html {
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Font rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* Prevent horizontal scroll globally */
+#__next,
+[data-nextjs-scroll-focus-boundary] {
+  overflow-x: hidden;
+}
+
+/* Clean focus ring using brand color */
+*:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Smooth image transitions */
+img {
+  transition: opacity 0.3s ease;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Mobile drawer / overlay animations ─────────────────────────────────── */
+
+/* Staggered nav link entrance used by Header mobile drawer */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Soft pulse for "live" admin badge */
+@keyframes softPulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+.animate-soft-pulse {
+  animation: softPulse 2s ease-in-out infinite;
+}
+
+/* Custom easing for the mobile drawer slide */
+.ease-drawer {
+  transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* ─── Better tap targets on mobile ───────────────────────────────────────── */
+@media (max-width: 1023px) {
+  /* Minimum 44px tap target for links/buttons per WCAG */
+  a, button {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* Compensate for nav links that are inline */
+  nav a {
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
+  }
+}
+
+/* ─── Responsive typography scale ────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Slightly tighter headings on very small screens */
+  h1 { letter-spacing: -0.02em; }
+  h2 { letter-spacing: -0.015em; }
+
+  /* Prevent font-size from being too large for viewport */
+  .text-balance {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+}
