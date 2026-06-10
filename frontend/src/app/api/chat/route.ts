@@ -76,7 +76,7 @@ export async function POST(req: NextRequest) {
         }
 
         const systemPrompt = await getRPGContext();
-        const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
         // Build chat history (all but last message) starting from the first user message
         const firstUserIndex = messages.findIndex((m: any) => m.role === "user");
