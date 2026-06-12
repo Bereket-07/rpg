@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
 import {
     LayoutDashboard, FileText, Users, Tag, Mail,
-    Palette, User, LogOut, CalendarCheck, ChevronRight, Sparkles
+    Palette, User, LogOut, CalendarCheck, ChevronRight, Sparkles, Inbox
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { getApiUrl } from "@/lib/api";
@@ -50,11 +50,15 @@ export default function AdminSidebar() {
         { label: "Articles", href: "/admin/articles", icon: <FileText className="w-4 h-4" /> },
     ];
 
-    const practiceItems: NavItem[] = [
-        { label: "Consultations", href: "/admin/consultations", icon: <CalendarCheck className="w-4 h-4" />, badge: consultationCount },
-        { label: "Newsletter", href: "/admin/newsletter", icon: <Mail className="w-4 h-4" /> },
-        { label: "AI Insights", href: "/admin/insights", icon: <Sparkles className="w-4 h-4" /> },
-    ];
+    const practiceItems: NavItem[] = isAdmin
+        ? [
+            { label: "Consultations", href: "/admin/consultations", icon: <CalendarCheck className="w-4 h-4" />, badge: consultationCount },
+            { label: "Newsletter", href: "/admin/newsletter", icon: <Mail className="w-4 h-4" /> },
+            { label: "AI Insights", href: "/admin/insights", icon: <Sparkles className="w-4 h-4" /> },
+        ]
+        : [
+            { label: "My Requests", href: "/admin/my-requests", icon: <Inbox className="w-4 h-4" /> },
+        ];
 
     const adminItems: NavItem[] = [
         { label: "Clinicians", href: "/admin/authors", icon: <Users className="w-4 h-4" /> },

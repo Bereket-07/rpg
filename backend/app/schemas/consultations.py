@@ -12,6 +12,7 @@ class ContactInquiryCreate(BaseModel):
 
 class ContactInquiryUpdate(BaseModel):
     status: Optional[str] = None
+    admin_notes: Optional[str] = None
 
 class ContactInquiryResponse(BaseModel):
     id: int
@@ -20,6 +21,7 @@ class ContactInquiryResponse(BaseModel):
     email: str
     subject: Optional[str] = None
     message: str
+    admin_notes: Optional[str] = None
     status: str
     submitted_at: datetime
 
@@ -38,6 +40,9 @@ class BookingRequestCreate(BaseModel):
 
 class BookingRequestUpdate(BaseModel):
     status: Optional[str] = None
+    assigned_author_id: Optional[int] = None
+    admin_notes: Optional[str] = None
+    video_link: Optional[str] = None
 
 class BookingRequestResponse(BaseModel):
     id: int
@@ -49,7 +54,13 @@ class BookingRequestResponse(BaseModel):
     requested_time: str
     therapist_preference: Optional[str] = None
     notes: Optional[str] = None
+    assigned_author_id: Optional[int] = None
+    admin_notes: Optional[str] = None
+    video_link: Optional[str] = None
     status: str
     submitted_at: datetime
+    confirmed_at: Optional[datetime] = None
+    declined_at: Optional[datetime] = None
+    last_notified_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)

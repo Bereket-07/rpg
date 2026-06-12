@@ -1,9 +1,12 @@
-from typing import List
+from datetime import datetime
+from typing import List, Optional, Tuple
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import or_
 
 from app.api import deps
+from app.models.author_category import Author
 from app.models.consultations import ContactInquiry, BookingRequest
 from app.models.user import User, Role
 from app.schemas.consultations import (
@@ -13,6 +16,28 @@ from app.schemas.consultations import (
 from app.core import email as email_module
 
 router = APIRouter()
+
+
+async def _find_booking_clinician(
+    db: AsyncSession,
+    booking: BookingRequest,
+) -> Tuple[Optional[Author], Optional[User]]:
+    author = None
+    if booking.assigned_author_id:
+        result = await db.execute(select(Author).where(Author.id == booking.assigned_author_id))
+        author = result.scalar_one_or_none()
+
+    if not author and booking.therapist_preference:
+        result = await db.execute(
+            select(Author).where(Author.name.ilike(f"%{booking.therapist_preference}%"))
+        )
+        author = result.scalar_one_or_none()
+
+    if not author:
+        return None, None
+
+    result = await db.execute(select(User).where(User.author_id == author.id, User.is_active == True))
+    return author, result.scalar_one_or_none()
 
 # ─── Contact Inquiries ────────────────────────────────────────────────────────
 
@@ -112,6 +137,15 @@ async def submit_booking(
         db_booking.therapist_preference or "No preference",
         db_booking.notes or ""
     )
+    background_tasks.add_task(
+        email_module.send_booking_received_client_email,
+        db_booking.email,
+        db_booking.first_name,
+        db_booking.last_name,
+        db_booking.requested_date,
+        db_booking.requested_time,
+        db_booking.therapist_preference or "No preference",
+    )
     return db_booking
 
 @router.get("/bookings", response_model=List[BookingRequestResponse])
@@ -127,10 +161,39 @@ async def get_bookings(
     )
     return result.scalars().all()
 
+@router.get("/bookings/my", response_model=List[BookingRequestResponse])
+async def get_my_bookings(
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """Clinician view for requests assigned to or naming their author profile."""
+    if current_user.role == Role.ADMIN:
+        result = await db.execute(
+            select(BookingRequest).order_by(BookingRequest.submitted_at.desc())
+        )
+        return result.scalars().all()
+
+    if not current_user.author_id:
+        return []
+
+    author_result = await db.execute(select(Author).where(Author.id == current_user.author_id))
+    author = author_result.scalar_one_or_none()
+    conditions = [BookingRequest.assigned_author_id == current_user.author_id]
+    if author and author.name:
+        conditions.append(BookingRequest.therapist_preference.ilike(f"%{author.name}%"))
+
+    result = await db.execute(
+        select(BookingRequest)
+        .where(or_(*conditions))
+        .order_by(BookingRequest.submitted_at.desc())
+    )
+    return result.scalars().all()
+
 @router.patch("/bookings/{booking_id}", response_model=BookingRequestResponse)
 async def update_booking_status(
     booking_id: int,
     booking_in: BookingRequestUpdate,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user)
 ):
@@ -141,12 +204,71 @@ async def update_booking_status(
     booking = result.scalar_one_or_none()
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
+    previous_status = booking.status.value if hasattr(booking.status, "value") else booking.status
     update_data = booking_in.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(booking, field, value)
+    next_status = update_data.get("status", previous_status)
+    now = datetime.utcnow()
+    if next_status == "confirmed" and previous_status != "confirmed":
+        booking.confirmed_at = now
+        booking.last_notified_at = now
+    elif next_status == "declined" and previous_status != "declined":
+        booking.declined_at = now
+        booking.last_notified_at = now
+    elif next_status == "assigned_to_clinician" and previous_status != "assigned_to_clinician":
+        booking.last_notified_at = now
     db.add(booking)
     await db.commit()
     await db.refresh(booking)
+    clinician, clinician_user = await _find_booking_clinician(db, booking)
+    clinician_name = clinician.name if clinician else (booking.therapist_preference or "No preference")
+    client_name = f"{booking.first_name} {booking.last_name}"
+
+    if next_status == "confirmed" and previous_status != "confirmed":
+        background_tasks.add_task(
+            email_module.send_booking_confirmed_client_email,
+            booking.email,
+            booking.first_name,
+            booking.last_name,
+            booking.requested_date,
+            booking.requested_time,
+            clinician_name,
+            booking.video_link,
+        )
+        if clinician_user and clinician_user.email:
+            background_tasks.add_task(
+                email_module.send_booking_clinician_notification,
+                clinician_user.email,
+                clinician_name,
+                client_name,
+                booking.requested_date,
+                booking.requested_time,
+                booking.id,
+                "confirmed",
+            )
+    elif next_status == "declined" and previous_status != "declined":
+        background_tasks.add_task(
+            email_module.send_booking_declined_client_email,
+            booking.email,
+            booking.first_name,
+            booking.last_name,
+            booking.requested_date,
+            booking.requested_time,
+            clinician_name,
+        )
+    elif next_status == "assigned_to_clinician" and previous_status != "assigned_to_clinician":
+        if clinician_user and clinician_user.email:
+            background_tasks.add_task(
+                email_module.send_booking_clinician_notification,
+                clinician_user.email,
+                clinician_name,
+                client_name,
+                booking.requested_date,
+                booking.requested_time,
+                booking.id,
+                "assigned to you",
+            )
     return booking
 
 @router.delete("/bookings/{booking_id}")

@@ -4,7 +4,8 @@ All functions are async-safe and fail silently with logging.
 """
 import logging
 import os
-from typing import List
+from html import escape
+from typing import List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,37 @@ def _get_resend():
 MAIL_FROM_NAME = os.getenv("MAIL_FROM_NAME", "Reframe Psychology")
 MAIL_FROM      = os.getenv("MAIL_FROM", "onboarding@resend.dev")   # swap once domain verified
 SITE_URL       = os.getenv("SITE_URL", "http://localhost:3000")
+
+
+def _safe(value: Optional[str]) -> str:
+    return escape(value or "")
+
+
+def _booking_summary_table(
+    first_name: str,
+    last_name: str,
+    requested_date: str,
+    requested_time: str,
+    therapist_preference: Optional[str] = None,
+    video_link: Optional[str] = None,
+) -> str:
+    video_row = ""
+    if video_link:
+        safe_link = _safe(video_link)
+        video_row = (
+            "<tr><td style=\"padding:8px 0;font-weight:700;color:#555;\">Session Link</td>"
+            f"<td><a href=\"{safe_link}\" style=\"color:#7ebac8;\">{safe_link}</a></td></tr>"
+        )
+
+    return f"""
+      <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0 22px;">
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;width:170px;">Client</td><td style="color:#333;">{_safe(first_name)} {_safe(last_name)}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Requested Date</td><td style="color:#333;">{_safe(requested_date)}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Requested Time</td><td style="color:#333;">{_safe(requested_time)}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Clinician</td><td style="color:#333;">{_safe(therapist_preference or "No preference")}</td></tr>
+        {video_row}
+      </table>
+    """
 
 # ---------------------------------------------------------------------------
 # HTML helpers
@@ -236,3 +268,153 @@ async def send_booking_notification(
         logger.info(f"Booking notification sent for {email_from}")
     except Exception as e:
         logger.error(f"Failed to send booking notification: {e}")
+
+
+async def send_booking_received_client_email(
+    email_to: str,
+    first_name: str,
+    last_name: str,
+    requested_date: str,
+    requested_time: str,
+    therapist_preference: Optional[str] = None,
+):
+    rs = _get_resend()
+    if not rs:
+        logger.warning(f"Resend not configured - skipping booking receipt email to {email_to}")
+        return
+
+    body = f"""
+      <h2 style="margin:0 0 16px;color:#1e2328;font-size:22px;">We received your consultation request</h2>
+      <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 16px;">
+        Hi {_safe(first_name)}, thank you for reaching out to Reframe Psychology Group.
+        Our team will review your request and follow up with next steps.
+      </p>
+      {_booking_summary_table(first_name, last_name, requested_date, requested_time, therapist_preference)}
+      <p style="color:#4a535e;font-size:14px;line-height:1.7;margin:0;">
+        If anything changes before we respond, you can reply directly to this email.
+      </p>
+    """
+
+    try:
+        rs.Emails.send({
+            "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
+            "to": [email_to],
+            "subject": "We received your consultation request",
+            "html": _base_html(body),
+        })
+        logger.info(f"Booking receipt email sent to {email_to}")
+    except Exception as e:
+        logger.error(f"Failed to send booking receipt email to {email_to}: {e}")
+
+
+async def send_booking_confirmed_client_email(
+    email_to: str,
+    first_name: str,
+    last_name: str,
+    requested_date: str,
+    requested_time: str,
+    therapist_preference: Optional[str] = None,
+    video_link: Optional[str] = None,
+):
+    rs = _get_resend()
+    if not rs:
+        logger.warning(f"Resend not configured - skipping booking confirmation email to {email_to}")
+        return
+
+    body = f"""
+      <h2 style="margin:0 0 16px;color:#1e2328;font-size:22px;">Your consultation is confirmed</h2>
+      <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 16px;">
+        Hi {_safe(first_name)}, your requested consultation time has been confirmed.
+      </p>
+      {_booking_summary_table(first_name, last_name, requested_date, requested_time, therapist_preference, video_link)}
+      <p style="color:#4a535e;font-size:14px;line-height:1.7;margin:0;">
+        Please keep this email for your records. If you need to make a change, reply directly and the practice team will help.
+      </p>
+    """
+
+    try:
+        rs.Emails.send({
+            "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
+            "to": [email_to],
+            "subject": "Your consultation is confirmed",
+            "html": _base_html(body),
+        })
+        logger.info(f"Booking confirmation email sent to {email_to}")
+    except Exception as e:
+        logger.error(f"Failed to send booking confirmation email to {email_to}: {e}")
+
+
+async def send_booking_declined_client_email(
+    email_to: str,
+    first_name: str,
+    last_name: str,
+    requested_date: str,
+    requested_time: str,
+    therapist_preference: Optional[str] = None,
+):
+    rs = _get_resend()
+    if not rs:
+        logger.warning(f"Resend not configured - skipping booking decline email to {email_to}")
+        return
+
+    body = f"""
+      <h2 style="margin:0 0 16px;color:#1e2328;font-size:22px;">Update on your consultation request</h2>
+      <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 16px;">
+        Hi {_safe(first_name)}, thank you for reaching out. The requested consultation time is not available.
+        Please reply to this email and our team can help find another option.
+      </p>
+      {_booking_summary_table(first_name, last_name, requested_date, requested_time, therapist_preference)}
+    """
+
+    try:
+        rs.Emails.send({
+            "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
+            "to": [email_to],
+            "subject": "Update on your consultation request",
+            "html": _base_html(body),
+        })
+        logger.info(f"Booking decline email sent to {email_to}")
+    except Exception as e:
+        logger.error(f"Failed to send booking decline email to {email_to}: {e}")
+
+
+async def send_booking_clinician_notification(
+    email_to: str,
+    clinician_name: str,
+    client_name: str,
+    requested_date: str,
+    requested_time: str,
+    booking_id: int,
+    status_label: str,
+):
+    rs = _get_resend()
+    if not rs:
+        logger.warning(f"Resend not configured - skipping clinician booking email to {email_to}")
+        return
+
+    body = f"""
+      <h2 style="margin:0 0 16px;color:#1e2328;font-size:22px;">Consultation request update</h2>
+      <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 16px;">
+        Hi {_safe(clinician_name)}, a consultation request has been marked <strong>{_safe(status_label)}</strong>.
+      </p>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0 22px;">
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;width:170px;">Client</td><td style="color:#333;">{_safe(client_name)}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Date</td><td style="color:#333;">{_safe(requested_date)}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Time</td><td style="color:#333;">{_safe(requested_time)}</td></tr>
+      </table>
+      <a href="{SITE_URL}/admin/my-requests"
+         style="display:inline-block;background:#1e2328;color:#fff;font-weight:700;padding:11px 22px;border-radius:8px;text-decoration:none;font-size:13px;">
+        View Request
+      </a>
+    """
+
+    try:
+        rs.Emails.send({
+            "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
+            "to": [email_to],
+            "subject": f"Consultation request #{booking_id}: {status_label}",
+            "html": _base_html(body),
+        })
+        logger.info(f"Clinician booking email sent to {email_to}")
+    except Exception as e:
+        logger.error(f"Failed to send clinician booking email to {email_to}: {e}")
