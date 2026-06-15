@@ -39,6 +39,9 @@ def _booking_summary_table(
     requested_date: str,
     requested_time: str,
     therapist_preference: Optional[str] = None,
+    presenting_concern: Optional[str] = None,
+    urgency: Optional[str] = None,
+    preferred_contact_method: Optional[str] = None,
     video_link: Optional[str] = None,
 ) -> str:
     video_row = ""
@@ -55,6 +58,9 @@ def _booking_summary_table(
         <tr><td style="padding:8px 0;font-weight:700;color:#555;">Requested Date</td><td style="color:#333;">{_safe(requested_date)}</td></tr>
         <tr><td style="padding:8px 0;font-weight:700;color:#555;">Requested Time</td><td style="color:#333;">{_safe(requested_time)}</td></tr>
         <tr><td style="padding:8px 0;font-weight:700;color:#555;">Clinician</td><td style="color:#333;">{_safe(therapist_preference or "No preference")}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Concern</td><td style="color:#333;">{_safe(presenting_concern or "Not specified")}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Timing</td><td style="color:#333;">{_safe(urgency or "Flexible")}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Preferred Contact</td><td style="color:#333;">{_safe(preferred_contact_method or "Email")}</td></tr>
         {video_row}
       </table>
     """
@@ -226,7 +232,10 @@ async def send_inquiry_notification(first_name: str, last_name: str, email_from:
 async def send_booking_notification(
     first_name: str, last_name: str, email_from: str,
     requested_date: str, requested_time: str,
-    therapist_preference: str, notes: str
+    therapist_preference: str, notes: str,
+    presenting_concern: Optional[str] = None,
+    urgency: Optional[str] = None,
+    preferred_contact_method: Optional[str] = None,
 ):
     rs = _get_resend()
     if not rs:
@@ -247,6 +256,9 @@ async def send_booking_notification(
         <tr><td style="padding:8px 0;font-weight:700;color:#555;">Requested Date</td><td style="color:#333;">{requested_date}</td></tr>
         <tr><td style="padding:8px 0;font-weight:700;color:#555;">Requested Time</td><td style="color:#333;">{requested_time}</td></tr>
         <tr><td style="padding:8px 0;font-weight:700;color:#555;">Therapist</td><td style="color:#333;">{therapist_preference or "No preference"}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Concern</td><td style="color:#333;">{_safe(presenting_concern or "Not specified")}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Timing</td><td style="color:#333;">{_safe(urgency or "Flexible")}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Preferred Contact</td><td style="color:#333;">{_safe(preferred_contact_method or "Email")}</td></tr>
       </table>
       {notes_html}
       <div style="margin-top:24px;">
@@ -277,6 +289,9 @@ async def send_booking_received_client_email(
     requested_date: str,
     requested_time: str,
     therapist_preference: Optional[str] = None,
+    presenting_concern: Optional[str] = None,
+    urgency: Optional[str] = None,
+    preferred_contact_method: Optional[str] = None,
 ):
     rs = _get_resend()
     if not rs:
@@ -289,7 +304,16 @@ async def send_booking_received_client_email(
         Hi {_safe(first_name)}, thank you for reaching out to Reframe Psychology Group.
         Our team will review your request and follow up with next steps.
       </p>
-      {_booking_summary_table(first_name, last_name, requested_date, requested_time, therapist_preference)}
+      {_booking_summary_table(
+        first_name=first_name,
+        last_name=last_name,
+        requested_date=requested_date,
+        requested_time=requested_time,
+        therapist_preference=therapist_preference,
+        presenting_concern=presenting_concern,
+        urgency=urgency,
+        preferred_contact_method=preferred_contact_method,
+      )}
       <p style="color:#4a535e;font-size:14px;line-height:1.7;margin:0;">
         If anything changes before we respond, you can reply directly to this email.
       </p>
@@ -315,6 +339,9 @@ async def send_booking_confirmed_client_email(
     requested_time: str,
     therapist_preference: Optional[str] = None,
     video_link: Optional[str] = None,
+    presenting_concern: Optional[str] = None,
+    urgency: Optional[str] = None,
+    preferred_contact_method: Optional[str] = None,
 ):
     rs = _get_resend()
     if not rs:
@@ -326,7 +353,17 @@ async def send_booking_confirmed_client_email(
       <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 16px;">
         Hi {_safe(first_name)}, your requested consultation time has been confirmed.
       </p>
-      {_booking_summary_table(first_name, last_name, requested_date, requested_time, therapist_preference, video_link)}
+      {_booking_summary_table(
+        first_name=first_name,
+        last_name=last_name,
+        requested_date=requested_date,
+        requested_time=requested_time,
+        therapist_preference=therapist_preference,
+        presenting_concern=presenting_concern,
+        urgency=urgency,
+        preferred_contact_method=preferred_contact_method,
+        video_link=video_link,
+      )}
       <p style="color:#4a535e;font-size:14px;line-height:1.7;margin:0;">
         Please keep this email for your records. If you need to make a change, reply directly and the practice team will help.
       </p>
@@ -351,6 +388,9 @@ async def send_booking_declined_client_email(
     requested_date: str,
     requested_time: str,
     therapist_preference: Optional[str] = None,
+    presenting_concern: Optional[str] = None,
+    urgency: Optional[str] = None,
+    preferred_contact_method: Optional[str] = None,
 ):
     rs = _get_resend()
     if not rs:
@@ -363,7 +403,16 @@ async def send_booking_declined_client_email(
         Hi {_safe(first_name)}, thank you for reaching out. The requested consultation time is not available.
         Please reply to this email and our team can help find another option.
       </p>
-      {_booking_summary_table(first_name, last_name, requested_date, requested_time, therapist_preference)}
+      {_booking_summary_table(
+        first_name=first_name,
+        last_name=last_name,
+        requested_date=requested_date,
+        requested_time=requested_time,
+        therapist_preference=therapist_preference,
+        presenting_concern=presenting_concern,
+        urgency=urgency,
+        preferred_contact_method=preferred_contact_method,
+      )}
     """
 
     try:

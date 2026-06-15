@@ -73,6 +73,11 @@ async def get_all_author_accounts(
             "must_change_password": u.must_change_password,
             "author_id": u.author_id,
             "name": author_profile.name if author_profile else "Unknown",
+            "profile_image_url": author_profile.profile_image_url if author_profile else None,
+            "role": author_profile.role if author_profile else None,
+            "accepting_new_clients": author_profile.accepting_new_clients if author_profile else True,
+            "availability_timezone": author_profile.availability_timezone if author_profile else None,
+            "consultation_modes": author_profile.consultation_modes if author_profile else [],
         })
     return response_data
 

@@ -20,6 +20,11 @@ interface ProfileData {
     specialties_list: Specialty[];
     calendar_type: string;
     booking_link: string;
+    accepting_new_clients: boolean;
+    availability_timezone: string;
+    available_weekdays: number[];
+    consultation_modes: string[];
+    intake_note: string;
 }
 
 const EMPTY: ProfileData = {
@@ -28,9 +33,25 @@ const EMPTY: ProfileData = {
     approach_paragraphs: [""], background_paragraphs: [""],
     specialties_list: [{ title: "", description: "" }],
     calendar_type: "", booking_link: "",
+    accepting_new_clients: true,
+    availability_timezone: "America/Los_Angeles",
+    available_weekdays: [1, 2, 3, 4, 5],
+    consultation_modes: ["Telehealth"],
+    intake_note: "",
 };
 
 type TabKey = "basic" | "approach" | "specialties" | "background" | "beyond" | "calendar";
+
+const WEEKDAYS = [
+    { value: 1, label: "Mon" },
+    { value: 2, label: "Tue" },
+    { value: 3, label: "Wed" },
+    { value: 4, label: "Thu" },
+    { value: 5, label: "Fri" },
+    { value: 6, label: "Sat" },
+    { value: 7, label: "Sun" },
+];
+const CONSULTATION_MODES = ["Telehealth", "In-person", "Hybrid"];
 
 const TABS: { key: TabKey; label: string }[] = [
     { key: "basic", label: "Basic Info" },
@@ -71,6 +92,11 @@ export default function AdminProfilePage() {
                     specialties_list: data.specialties_list?.length ? data.specialties_list : [{ title: "", description: "" }],
                     calendar_type: data.calendar_type || "",
                     booking_link: data.booking_link || "",
+                    accepting_new_clients: data.accepting_new_clients ?? true,
+                    availability_timezone: data.availability_timezone || "America/Los_Angeles",
+                    available_weekdays: data.available_weekdays?.length ? data.available_weekdays : [1, 2, 3, 4, 5],
+                    consultation_modes: data.consultation_modes?.length ? data.consultation_modes : ["Telehealth"],
+                    intake_note: data.intake_note || "",
                 });
             })
             .finally(() => setLoading(false));
@@ -106,6 +132,20 @@ export default function AdminProfilePage() {
         setProfile(p => ({ ...p, specialties_list: p.specialties_list.map((s, i) => i === idx ? { ...s, [field]: val } : s) }));
     const addSpecialty = () => setProfile(p => ({ ...p, specialties_list: [...p.specialties_list, { title: "", description: "" }] }));
     const removeSpecialty = (idx: number) => setProfile(p => ({ ...p, specialties_list: p.specialties_list.filter((_, i) => i !== idx) }));
+    const toggleWeekday = (day: number) =>
+        setProfile(p => ({
+            ...p,
+            available_weekdays: p.available_weekdays.includes(day)
+                ? p.available_weekdays.filter(d => d !== day)
+                : [...p.available_weekdays, day].sort((a, b) => a - b),
+        }));
+    const toggleMode = (mode: string) =>
+        setProfile(p => ({
+            ...p,
+            consultation_modes: p.consultation_modes.includes(mode)
+                ? p.consultation_modes.filter(m => m !== mode)
+                : [...p.consultation_modes, mode],
+        }));
 
     if (loading) return (
         <div className="flex items-center justify-center h-64">
@@ -277,6 +317,74 @@ export default function AdminProfilePage() {
                                         Connect your booking calendar so clients can schedule directly with you from the <strong>/book</strong> page.
                                         Choose your platform and paste your booking link.
                                     </p>
+
+                                    <div className="rounded-xl border border-black/[0.07] bg-[#f7f5f2] p-4 space-y-4">
+                                        <label className="flex items-center justify-between gap-4">
+                                            <div>
+                                                <p className="text-sm font-bold text-[#1e2328]">Accepting new consultation requests</p>
+                                                <p className="text-xs text-muted-foreground">Turn this off to keep your profile visible but stop new booking requests.</p>
+                                            </div>
+                                            <input
+                                                type="checkbox"
+                                                checked={profile.accepting_new_clients}
+                                                onChange={e => setProfile(p => ({ ...p, accepting_new_clients: e.target.checked }))}
+                                                className="h-5 w-5 accent-[#7ebac8]"
+                                            />
+                                        </label>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Timezone</label>
+                                            <input
+                                                value={profile.availability_timezone}
+                                                onChange={e => setProfile(p => ({ ...p, availability_timezone: e.target.value }))}
+                                                placeholder="America/Los_Angeles"
+                                                className="w-full border border-black/[0.1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7ebac8]/40"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Available request days</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {WEEKDAYS.map(day => (
+                                                    <button
+                                                        key={day.value}
+                                                        type="button"
+                                                        onClick={() => toggleWeekday(day.value)}
+                                                        className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${profile.available_weekdays.includes(day.value) ? "bg-[#7ebac8] text-white border-[#7ebac8]" : "bg-white text-muted-foreground border-black/[0.08] hover:border-[#7ebac8]/50"}`}
+                                                    >
+                                                        {day.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Consultation modes</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {CONSULTATION_MODES.map(mode => (
+                                                    <button
+                                                        key={mode}
+                                                        type="button"
+                                                        onClick={() => toggleMode(mode)}
+                                                        className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${profile.consultation_modes.includes(mode) ? "bg-[#1e2328] text-white border-[#1e2328]" : "bg-white text-muted-foreground border-black/[0.08] hover:border-[#1e2328]/40"}`}
+                                                    >
+                                                        {mode}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Public intake note</label>
+                                            <textarea
+                                                value={profile.intake_note}
+                                                onChange={e => setProfile(p => ({ ...p, intake_note: e.target.value }))}
+                                                rows={3}
+                                                placeholder="Example: Currently offering telehealth consultations on weekday afternoons."
+                                                className="w-full border border-black/[0.1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7ebac8]/40"
+                                            />
+                                        </div>
+                                    </div>
 
                                     {/* Platform selector */}
                                     <div className="space-y-1.5">

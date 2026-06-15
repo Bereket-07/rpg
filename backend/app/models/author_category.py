@@ -24,6 +24,11 @@ class Author(Base):
     booking_link = Column(String, nullable=True)   # URL for Calendly/Cal.com/custom
     google_calendar_token = Column(JSON, nullable=True)  # Encrypted OAuth token for Google Calendar
     google_calendar_id = Column(String, nullable=True)   # e.g. 'primary' or specific calendar ID
+    accepting_new_clients = Column(Boolean, nullable=False, default=True)
+    availability_timezone = Column(String, nullable=True, default="America/Los_Angeles")
+    available_weekdays = Column(JSON, nullable=True)  # JSON list of weekday numbers, Monday=1
+    consultation_modes = Column(JSON, nullable=True)  # JSON list, e.g. ["Telehealth", "In-person"]
+    intake_note = Column(Text, nullable=True)
 
     # Relationship to articles
     articles = relationship("Article", back_populates="author")

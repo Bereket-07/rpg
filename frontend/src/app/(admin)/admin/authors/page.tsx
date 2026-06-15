@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { Users, PlusCircle, RefreshCw, ShieldOff, Shield, Trash2, X, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { BlockUserAction, ResetPasswordAction } from "@/components/admin/AccountActions";
 import DeleteAction from "@/components/admin/DeleteAction";
@@ -16,6 +17,10 @@ interface Author {
     must_change_password: boolean;
     profile_image_url?: string;
     role?: string;
+    author_id?: number;
+    accepting_new_clients?: boolean;
+    availability_timezone?: string;
+    consultation_modes?: string[];
 }
 
 interface NewAccountForm { name: string; email: string; password: string; }
@@ -127,11 +132,28 @@ export default function AdminAuthorsPage() {
                                             Pending Reset
                                         </span>
                                     )}
+                                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${author.accepting_new_clients === false ? "bg-slate-100 text-slate-600" : "bg-sky-50 text-sky-700"}`}>
+                                        {author.accepting_new_clients === false ? "Closed to new requests" : "Accepting requests"}
+                                    </span>
                                 </div>
+                                {(author.consultation_modes?.length || author.availability_timezone) && (
+                                    <p className="text-[10px] text-muted-foreground mt-2">
+                                        {author.consultation_modes?.join(", ") || "Telehealth"} - {author.availability_timezone || "Timezone not set"}
+                                    </p>
+                                )}
                             </div>
 
                             {/* Actions */}
                             <div className="flex items-center gap-2 pt-2 border-t border-black/[0.04] w-full justify-center">
+                                {author.author_id && (
+                                    <Link
+                                        href={`/admin/authors/${author.author_id}/edit`}
+                                        className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-black/[0.08] text-muted-foreground hover:text-[#7ebac8] hover:border-[#7ebac8]/40 transition-colors"
+                                        title="Edit profile and availability"
+                                    >
+                                        <ExternalLink className="w-3.5 h-3.5" />
+                                    </Link>
+                                )}
                                 <ResetPasswordAction userId={author.id} userName={author.name} />
                                 <BlockUserAction userId={author.id} isBlocked={!author.is_active} userName={author.name} />
                                 <DeleteAction endpoint={`users/${author.id}`} itemName={author.name} />

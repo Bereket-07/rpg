@@ -41,6 +41,9 @@ interface Booking {
     requested_date: string;
     requested_time: string;
     therapist_preference?: string;
+    presenting_concern?: string;
+    urgency?: string;
+    preferred_contact_method?: string;
     notes?: string;
     assigned_author_id?: number | null;
     admin_notes?: string;
@@ -56,6 +59,14 @@ interface Author {
     id: number;
     name: string;
     role?: string;
+}
+
+interface ConsultationEvent {
+    id: number;
+    event_type: string;
+    actor_label?: string;
+    message: string;
+    created_at: string;
 }
 
 type Tab = "inquiries" | "bookings";
@@ -94,6 +105,10 @@ function daysWaiting(date: string) {
     return Math.max(0, Math.floor((Date.now() - created) / 86400000));
 }
 
+function isHighUrgency(booking: Booking) {
+    return (booking.urgency || "").toLowerCase().includes("soon");
+}
+
 function clientName(item: Inquiry | Booking) {
     return `${item.first_name} ${item.last_name}`;
 }
@@ -106,6 +121,8 @@ export default function AdminConsultationsPage() {
     const [authors, setAuthors] = useState<Author[]>([]);
     const [loading, setLoading] = useState(true);
     const [selected, setSelected] = useState<Selected | null>(null);
+    const [events, setEvents] = useState<ConsultationEvent[]>([]);
+    const [eventsLoading, setEventsLoading] = useState(false);
     const [search, setSearch] = useState("");
     const [saving, setSaving] = useState(false);
     const token = (session as any)?.accessToken;
@@ -133,6 +150,26 @@ export default function AdminConsultationsPage() {
         loadAll();
     }, [token]);
 
+    async function loadEvents(type: Tab, id: number) {
+        if (!token) return;
+        setEventsLoading(true);
+        try {
+            const res = await fetch(`${getApiUrl()}/api/v1/consultations/${type}/${id}/events`, { headers });
+            if (res.ok) setEvents(await res.json());
+            else setEvents([]);
+        } finally {
+            setEventsLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        if (!selected?.id) {
+            setEvents([]);
+            return;
+        }
+        loadEvents(selected.type || tab, selected.id);
+    }, [selected?.id, selected?.type, token]);
+
     async function patchRecord(type: Tab, id: number, body: Record<string, unknown>, closeAfter = false) {
         setSaving(true);
         try {
@@ -143,6 +180,7 @@ export default function AdminConsultationsPage() {
             });
             const updated = res.ok ? await res.json() : null;
             await loadAll();
+            await loadEvents(type, id);
             setSelected(closeAfter ? null : updated ? { ...updated, type } : selected);
         } finally {
             setSaving(false);
@@ -150,7 +188,7 @@ export default function AdminConsultationsPage() {
     }
 
     const waitingBookings = bookings.filter((b) => !["confirmed", "declined", "completed"].includes(b.status));
-    const overdueBookings = waitingBookings.filter((b) => daysWaiting(b.submitted_at) >= 2).length;
+    const overdueBookings = waitingBookings.filter((b) => daysWaiting(b.submitted_at) >= 2 || isHighUrgency(b)).length;
     const newInquiries = inquiries.filter((i) => i.status === "new").length;
     const newBookings = bookings.filter((b) => b.status === "new").length;
     const oldestBooking = waitingBookings.reduce<Booking | null>((oldest, current) => {
@@ -250,15 +288,16 @@ export default function AdminConsultationsPage() {
                                     <div className="min-w-0">
                                         <div className="flex flex-wrap items-center gap-2">
                                             <p className="text-[13px] font-bold text-[#1e2328] truncate">{clientName(book)}</p>
-                                            {daysWaiting(book.submitted_at) >= 2 && (
+                                            {(daysWaiting(book.submitted_at) >= 2 || isHighUrgency(book)) && (
                                                 <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
-                                                    <AlertCircle className="w-3 h-3" /> {daysWaiting(book.submitted_at)}d
+                                                    <AlertCircle className="w-3 h-3" /> {isHighUrgency(book) ? "Soon" : `${daysWaiting(book.submitted_at)}d`}
                                                 </span>
                                             )}
                                         </div>
                                         <p className="text-[11px] text-muted-foreground truncate">
                                             {book.requested_date} at {book.requested_time}
                                             {book.therapist_preference && ` - ${book.therapist_preference}`}
+                                            {book.presenting_concern && ` - ${book.presenting_concern}`}
                                         </p>
                                     </div>
                                     <div className="flex items-center gap-3 shrink-0">
@@ -343,6 +382,11 @@ export default function AdminConsultationsPage() {
                                     </div>
                                     <Field label="Requested clinician" value={selectedBooking.therapist_preference || "No preference"} />
                                     <Field label="Assigned clinician" value={assignedAuthorName || "Not assigned yet"} />
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Field label="Concern" value={selectedBooking.presenting_concern || "Not specified"} framed />
+                                        <Field label="Timing" value={selectedBooking.urgency || "Flexible"} framed />
+                                    </div>
+                                    <Field label="Preferred contact" value={selectedBooking.preferred_contact_method || "Email"} />
                                     {selectedBooking.notes && <TextBlock label="Client notes" value={selectedBooking.notes} />}
 
                                     <div>
@@ -386,6 +430,31 @@ export default function AdminConsultationsPage() {
                                     placeholder="Private team notes. These are not emailed to the client."
                                     className="w-full bg-[#f7f5f2] border border-black/[0.05] rounded-lg px-3 py-2.5 text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#7ebac8]/40"
                                 />
+                            </div>
+
+                            <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">
+                                    Timeline
+                                </p>
+                                <div className="rounded-lg border border-black/[0.06] bg-white divide-y divide-black/[0.04] overflow-hidden">
+                                    {eventsLoading ? (
+                                        <div className="p-4 text-xs text-muted-foreground">Loading history...</div>
+                                    ) : events.length === 0 ? (
+                                        <div className="p-4 text-xs text-muted-foreground">No history yet.</div>
+                                    ) : (
+                                        events.map((event) => (
+                                            <div key={event.id} className="p-3 flex gap-3">
+                                                <div className="mt-1 h-2 w-2 rounded-full bg-[#7ebac8] shrink-0" />
+                                                <div className="min-w-0">
+                                                    <p className="text-[12px] font-semibold text-[#333a42] leading-snug">{event.message}</p>
+                                                    <p className="text-[10px] text-muted-foreground mt-1">
+                                                        {event.actor_label || "System"} - {new Date(event.created_at).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
                             </div>
                         </div>
 

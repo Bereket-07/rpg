@@ -1,14 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { getApiUrl } from "@/lib/api";
 import {
-    FileText, Users, Tag, Mail, CalendarCheck,
-    TrendingUp, Clock, ArrowRight, PlusCircle,
-    Eye, Palette, AlertCircle, CheckCircle2, Circle
+    AlertCircle,
+    ArrowRight,
+    CalendarCheck,
+    CheckCircle2,
+    Circle,
+    Eye,
+    FileText,
+    Mail,
+    Palette,
+    PlusCircle,
+    Tag,
+    Users,
 } from "lucide-react";
+import { getApiUrl } from "@/lib/api";
 
 interface Stats {
     published: number;
@@ -29,10 +38,40 @@ interface RecentArticle {
     category?: { name: string };
 }
 
+interface BookingPriority {
+    id: number;
+    first_name: string;
+    last_name: string;
+    requested_date: string;
+    requested_time: string;
+    presenting_concern?: string;
+    urgency?: string;
+    status: string;
+    submitted_at: string;
+}
+
+interface InquiryPriority {
+    id: number;
+    first_name: string;
+    last_name: string;
+    subject?: string;
+    status: string;
+    submitted_at: string;
+}
+
 export default function AdminDashboardPage() {
     const { data: session } = useSession();
-    const [stats, setStats] = useState<Stats>({ published: 0, drafts: 0, authors: 0, categories: 0, subscribers: 0, new_consultations: 0 });
+    const [stats, setStats] = useState<Stats>({
+        published: 0,
+        drafts: 0,
+        authors: 0,
+        categories: 0,
+        subscribers: 0,
+        new_consultations: 0,
+    });
     const [recent, setRecent] = useState<RecentArticle[]>([]);
+    const [priorityBookings, setPriorityBookings] = useState<BookingPriority[]>([]);
+    const [priorityInquiries, setPriorityInquiries] = useState<InquiryPriority[]>([]);
     const [loading, setLoading] = useState(true);
 
     const token = (session as any)?.accessToken;
@@ -40,28 +79,30 @@ export default function AdminDashboardPage() {
 
     useEffect(() => {
         if (!session) return;
+
         async function fetchDashboard() {
             try {
-                const headers = token ? { Authorization: `Bearer ${token}` } : {};
+                const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
                 const [articlesRes, authorsRes, catsRes, newsletterRes, consultRes] = await Promise.allSettled([
                     fetch(`${getApiUrl()}/api/v1/articles`, { cache: "no-store" }),
-                    fetch(`${getApiUrl()}/api/v1/users/authors`, { headers }),
+                    isAdmin ? fetch(`${getApiUrl()}/api/v1/users/authors`, { headers }) : Promise.resolve(null),
                     fetch(`${getApiUrl()}/api/v1/categories`),
-                    fetch(`${getApiUrl()}/api/v1/newsletter`, { headers }),
-                    fetch(`${getApiUrl()}/api/v1/consultations/counts`, { headers }),
+                    isAdmin ? fetch(`${getApiUrl()}/api/v1/newsletter`, { headers }) : Promise.resolve(null),
+                    isAdmin ? fetch(`${getApiUrl()}/api/v1/consultations/counts`, { headers }) : Promise.resolve(null),
                 ]);
 
                 let articles: RecentArticle[] = [];
-                let published = 0, drafts = 0;
+                let published = 0;
+                let drafts = 0;
                 if (articlesRes.status === "fulfilled" && articlesRes.value.ok) {
                     articles = await articlesRes.value.json();
-                    published = articles.filter(a => a.published).length;
-                    drafts = articles.filter(a => !a.published).length;
+                    published = articles.filter((article) => article.published).length;
+                    drafts = articles.filter((article) => !article.published).length;
                     setRecent(articles.slice(0, 6));
                 }
 
                 let authors = 0;
-                if (authorsRes.status === "fulfilled" && authorsRes.value.ok) {
+                if (authorsRes.status === "fulfilled" && authorsRes.value && authorsRes.value.ok) {
                     const data = await authorsRes.value.json();
                     authors = data.length;
                 }
@@ -73,15 +114,39 @@ export default function AdminDashboardPage() {
                 }
 
                 let subscribers = 0;
-                if (newsletterRes.status === "fulfilled" && newsletterRes.value.ok) {
+                if (newsletterRes.status === "fulfilled" && newsletterRes.value && newsletterRes.value.ok) {
                     const data = await newsletterRes.value.json();
-                    subscribers = data.filter((s: any) => s.is_active).length;
+                    subscribers = data.filter((subscriber: any) => subscriber.is_active).length;
                 }
 
                 let new_consultations = 0;
-                if (consultRes.status === "fulfilled" && consultRes.value.ok) {
+                if (consultRes.status === "fulfilled" && consultRes.value && consultRes.value.ok) {
                     const data = await consultRes.value.json();
                     new_consultations = (data.new_inquiries || 0) + (data.new_bookings || 0);
+                }
+
+                if (isAdmin) {
+                    const [bookingsRes, inquiriesRes] = await Promise.all([
+                        fetch(`${getApiUrl()}/api/v1/consultations/bookings`, { headers }),
+                        fetch(`${getApiUrl()}/api/v1/consultations/inquiries`, { headers }),
+                    ]);
+                    if (bookingsRes.ok) {
+                        const data: BookingPriority[] = await bookingsRes.json();
+                        setPriorityBookings(
+                            data
+                                .filter((item) => !["confirmed", "declined", "completed"].includes(item.status))
+                                .sort((a, b) => {
+                                    const urgentA = (a.urgency || "").toLowerCase().includes("soon") ? 0 : 1;
+                                    const urgentB = (b.urgency || "").toLowerCase().includes("soon") ? 0 : 1;
+                                    return urgentA - urgentB || new Date(a.submitted_at).getTime() - new Date(b.submitted_at).getTime();
+                                })
+                                .slice(0, 4)
+                        );
+                    }
+                    if (inquiriesRes.ok) {
+                        const data: InquiryPriority[] = await inquiriesRes.json();
+                        setPriorityInquiries(data.filter((item) => item.status === "new").slice(0, 3));
+                    }
                 }
 
                 setStats({ published, drafts, authors, categories, subscribers, new_consultations });
@@ -91,8 +156,9 @@ export default function AdminDashboardPage() {
                 setLoading(false);
             }
         }
+
         fetchDashboard();
-    }, [session, token]);
+    }, [session, token, isAdmin]);
 
     const statCards = [
         {
@@ -138,24 +204,29 @@ export default function AdminDashboardPage() {
         { label: "Write Article", icon: <PlusCircle className="w-4 h-4" />, href: "/admin/articles/new", color: "bg-[#7ebac8] hover:bg-[#6aaab8] text-white" },
         { label: "View Site", icon: <Eye className="w-4 h-4" />, href: "/", color: "bg-white hover:bg-gray-50 text-[#333a42] border border-black/10" },
         { label: "Open CMS", icon: <Palette className="w-4 h-4" />, href: "/admin/settings", color: "bg-white hover:bg-gray-50 text-[#333a42] border border-black/10" },
-        { label: "Consultations", icon: <CalendarCheck className="w-4 h-4" />, href: "/admin/consultations", color: "bg-white hover:bg-gray-50 text-[#333a42] border border-black/10" },
+        {
+            label: isAdmin ? "Consultations" : "My Requests",
+            icon: <CalendarCheck className="w-4 h-4" />,
+            href: isAdmin ? "/admin/consultations" : "/admin/my-requests",
+            color: "bg-white hover:bg-gray-50 text-[#333a42] border border-black/10",
+        },
     ];
 
     return (
         <div className="space-y-8 max-w-6xl">
-            {/* Header */}
             <div>
                 <h1 className="text-2xl font-bold text-[#1e2328] tracking-tight">
                     Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"},{" "}
-                    {session?.user?.name?.split(" ")[0] || "Admin"} 👋
+                    {session?.user?.name?.split(" ")[0] || "Admin"}
                 </h1>
-                <p className="text-sm text-muted-foreground mt-1">Here's what's happening with Reframe Psychology today.</p>
+                <p className="text-sm text-muted-foreground mt-1">Here is what needs attention today.</p>
             </div>
 
-            {/* Pending consultations alert */}
-            {stats.new_consultations > 0 && (
-                <Link href="/admin/consultations"
-                    className="flex items-center gap-4 bg-rose-50 border border-rose-200 rounded-xl px-5 py-4 hover:bg-rose-100 transition-colors group">
+            {isAdmin && stats.new_consultations > 0 && (
+                <Link
+                    href="/admin/consultations"
+                    className="flex items-center gap-4 bg-rose-50 border border-rose-200 rounded-xl px-5 py-4 hover:bg-rose-100 transition-colors group"
+                >
                     <div className="w-9 h-9 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
                         <AlertCircle className="w-4.5 h-4.5 text-rose-500" />
                     </div>
@@ -169,11 +240,54 @@ export default function AdminDashboardPage() {
                 </Link>
             )}
 
-            {/* Stat Cards */}
+            {isAdmin && (priorityBookings.length > 0 || priorityInquiries.length > 0) && (
+                <div className="bg-white rounded-xl border border-black/[0.06] overflow-hidden">
+                    <div className="px-5 py-4 border-b border-black/[0.04] flex items-center justify-between gap-4">
+                        <div>
+                            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Practice Priorities</p>
+                            <p className="text-sm text-[#333a42] mt-0.5">Open client requests that need the next action</p>
+                        </div>
+                        <Link href="/admin/consultations" className="text-[12px] text-[#7ebac8] hover:underline font-medium flex items-center gap-1 shrink-0">
+                            Open workflow <ArrowRight className="w-3 h-3" />
+                        </Link>
+                    </div>
+                    <div className="divide-y divide-black/[0.04]">
+                        {priorityBookings.map((booking) => (
+                            <Link key={`booking-${booking.id}`} href="/admin/consultations" className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#f7f5f2] transition-colors">
+                                <CalendarCheck className="w-4 h-4 text-[#7ebac8] shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[13px] font-semibold text-[#333a42] truncate">{booking.first_name} {booking.last_name}</p>
+                                    <p className="text-[11px] text-muted-foreground truncate">
+                                        {booking.requested_date} at {booking.requested_time}
+                                        {booking.presenting_concern && ` - ${booking.presenting_concern}`}
+                                    </p>
+                                </div>
+                                <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${(booking.urgency || "").toLowerCase().includes("soon") ? "bg-amber-50 text-amber-700" : "bg-sky-50 text-sky-700"}`}>
+                                    {booking.urgency || "Open"}
+                                </span>
+                            </Link>
+                        ))}
+                        {priorityInquiries.map((inquiry) => (
+                            <Link key={`inquiry-${inquiry.id}`} href="/admin/consultations" className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#f7f5f2] transition-colors">
+                                <Mail className="w-4 h-4 text-rose-500 shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[13px] font-semibold text-[#333a42] truncate">{inquiry.first_name} {inquiry.last_name}</p>
+                                    <p className="text-[11px] text-muted-foreground truncate">{inquiry.subject || "General inquiry"}</p>
+                                </div>
+                                <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-rose-50 text-rose-700">New inquiry</span>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {statCards.map((card) => (
-                    <Link key={card.label} href={card.href}
-                        className={`bg-white rounded-xl border border-black/[0.06] p-5 hover:shadow-md hover:-translate-y-0.5 transition-all group ${card.primary ? "ring-1 ring-[#7ebac8]/30" : ""}`}>
+                    <Link
+                        key={card.label}
+                        href={card.href}
+                        className={`bg-white rounded-xl border border-black/[0.06] p-5 hover:shadow-md hover:-translate-y-0.5 transition-all group ${card.primary ? "ring-1 ring-[#7ebac8]/30" : ""}`}
+                    >
                         <div className="flex items-center justify-between mb-3">
                             <div className={`w-9 h-9 rounded-lg ${card.bg} flex items-center justify-center ${card.color}`}>
                                 {card.icon}
@@ -189,20 +303,21 @@ export default function AdminDashboardPage() {
                 ))}
             </div>
 
-            {/* Quick actions */}
             <div>
                 <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">Quick Actions</p>
                 <div className="flex flex-wrap gap-2.5">
-                    {quickActions.map(a => (
-                        <Link key={a.label} href={a.href}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${a.color} shadow-sm`}>
-                            {a.icon} {a.label}
+                    {quickActions.map((action) => (
+                        <Link
+                            key={action.label}
+                            href={action.href}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${action.color} shadow-sm`}
+                        >
+                            {action.icon} {action.label}
                         </Link>
                     ))}
                 </div>
             </div>
 
-            {/* Recent Articles */}
             <div>
                 <div className="flex items-center justify-between mb-4">
                     <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Recent Articles</p>
@@ -212,20 +327,22 @@ export default function AdminDashboardPage() {
                 </div>
                 <div className="bg-white rounded-xl border border-black/[0.06] divide-y divide-black/[0.04] overflow-hidden">
                     {loading ? (
-                        <div className="p-8 text-center text-sm text-muted-foreground">Loading…</div>
+                        <div className="p-8 text-center text-sm text-muted-foreground">Loading...</div>
                     ) : recent.length === 0 ? (
                         <div className="p-8 text-center">
                             <FileText className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
                             <p className="text-sm text-muted-foreground">No articles yet. Ready to start writing?</p>
-                            <Link href="/admin/articles/new"
-                                className="mt-3 inline-flex items-center gap-1.5 text-sm text-[#7ebac8] hover:underline font-medium">
+                            <Link href="/admin/articles/new" className="mt-3 inline-flex items-center gap-1.5 text-sm text-[#7ebac8] hover:underline font-medium">
                                 <PlusCircle className="w-3.5 h-3.5" /> Compose your first article
                             </Link>
                         </div>
                     ) : (
-                        recent.map(article => (
-                            <Link key={article.id} href={`/admin/articles/${article.slug}/edit`}
-                                className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#f7f5f2] transition-colors group">
+                        recent.map((article) => (
+                            <Link
+                                key={article.id}
+                                href={`/admin/articles/${article.slug}/edit`}
+                                className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#f7f5f2] transition-colors group"
+                            >
                                 <div className="shrink-0">
                                     {article.published
                                         ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
@@ -236,7 +353,7 @@ export default function AdminDashboardPage() {
                                         {article.title}
                                     </p>
                                     <p className="text-[11px] text-muted-foreground">
-                                        {article.author?.name} · {article.category?.name} · {new Date(article.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                        {article.author?.name} - {article.category?.name} - {new Date(article.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                                     </p>
                                 </div>
                                 <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${article.published ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>

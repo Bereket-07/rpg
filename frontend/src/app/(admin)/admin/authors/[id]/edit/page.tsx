@@ -30,6 +30,22 @@ export default function EditAuthorPage({ params }: { params: { id: string } }) {
     const [approachText, setApproachText] = useState("");
     const [backgroundText, setBackgroundText] = useState("");
     const [specialtiesText, setSpecialtiesText] = useState("");
+    const [acceptingNewClients, setAcceptingNewClients] = useState(true);
+    const [availabilityTimezone, setAvailabilityTimezone] = useState("America/Los_Angeles");
+    const [availableWeekdays, setAvailableWeekdays] = useState<number[]>([1, 2, 3, 4, 5]);
+    const [consultationModes, setConsultationModes] = useState<string[]>(["Telehealth"]);
+    const [intakeNote, setIntakeNote] = useState("");
+
+    const weekdays = [
+        { value: 1, label: "Mon" },
+        { value: 2, label: "Tue" },
+        { value: 3, label: "Wed" },
+        { value: 4, label: "Thu" },
+        { value: 5, label: "Fri" },
+        { value: 6, label: "Sat" },
+        { value: 7, label: "Sun" },
+    ];
+    const consultationModeOptions = ["Telehealth", "In-person", "Hybrid"];
 
     useEffect(() => {
         let isMounted = true;
@@ -52,6 +68,11 @@ export default function EditAuthorPage({ params }: { params: { id: string } }) {
                     setApproachText(data.approach_paragraphs ? data.approach_paragraphs.join("\n\n") : "");
                     setBackgroundText(data.background_paragraphs ? data.background_paragraphs.join("\n\n") : "");
                     setSpecialtiesText(data.specialties_list ? data.specialties_list.map((s: any) => `${s.title}: ${s.desc}`).join("\n") : "");
+                    setAcceptingNewClients(data.accepting_new_clients ?? true);
+                    setAvailabilityTimezone(data.availability_timezone || "America/Los_Angeles");
+                    setAvailableWeekdays(data.available_weekdays?.length ? data.available_weekdays : [1, 2, 3, 4, 5]);
+                    setConsultationModes(data.consultation_modes?.length ? data.consultation_modes : ["Telehealth"]);
+                    setIntakeNote(data.intake_note || "");
                 }
             } catch (error) {
                 console.error(error);
@@ -88,7 +109,12 @@ export default function EditAuthorPage({ params }: { params: { id: string } }) {
                     title: line.substring(0, colonIdx).trim(),
                     desc: line.substring(colonIdx + 1).trim()
                 };
-            }).filter(s => s.title) : []
+            }).filter(s => s.title) : [],
+            accepting_new_clients: acceptingNewClients,
+            availability_timezone: availabilityTimezone,
+            available_weekdays: availableWeekdays,
+            consultation_modes: consultationModes,
+            intake_note: intakeNote || null,
         };
 
         try {
@@ -224,6 +250,80 @@ export default function EditAuthorPage({ params }: { params: { id: string } }) {
                                 onChange={(e) => setSpecialtiesText(e.target.value)} 
                                 rows={8} 
                                 placeholder="Couples Therapy: Breaking recurring conflict cycles.&#10;Functional Anxiety: Overthinking and career stress." 
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Availability and Booking</CardTitle>
+                        <CardDescription>Controls how this clinician appears in the public booking flow.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-5">
+                        <label className="flex items-center justify-between gap-4 rounded-lg bg-muted/40 p-4">
+                            <div>
+                                <p className="text-sm font-semibold">Accepting new consultation requests</p>
+                                <p className="text-xs text-muted-foreground">If off, clients can still view the profile but cannot choose this clinician.</p>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={acceptingNewClients}
+                                onChange={(e) => setAcceptingNewClients(e.target.checked)}
+                                className="h-5 w-5 accent-[#7ebac8]"
+                            />
+                        </label>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="availabilityTimezone">Timezone</Label>
+                            <Input
+                                id="availabilityTimezone"
+                                value={availabilityTimezone}
+                                onChange={(e) => setAvailabilityTimezone(e.target.value)}
+                                placeholder="America/Los_Angeles"
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Available request days</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {weekdays.map(day => (
+                                    <button
+                                        key={day.value}
+                                        type="button"
+                                        onClick={() => setAvailableWeekdays(days => days.includes(day.value) ? days.filter(d => d !== day.value) : [...days, day.value].sort((a, b) => a - b))}
+                                        className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${availableWeekdays.includes(day.value) ? "bg-[#7ebac8] text-white border-[#7ebac8]" : "bg-white text-muted-foreground border-black/[0.08]"}`}
+                                    >
+                                        {day.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Consultation modes</Label>
+                            <div className="flex flex-wrap gap-2">
+                                {consultationModeOptions.map(mode => (
+                                    <button
+                                        key={mode}
+                                        type="button"
+                                        onClick={() => setConsultationModes(modes => modes.includes(mode) ? modes.filter(m => m !== mode) : [...modes, mode])}
+                                        className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-colors ${consultationModes.includes(mode) ? "bg-[#1e2328] text-white border-[#1e2328]" : "bg-white text-muted-foreground border-black/[0.08]"}`}
+                                    >
+                                        {mode}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label htmlFor="intakeNote">Public intake note</Label>
+                            <Textarea
+                                id="intakeNote"
+                                value={intakeNote}
+                                onChange={(e) => setIntakeNote(e.target.value)}
+                                rows={3}
+                                placeholder="Example: Currently offering telehealth consultations on weekday afternoons."
                             />
                         </div>
                     </CardContent>

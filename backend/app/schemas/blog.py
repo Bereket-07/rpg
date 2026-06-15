@@ -33,6 +33,11 @@ class AuthorBase(BaseModel):
     background_paragraphs: Optional[List[str]] = None
     specialties_list: Optional[List[Dict[str, str]]] = None
     is_team_member: bool = False
+    accepting_new_clients: bool = True
+    availability_timezone: Optional[str] = "America/Los_Angeles"
+    available_weekdays: Optional[List[int]] = None
+    consultation_modes: Optional[List[str]] = None
+    intake_note: Optional[str] = None
 
 class AuthorCreate(AuthorBase):
     pass
@@ -48,6 +53,11 @@ class AuthorUpdate(BaseModel):
     background_paragraphs: Optional[List[str]] = None
     specialties_list: Optional[List[Dict[str, str]]] = None
     is_team_member: Optional[bool] = None
+    accepting_new_clients: Optional[bool] = None
+    availability_timezone: Optional[str] = None
+    available_weekdays: Optional[List[int]] = None
+    consultation_modes: Optional[List[str]] = None
+    intake_note: Optional[str] = None
 
 class AuthorResponse(AuthorBase):
     id: int

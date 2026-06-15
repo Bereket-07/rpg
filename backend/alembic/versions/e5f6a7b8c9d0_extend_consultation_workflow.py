@@ -18,24 +18,20 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.execute(
-        """
-        DO $$
-        BEGIN
-            IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'bookingstatus') THEN
-                ALTER TYPE bookingstatus ADD VALUE IF NOT EXISTS 'reviewing';
-                ALTER TYPE bookingstatus ADD VALUE IF NOT EXISTS 'assigned_to_clinician';
-                ALTER TYPE bookingstatus ADD VALUE IF NOT EXISTS 'awaiting_client';
-                ALTER TYPE bookingstatus ADD VALUE IF NOT EXISTS 'waitlisted';
-                ALTER TYPE bookingstatus ADD VALUE IF NOT EXISTS 'completed';
-            END IF;
-        END
-        $$;
-        """
-    )
+    for value in (
+        "reviewing",
+        "assigned_to_clinician",
+        "awaiting_client",
+        "waitlisted",
+        "completed",
+    ):
+        op.execute(f"ALTER TYPE bookingstatus ADD VALUE IF NOT EXISTS '{value}'")
 
     op.execute("ALTER TABLE contact_inquiries ADD COLUMN IF NOT EXISTS admin_notes TEXT")
     op.execute("ALTER TABLE booking_requests ADD COLUMN IF NOT EXISTS assigned_author_id INTEGER")
+    op.execute("ALTER TABLE booking_requests ADD COLUMN IF NOT EXISTS presenting_concern VARCHAR")
+    op.execute("ALTER TABLE booking_requests ADD COLUMN IF NOT EXISTS urgency VARCHAR")
+    op.execute("ALTER TABLE booking_requests ADD COLUMN IF NOT EXISTS preferred_contact_method VARCHAR")
     op.execute("ALTER TABLE booking_requests ADD COLUMN IF NOT EXISTS admin_notes TEXT")
     op.execute("ALTER TABLE booking_requests ADD COLUMN IF NOT EXISTS video_link VARCHAR")
     op.execute("ALTER TABLE booking_requests ADD COLUMN IF NOT EXISTS confirmed_at TIMESTAMP")
@@ -49,5 +45,8 @@ def downgrade() -> None:
     op.execute("ALTER TABLE booking_requests DROP COLUMN IF EXISTS confirmed_at")
     op.execute("ALTER TABLE booking_requests DROP COLUMN IF EXISTS video_link")
     op.execute("ALTER TABLE booking_requests DROP COLUMN IF EXISTS admin_notes")
+    op.execute("ALTER TABLE booking_requests DROP COLUMN IF EXISTS preferred_contact_method")
+    op.execute("ALTER TABLE booking_requests DROP COLUMN IF EXISTS urgency")
+    op.execute("ALTER TABLE booking_requests DROP COLUMN IF EXISTS presenting_concern")
     op.execute("ALTER TABLE booking_requests DROP COLUMN IF EXISTS assigned_author_id")
     op.execute("ALTER TABLE contact_inquiries DROP COLUMN IF EXISTS admin_notes")

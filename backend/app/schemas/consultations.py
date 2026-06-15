@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Dict, Optional
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, ConfigDict
 
@@ -36,6 +36,9 @@ class BookingRequestCreate(BaseModel):
     requested_date: str
     requested_time: str
     therapist_preference: Optional[str] = None
+    presenting_concern: Optional[str] = None
+    urgency: Optional[str] = None
+    preferred_contact_method: Optional[str] = None
     notes: Optional[str] = None
 
 class BookingRequestUpdate(BaseModel):
@@ -43,6 +46,9 @@ class BookingRequestUpdate(BaseModel):
     assigned_author_id: Optional[int] = None
     admin_notes: Optional[str] = None
     video_link: Optional[str] = None
+    presenting_concern: Optional[str] = None
+    urgency: Optional[str] = None
+    preferred_contact_method: Optional[str] = None
 
 class BookingRequestResponse(BaseModel):
     id: int
@@ -53,6 +59,9 @@ class BookingRequestResponse(BaseModel):
     requested_date: str
     requested_time: str
     therapist_preference: Optional[str] = None
+    presenting_concern: Optional[str] = None
+    urgency: Optional[str] = None
+    preferred_contact_method: Optional[str] = None
     notes: Optional[str] = None
     assigned_author_id: Optional[int] = None
     admin_notes: Optional[str] = None
@@ -62,5 +71,19 @@ class BookingRequestResponse(BaseModel):
     confirmed_at: Optional[datetime] = None
     declined_at: Optional[datetime] = None
     last_notified_at: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ConsultationEventResponse(BaseModel):
+    id: int
+    target_type: str
+    target_id: int
+    event_type: str
+    actor_id: Optional[int] = None
+    actor_label: Optional[str] = None
+    message: str
+    event_metadata: Optional[Dict[str, Any]] = None
+    created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

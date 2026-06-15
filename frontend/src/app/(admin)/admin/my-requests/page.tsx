@@ -15,6 +15,9 @@ interface Booking {
     requested_date: string;
     requested_time: string;
     therapist_preference?: string;
+    presenting_concern?: string;
+    urgency?: string;
+    preferred_contact_method?: string;
     notes?: string;
     admin_notes?: string;
     video_link?: string;
@@ -102,6 +105,9 @@ export default function MyRequestsPage() {
                                 <Info icon={<Mail className="w-4 h-4" />} label="Email" value={booking.email} />
                                 <Info icon={<Phone className="w-4 h-4" />} label="Phone" value={booking.phone || "Not provided"} />
                                 <Info icon={<UserRound className="w-4 h-4" />} label="Preference" value={booking.therapist_preference || "No preference"} />
+                                <Info icon={<Clock className="w-4 h-4" />} label="Timing" value={booking.urgency || "Flexible"} />
+                                <Info icon={<CalendarCheck className="w-4 h-4" />} label="Concern" value={booking.presenting_concern || "Not specified"} />
+                                <Info icon={<Mail className="w-4 h-4" />} label="Preferred contact" value={booking.preferred_contact_method || "Email"} />
                                 <Info icon={<Clock className="w-4 h-4" />} label="Session link" value={booking.video_link || "Not added yet"} />
                             </div>
 

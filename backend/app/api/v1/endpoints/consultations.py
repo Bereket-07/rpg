@@ -7,15 +7,48 @@ from sqlalchemy import or_
 
 from app.api import deps
 from app.models.author_category import Author
-from app.models.consultations import ContactInquiry, BookingRequest
+from app.models.consultations import ContactInquiry, BookingRequest, ConsultationEvent
 from app.models.user import User, Role
 from app.schemas.consultations import (
     ContactInquiryCreate, ContactInquiryUpdate, ContactInquiryResponse,
-    BookingRequestCreate, BookingRequestUpdate, BookingRequestResponse
+    BookingRequestCreate, BookingRequestUpdate, BookingRequestResponse,
+    ConsultationEventResponse
 )
 from app.core import email as email_module
 
 router = APIRouter()
+
+
+def _user_label(user: Optional[User]) -> str:
+    if not user:
+        return "Client"
+    return user.email or f"User #{user.id}"
+
+
+def _enum_value(value):
+    return value.value if hasattr(value, "value") else value
+
+
+def _log_event(
+    db: AsyncSession,
+    target_type: str,
+    target_id: int,
+    event_type: str,
+    message: str,
+    actor: Optional[User] = None,
+    metadata: Optional[dict] = None,
+) -> None:
+    db.add(
+        ConsultationEvent(
+            target_type=target_type,
+            target_id=target_id,
+            event_type=event_type,
+            actor_id=actor.id if actor else None,
+            actor_label=_user_label(actor),
+            message=message,
+            event_metadata=metadata or {},
+        )
+    )
 
 
 async def _find_booking_clinician(
@@ -52,6 +85,15 @@ async def submit_inquiry(
     db.add(db_inquiry)
     await db.commit()
     await db.refresh(db_inquiry)
+    _log_event(
+        db,
+        "inquiry",
+        db_inquiry.id,
+        "submitted",
+        "Contact inquiry submitted by client.",
+        metadata={"subject": db_inquiry.subject or "General Inquiry"},
+    )
+    await db.commit()
     # Notify practice via email
     background_tasks.add_task(
         email_module.send_inquiry_notification,
@@ -91,8 +133,25 @@ async def update_inquiry_status(
     if not inquiry:
         raise HTTPException(status_code=404, detail="Inquiry not found")
     update_data = inquiry_in.model_dump(exclude_unset=True)
+    previous_status = _enum_value(inquiry.status)
+    previous_notes = inquiry.admin_notes
     for field, value in update_data.items():
         setattr(inquiry, field, value)
+    messages = []
+    if "status" in update_data and update_data["status"] != previous_status:
+        messages.append(f"Status changed from {previous_status} to {update_data['status']}.")
+    if "admin_notes" in update_data and update_data["admin_notes"] != previous_notes:
+        messages.append("Internal notes updated.")
+    if messages:
+        _log_event(
+            db,
+            "inquiry",
+            inquiry.id,
+            "updated",
+            " ".join(messages),
+            actor=current_user,
+            metadata={"changes": update_data},
+        )
     db.add(inquiry)
     await db.commit()
     await db.refresh(inquiry)
@@ -114,6 +173,21 @@ async def delete_inquiry(
     await db.commit()
     return {"ok": True}
 
+@router.get("/inquiries/{inquiry_id}/events", response_model=List[ConsultationEventResponse])
+async def get_inquiry_events(
+    inquiry_id: int,
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user)
+):
+    if current_user.role != Role.ADMIN:
+        raise HTTPException(status_code=403, detail="Not permitted")
+    result = await db.execute(
+        select(ConsultationEvent)
+        .where(ConsultationEvent.target_type == "inquiry", ConsultationEvent.target_id == inquiry_id)
+        .order_by(ConsultationEvent.created_at.desc())
+    )
+    return result.scalars().all()
+
 # ─── Booking Requests ─────────────────────────────────────────────────────────
 
 @router.post("/bookings", response_model=BookingRequestResponse)
@@ -127,6 +201,29 @@ async def submit_booking(
     db.add(db_booking)
     await db.commit()
     await db.refresh(db_booking)
+    _log_event(
+        db,
+        "booking",
+        db_booking.id,
+        "submitted",
+        "Booking request submitted by client.",
+        metadata={
+            "requested_date": db_booking.requested_date,
+            "requested_time": db_booking.requested_time,
+            "therapist_preference": db_booking.therapist_preference,
+            "presenting_concern": db_booking.presenting_concern,
+            "urgency": db_booking.urgency,
+        },
+    )
+    _log_event(
+        db,
+        "booking",
+        db_booking.id,
+        "notification_queued",
+        "Client receipt and practice notification queued.",
+        metadata={"channels": ["client_email", "practice_email"]},
+    )
+    await db.commit()
     background_tasks.add_task(
         email_module.send_booking_notification,
         db_booking.first_name,
@@ -135,7 +232,10 @@ async def submit_booking(
         db_booking.requested_date,
         db_booking.requested_time,
         db_booking.therapist_preference or "No preference",
-        db_booking.notes or ""
+        db_booking.notes or "",
+        db_booking.presenting_concern,
+        db_booking.urgency,
+        db_booking.preferred_contact_method,
     )
     background_tasks.add_task(
         email_module.send_booking_received_client_email,
@@ -145,6 +245,9 @@ async def submit_booking(
         db_booking.requested_date,
         db_booking.requested_time,
         db_booking.therapist_preference or "No preference",
+        db_booking.presenting_concern,
+        db_booking.urgency,
+        db_booking.preferred_contact_method,
     )
     return db_booking
 
@@ -204,7 +307,10 @@ async def update_booking_status(
     booking = result.scalar_one_or_none()
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
-    previous_status = booking.status.value if hasattr(booking.status, "value") else booking.status
+    previous_status = _enum_value(booking.status)
+    previous_assigned_author_id = booking.assigned_author_id
+    previous_notes = booking.admin_notes
+    previous_video_link = booking.video_link
     update_data = booking_in.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(booking, field, value)
@@ -218,6 +324,55 @@ async def update_booking_status(
         booking.last_notified_at = now
     elif next_status == "assigned_to_clinician" and previous_status != "assigned_to_clinician":
         booking.last_notified_at = now
+    messages = []
+    if "status" in update_data and next_status != previous_status:
+        messages.append(f"Status changed from {previous_status} to {next_status}.")
+    if "assigned_author_id" in update_data and booking.assigned_author_id != previous_assigned_author_id:
+        messages.append("Assigned clinician updated.")
+    if "admin_notes" in update_data and booking.admin_notes != previous_notes:
+        messages.append("Internal notes updated.")
+    if "video_link" in update_data and booking.video_link != previous_video_link:
+        messages.append("Session link updated.")
+    if messages:
+        _log_event(
+            db,
+            "booking",
+            booking.id,
+            "updated",
+            " ".join(messages),
+            actor=current_user,
+            metadata={"changes": update_data},
+        )
+    if next_status == "confirmed" and previous_status != "confirmed":
+        _log_event(
+            db,
+            "booking",
+            booking.id,
+            "notification_queued",
+            "Confirmation email queued for client.",
+            actor=current_user,
+            metadata={"recipient": "client"},
+        )
+    elif next_status == "declined" and previous_status != "declined":
+        _log_event(
+            db,
+            "booking",
+            booking.id,
+            "notification_queued",
+            "Decline email queued for client.",
+            actor=current_user,
+            metadata={"recipient": "client"},
+        )
+    elif next_status == "assigned_to_clinician" and previous_status != "assigned_to_clinician":
+        _log_event(
+            db,
+            "booking",
+            booking.id,
+            "notification_queued",
+            "Clinician assignment notification queued.",
+            actor=current_user,
+            metadata={"recipient": "clinician"},
+        )
     db.add(booking)
     await db.commit()
     await db.refresh(booking)
@@ -235,6 +390,9 @@ async def update_booking_status(
             booking.requested_time,
             clinician_name,
             booking.video_link,
+            booking.presenting_concern,
+            booking.urgency,
+            booking.preferred_contact_method,
         )
         if clinician_user and clinician_user.email:
             background_tasks.add_task(
@@ -256,6 +414,9 @@ async def update_booking_status(
             booking.requested_date,
             booking.requested_time,
             clinician_name,
+            booking.presenting_concern,
+            booking.urgency,
+            booking.preferred_contact_method,
         )
     elif next_status == "assigned_to_clinician" and previous_status != "assigned_to_clinician":
         if clinician_user and clinician_user.email:
@@ -286,6 +447,29 @@ async def delete_booking(
     await db.delete(booking)
     await db.commit()
     return {"ok": True}
+
+@router.get("/bookings/{booking_id}/events", response_model=List[ConsultationEventResponse])
+async def get_booking_events(
+    booking_id: int,
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user)
+):
+    if current_user.role != Role.ADMIN:
+        if not current_user.author_id:
+            raise HTTPException(status_code=403, detail="Not permitted")
+        booking_result = await db.execute(select(BookingRequest).where(BookingRequest.id == booking_id))
+        booking = booking_result.scalar_one_or_none()
+        if not booking:
+            raise HTTPException(status_code=404, detail="Booking not found")
+        clinician, _ = await _find_booking_clinician(db, booking)
+        if booking.assigned_author_id != current_user.author_id and (not clinician or clinician.id != current_user.author_id):
+            raise HTTPException(status_code=403, detail="Not permitted")
+    result = await db.execute(
+        select(ConsultationEvent)
+        .where(ConsultationEvent.target_type == "booking", ConsultationEvent.target_id == booking_id)
+        .order_by(ConsultationEvent.created_at.desc())
+    )
+    return result.scalars().all()
 
 # ─── Counts (for dashboard badge) ────────────────────────────────────────────
 
