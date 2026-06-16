@@ -492,3 +492,101 @@ async def get_consultation_counts(
         "new_inquiries": inq_result.scalar(),
         "new_bookings": book_result.scalar()
     }
+
+
+# ─── KPI Stats ────────────────────────────────────────────────────────────────
+
+@router.get("/stats")
+async def get_consultation_stats(
+    period: str = "month",   # week | month | year
+    author_id: Optional[int] = None,
+    db: AsyncSession = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user)
+):
+    """
+    KPI stats for clinicians and admins.
+    - Admin: aggregate or per-clinician (pass author_id)
+    - Clinician: own stats only
+    """
+    from sqlalchemy import func
+    from datetime import timedelta
+
+    now = datetime.utcnow()
+    if period == "week":
+        since = now - timedelta(days=7)
+    elif period == "year":
+        since = now - timedelta(days=365)
+    else:
+        since = now - timedelta(days=30)
+
+    is_admin = current_user.role == Role.ADMIN
+
+    # Build base query filters
+    def build_query(aid: Optional[int] = None):
+        q = select(BookingRequest)
+        if aid:
+            q = q.where(BookingRequest.assigned_author_id == aid)
+        elif not is_admin:
+            # Clinician sees only their own
+            q = q.where(BookingRequest.assigned_author_id == current_user.author_id)
+        return q
+
+    async def compute_stats(aid: Optional[int] = None, name: str = "All"):
+        all_q = await db.execute(build_query(aid))
+        all_bookings = all_q.scalars().all()
+
+        period_q = await db.execute(
+            build_query(aid).where(BookingRequest.submitted_at >= since)
+        )
+        period_bookings = period_q.scalars().all()
+
+        total = len(all_bookings)
+        confirmed = sum(1 for b in all_bookings if _enum_value(b.status) in ("confirmed", "completed"))
+        declined = sum(1 for b in all_bookings if _enum_value(b.status) == "declined")
+        pending = sum(1 for b in all_bookings if _enum_value(b.status) in ("new", "reviewing"))
+        acceptance_rate = round((confirmed / (confirmed + declined) * 100), 1) if (confirmed + declined) > 0 else 0.0
+
+        by_concern: dict = {}
+        for b in all_bookings:
+            concern = b.presenting_concern or "Other"
+            by_concern[concern] = by_concern.get(concern, 0) + 1
+
+        by_status: dict = {}
+        for b in all_bookings:
+            s = _enum_value(b.status)
+            by_status[s] = by_status.get(s, 0) + 1
+
+        return {
+            "clinician_name": name,
+            "author_id": aid,
+            "total_bookings": total,
+            "confirmed": confirmed,
+            "declined": declined,
+            "pending": pending,
+            "acceptance_rate": acceptance_rate,
+            "this_period_bookings": len(period_bookings),
+            "period": period,
+            "by_concern": dict(sorted(by_concern.items(), key=lambda x: -x[1])[:6]),
+            "by_status": by_status,
+        }
+
+    # Admin: all clinicians breakdown
+    if is_admin and not author_id:
+        authors_result = await db.execute(select(Author).where(Author.is_team_member == True))
+        authors = authors_result.scalars().all()
+        clinician_stats = []
+        for a in authors:
+            stats = await compute_stats(a.id, a.name)
+            clinician_stats.append(stats)
+        aggregate = await compute_stats(None, "All Clinicians")
+        return {"aggregate": aggregate, "clinicians": clinician_stats}
+
+    # Admin querying specific clinician
+    if is_admin and author_id:
+        author_result = await db.execute(select(Author).where(Author.id == author_id))
+        author = author_result.scalar_one_or_none()
+        name = author.name if author else f"Clinician #{author_id}"
+        return await compute_stats(author_id, name)
+
+    # Clinician: their own stats
+    return await compute_stats(current_user.author_id, current_user.email or "Me")

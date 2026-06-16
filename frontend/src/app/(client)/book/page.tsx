@@ -43,7 +43,11 @@ interface Clinician {
     intake_note?: string;
 }
 
-const TIME_SLOTS = ["09:00 AM", "10:00 AM", "11:00 AM", "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM"];
+// Static fallback — replaced dynamically when clinician + date are selected
+const FALLBACK_SLOTS = [
+    "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
+    "01:00 PM", "02:00 PM", "03:00 PM", "04:00 PM", "05:00 PM",
+];
 const URGENCY_OPTIONS = ["Flexible", "Within 1-2 weeks", "As soon as available"];
 const CONTACT_OPTIONS = ["Email", "Phone", "Text"];
 
@@ -147,6 +151,10 @@ export default function BookingPage() {
     const [submitted, setSubmitted] = useState(false);
     const [submitError, setSubmitError] = useState("");
 
+    // Real-time availability
+    const [liveSlots, setLiveSlots] = useState<{ time: string; available: boolean; reason: string | null }[]>([]);
+    const [slotsLoading, setSlotsLoading] = useState(false);
+
     useEffect(() => {
         fetch(`${getApiUrl()}/api/v1/authors?team_only=true`)
             .then((res) => (res.ok ? res.json() : []))
@@ -156,6 +164,23 @@ export default function BookingPage() {
             })
             .finally(() => setLoading(false));
     }, []);
+
+    // Fetch live slots whenever clinician + date both change
+    useEffect(() => {
+        if (!selected?.id || !date) {
+            setLiveSlots([]);
+            setTime("");
+            return;
+        }
+        const dateStr = format(date, "yyyy-MM-dd");
+        setSlotsLoading(true);
+        setTime("");
+        fetch(`${getApiUrl()}/api/v1/availability/${selected.id}/available-slots?date=${dateStr}`)
+            .then(r => r.ok ? r.json() : [])
+            .then(setLiveSlots)
+            .catch(() => setLiveSlots([]))
+            .finally(() => setSlotsLoading(false));
+    }, [selected?.id, date]);
 
     function handleConcernSelect(label: string) {
         setConcern(label);
@@ -403,18 +428,42 @@ export default function BookingPage() {
                                         <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                                             <Clock className="w-3.5 h-3.5" /> Preferred Time
                                         </label>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {TIME_SLOTS.map((slot) => (
-                                                <button
-                                                    key={slot}
-                                                    type="button"
-                                                    onClick={() => setTime(slot)}
-                                                    className={`py-2 px-3 rounded-xl border text-sm font-semibold transition-all ${time === slot ? "border-primary bg-primary/10 text-primary" : "border-black/[0.08] hover:border-primary/40 text-muted-foreground"}`}
-                                                >
-                                                    {slot}
-                                                </button>
-                                            ))}
-                                        </div>
+                                        {!date ? (
+                                            <p className="text-[12px] text-muted-foreground italic py-2">← Pick a date first to see available times</p>
+                                        ) : slotsLoading ? (
+                                            <div className="flex items-center gap-2 py-3 text-muted-foreground">
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                                <span className="text-[13px]">Checking availability…</span>
+                                            </div>
+                                        ) : liveSlots.length > 0 && liveSlots.every(s => !s.available) ? (
+                                            <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[13px] text-amber-800 font-medium">
+                                                No availability on this date — please select a different day.
+                                            </div>
+                                        ) : (
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {(liveSlots.length > 0 ? liveSlots : FALLBACK_SLOTS.map(t => ({ time: t, available: true, reason: null }))).map((slot) => (
+                                                    <button
+                                                        key={slot.time}
+                                                        type="button"
+                                                        disabled={!slot.available}
+                                                        onClick={() => slot.available && setTime(slot.time)}
+                                                        title={!slot.available ? (slot.reason || "Not available") : ""}
+                                                        className={`py-2 px-3 rounded-xl border text-sm font-semibold transition-all relative
+                                                            ${!slot.available
+                                                                ? "border-black/[0.05] bg-[#f7f5f2] text-muted-foreground/40 cursor-not-allowed line-through"
+                                                                : time === slot.time
+                                                                    ? "border-primary bg-primary/10 text-primary"
+                                                                    : "border-black/[0.08] hover:border-primary/40 text-muted-foreground hover:text-primary"
+                                                            }`}
+                                                    >
+                                                        {slot.time}
+                                                        {!slot.available && (
+                                                            <span className="absolute top-0.5 right-1 text-[8px] font-bold text-rose-400">✕</span>
+                                                        )}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        )}
                                         <SelectField label="Timing" value={urgency} onChange={setUrgency} options={URGENCY_OPTIONS} />
                                         <SelectField label="Preferred Contact" value={contactMethod} onChange={setContactMethod} options={CONTACT_OPTIONS} />
                                         <div className="space-y-1.5">

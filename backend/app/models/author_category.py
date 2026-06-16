@@ -32,6 +32,22 @@ class Author(Base):
 
     # Relationship to articles
     articles = relationship("Article", back_populates="author")
+    blocked_slots = relationship("ClinicianBlockedSlot", back_populates="author", cascade="all, delete-orphan")
+
+
+class ClinicianBlockedSlot(Base):
+    __tablename__ = "clinician_blocked_slots"
+
+    id = Column(Integer, primary_key=True, index=True)
+    author_id = Column(Integer, ForeignKey("authors.id", ondelete="CASCADE"), nullable=False, index=True)
+    blocked_date = Column(String(10), nullable=False)   # YYYY-MM-DD
+    start_time = Column(String(8), nullable=True)       # e.g. "09:00 AM"
+    end_time = Column(String(8), nullable=True)
+    is_full_day = Column(Boolean, nullable=False, default=False)
+    reason = Column(String(200), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    author = relationship("Author", back_populates="blocked_slots")
 
 
 class Category(Base):

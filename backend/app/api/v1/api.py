@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.v1.endpoints import articles, categories, authors, auth, upload, newsletter, users, settings, consultations
+from app.api.v1.endpoints import articles, categories, authors, auth, upload, newsletter, users, settings, consultations, availability
 
 api_router = APIRouter()
 
@@ -13,3 +13,4 @@ api_router.include_router(authors.router, prefix="/authors", tags=["authors"])
 api_router.include_router(newsletter.router, prefix="/newsletter", tags=["newsletter"])
 api_router.include_router(settings.router, prefix="/settings", tags=["settings"])
 api_router.include_router(consultations.router, prefix="/consultations", tags=["consultations"])
+api_router.include_router(availability.router, prefix="/availability", tags=["availability"])

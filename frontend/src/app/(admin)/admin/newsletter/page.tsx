@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
-import { Mail, Download, Search, Users, UserX, TrendingUp } from "lucide-react";
+import { Mail, Download, Search, Users, UserX, TrendingUp, Send, X, Loader2, CheckCircle2 } from "lucide-react";
 import { getApiUrl } from "@/lib/api";
-
 
 interface Subscriber { id: number; email: string; is_active: boolean; subscribed_at: string; }
 
@@ -14,6 +13,11 @@ export default function AdminNewsletterPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<"all" | "active" | "unsubscribed">("all");
+    const [broadcastOpen, setBroadcastOpen] = useState(false);
+    const [broadcastSubject, setBroadcastSubject] = useState("");
+    const [broadcastMessage, setBroadcastMessage] = useState("");
+    const [sending, setSending] = useState(false);
+    const [sendResult, setSendResult] = useState<{ ok: boolean; msg: string } | null>(null);
     const token = (session as any)?.accessToken;
 
     useEffect(() => {
@@ -40,7 +44,8 @@ export default function AdminNewsletterPage() {
 
     function exportCSV() {
         const rows = [["Email", "Status", "Subscribed Date"],
-        ...filtered.map(s => [s.email, s.is_active ? "Active" : "Unsubscribed", new Date(s.subscribed_at).toLocaleDateString()])];
+            ...filtered.map(s => [s.email, s.is_active ? "Active" : "Unsubscribed",
+                new Date(s.subscribed_at).toLocaleDateString()])];
         const csv = rows.map(r => r.join(",")).join("\n");
         const blob = new Blob([csv], { type: "text/csv" });
         const url = URL.createObjectURL(blob);
@@ -48,20 +53,48 @@ export default function AdminNewsletterPage() {
         URL.revokeObjectURL(url);
     }
 
+    async function handleBroadcast(e: React.FormEvent) {
+        e.preventDefault();
+        if (!broadcastSubject.trim() || !broadcastMessage.trim()) return;
+        setSending(true); setSendResult(null);
+        try {
+            const res = await fetch(`${getApiUrl()}/api/v1/newsletter/broadcast`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ subject: broadcastSubject, message: broadcastMessage }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setSendResult({ ok: true, msg: data.message || `Sent to ${data.sent} subscribers!` });
+                setTimeout(() => { setBroadcastOpen(false); setBroadcastSubject(""); setBroadcastMessage(""); setSendResult(null); }, 2500);
+            } else {
+                setSendResult({ ok: false, msg: data.detail || "Failed to send broadcast." });
+            }
+        } catch {
+            setSendResult({ ok: false, msg: "Server connection error." });
+        } finally { setSending(false); }
+    }
+
     return (
         <div className="space-y-6 max-w-4xl">
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold text-[#1e2328] tracking-tight">Newsletter</h1>
-                    <p className="text-sm text-muted-foreground mt-0.5">Manage your mailing list and subscriber activity</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">Manage your mailing list and send broadcasts</p>
                 </div>
-                <button onClick={exportCSV}
-                    className="flex items-center gap-2 bg-white border border-black/[0.1] hover:border-[#7ebac8]/60 text-[#333a42] px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm">
-                    <Download className="w-4 h-4" /> Export CSV
-                </button>
+                <div className="flex items-center gap-2">
+                    <button onClick={exportCSV}
+                        className="flex items-center gap-2 bg-white border border-black/[0.1] hover:border-[#7ebac8]/60 text-[#333a42] px-4 py-2.5 rounded-lg text-sm font-semibold transition-all shadow-sm">
+                        <Download className="w-4 h-4" /> Export CSV
+                    </button>
+                    <button onClick={() => setBroadcastOpen(true)}
+                        className="flex items-center gap-2 bg-[#7ebac8] hover:bg-[#6aaab8] text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm">
+                        <Send className="w-4 h-4" /> Send Broadcast
+                    </button>
+                </div>
             </div>
 
-            {/* Summary banner */}
+            {/* Stats */}
             <div className="grid grid-cols-3 gap-4">
                 {[
                     { label: "Active", value: active.length, icon: <Users className="w-4 h-4" />, color: "text-emerald-600", bg: "bg-emerald-50" },
@@ -123,6 +156,76 @@ export default function AdminNewsletterPage() {
                     </div>
                 )}
             </div>
+
+            {/* Broadcast Drawer */}
+            {broadcastOpen && (
+                <div className="fixed inset-0 z-50 flex">
+                    <div className="flex-1 bg-black/30 backdrop-blur-sm" onClick={() => !sending && setBroadcastOpen(false)} />
+                    <div className="w-[460px] bg-white shadow-2xl flex flex-col">
+                        <div className="flex items-center justify-between px-6 py-5 border-b">
+                            <div>
+                                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Newsletter</p>
+                                <h3 className="font-bold text-[16px] text-[#1e2328]">Send Broadcast</h3>
+                            </div>
+                            <button onClick={() => setBroadcastOpen(false)} className="w-8 h-8 rounded-full hover:bg-black/[0.06] flex items-center justify-center">
+                                <X className="w-4 h-4 text-muted-foreground" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleBroadcast} className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+                            {/* Recipients preview */}
+                            <div className="bg-[#f0f9ff] border border-[#7ebac8]/30 rounded-lg px-4 py-3 flex items-center gap-3">
+                                <Users className="w-4 h-4 text-[#7ebac8]" />
+                                <p className="text-[13px] text-[#4a535e]">
+                                    Sending to <strong className="text-[#1e2328]">{active.length} active subscribers</strong>
+                                </p>
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-[#333a42] uppercase tracking-wider">Subject Line</label>
+                                <input
+                                    required
+                                    value={broadcastSubject}
+                                    onChange={e => setBroadcastSubject(e.target.value)}
+                                    placeholder="e.g. Monthly Mental Health Insights"
+                                    className="w-full border border-black/[0.1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7ebac8]/40"
+                                />
+                            </div>
+
+                            <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-[#333a42] uppercase tracking-wider">Message</label>
+                                <textarea
+                                    required
+                                    value={broadcastMessage}
+                                    onChange={e => setBroadcastMessage(e.target.value)}
+                                    placeholder={"Write your message here...\n\nEach paragraph will be formatted automatically.\nKeep it warm and personal."}
+                                    rows={10}
+                                    className="w-full border border-black/[0.1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7ebac8]/40 resize-none"
+                                />
+                                <p className="text-[11px] text-muted-foreground">Each new line becomes a paragraph. An unsubscribe link is added automatically.</p>
+                            </div>
+
+                            {sendResult && (
+                                <div className={`flex items-start gap-2 px-3 py-3 rounded-lg text-sm font-medium ${sendResult.ok ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}>
+                                    {sendResult.ok ? <CheckCircle2 className="w-4 h-4 mt-0.5 shrink-0" /> : <X className="w-4 h-4 mt-0.5 shrink-0" />}
+                                    {sendResult.msg}
+                                </div>
+                            )}
+
+                            <button
+                                type="submit"
+                                disabled={sending || !broadcastSubject.trim() || !broadcastMessage.trim()}
+                                className="w-full bg-[#7ebac8] hover:bg-[#6aaab8] disabled:opacity-50 text-white rounded-lg py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+                            >
+                                {sending
+                                    ? <><Loader2 className="w-4 h-4 animate-spin" /> Sending…</>
+                                    : <><Send className="w-4 h-4" /> Send to {active.length} Subscribers</>
+                                }
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

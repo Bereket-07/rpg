@@ -2,10 +2,12 @@
 Email sending via Resend (https://resend.com)
 All functions are async-safe and fail silently with logging.
 """
+import hashlib
 import logging
 import os
 from html import escape
 from typing import List, Optional
+from urllib.parse import quote
 
 logger = logging.getLogger(__name__)
 
@@ -25,12 +27,36 @@ def _get_resend():
         return None
 
 MAIL_FROM_NAME = os.getenv("MAIL_FROM_NAME", "Reframe Psychology")
-MAIL_FROM      = os.getenv("MAIL_FROM", "onboarding@resend.dev")   # swap once domain verified
+MAIL_FROM      = os.getenv("MAIL_FROM", "onboarding@resend.dev")
 SITE_URL       = os.getenv("SITE_URL", "http://localhost:3000")
+TIMEZONE_LABEL = os.getenv("PRACTICE_TIMEZONE_LABEL", "America/Los_Angeles")
 
 
 def _safe(value: Optional[str]) -> str:
     return escape(value or "")
+
+
+def _unsubscribe_link(email_addr: str) -> str:
+    token = hashlib.sha256(email_addr.encode()).hexdigest()[:16]
+    return f"{SITE_URL}/api/v1/newsletter/unsubscribe?token={token}"
+
+
+def _gcal_link(date_str: str, time_str: str, clinician: str) -> str:
+    """Generate a Google Calendar add-event deep link."""
+    try:
+        from datetime import datetime, timedelta
+        # Parse date (YYYY-MM-DD) and time (HH:MM AM/PM)
+        dt = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %I:%M %p")
+        end = dt + timedelta(hours=1)
+        fmt = "%Y%m%dT%H%M%S"
+        title = quote(f"Reframe Psychology Session with {clinician}")
+        details = quote(f"Consultation session with {clinician} via Reframe Psychology Group.")
+        return (
+            f"https://calendar.google.com/calendar/render?action=TEMPLATE"
+            f"&text={title}&dates={dt.strftime(fmt)}/{end.strftime(fmt)}&details={details}"
+        )
+    except Exception:
+        return ""
 
 
 def _booking_summary_table(
@@ -55,12 +81,12 @@ def _booking_summary_table(
     return f"""
       <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0 22px;">
         <tr><td style="padding:8px 0;font-weight:700;color:#555;width:170px;">Client</td><td style="color:#333;">{_safe(first_name)} {_safe(last_name)}</td></tr>
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Requested Date</td><td style="color:#333;">{_safe(requested_date)}</td></tr>
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Requested Time</td><td style="color:#333;">{_safe(requested_time)}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Date</td><td style="color:#333;">{_safe(requested_date)}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Time</td><td style="color:#333;">{_safe(requested_time)} ({TIMEZONE_LABEL})</td></tr>
         <tr><td style="padding:8px 0;font-weight:700;color:#555;">Clinician</td><td style="color:#333;">{_safe(therapist_preference or "No preference")}</td></tr>
         <tr><td style="padding:8px 0;font-weight:700;color:#555;">Concern</td><td style="color:#333;">{_safe(presenting_concern or "Not specified")}</td></tr>
         <tr><td style="padding:8px 0;font-weight:700;color:#555;">Timing</td><td style="color:#333;">{_safe(urgency or "Flexible")}</td></tr>
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Preferred Contact</td><td style="color:#333;">{_safe(preferred_contact_method or "Email")}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Contact</td><td style="color:#333;">{_safe(preferred_contact_method or "Email")}</td></tr>
         {video_row}
       </table>
     """
@@ -68,26 +94,36 @@ def _booking_summary_table(
 # ---------------------------------------------------------------------------
 # HTML helpers
 # ---------------------------------------------------------------------------
-def _base_html(body: str) -> str:
+def _base_html(body: str, unsubscribe_url: Optional[str] = None) -> str:
+    unsub_html = ""
+    if unsubscribe_url:
+        unsub_html = f' · <a href="{unsubscribe_url}" style="color:#aaa;">Unsubscribe</a>'
     return f"""<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <style>
+    @media only screen and (max-width:600px) {{
+      .email-body {{ padding: 24px 16px !important; }}
+      .email-header {{ padding: 20px 16px !important; }}
+    }}
+  </style>
 </head>
 <body style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:#f4f1ed;margin:0;padding:32px 16px;">
   <table width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;margin:0 auto;">
     <!-- Header -->
     <tr>
-      <td style="background:#1e2328;padding:28px 32px;border-radius:12px 12px 0 0;">
+      <td class="email-header" style="background:#1e2328;padding:28px 32px;border-radius:12px 12px 0 0;">
         <p style="margin:0;font-size:18px;font-weight:700;color:#7ebac8;letter-spacing:0.05em;">
           REFRAME PSYCHOLOGY
         </p>
+        <p style="margin:4px 0 0;font-size:11px;color:#7ebac8;opacity:0.6;letter-spacing:0.08em;">PSYCHOLOGY GROUP</p>
       </td>
     </tr>
     <!-- Body -->
     <tr>
-      <td style="background:#ffffff;padding:36px 32px;border-radius:0 0 12px 12px;border:1px solid #e8e4df;border-top:none;">
+      <td class="email-body" style="background:#ffffff;padding:36px 32px;border-radius:0 0 12px 12px;border:1px solid #e8e4df;border-top:none;">
         {body}
       </td>
     </tr>
@@ -95,7 +131,7 @@ def _base_html(body: str) -> str:
     <tr>
       <td style="padding:20px 0;text-align:center;">
         <p style="margin:0;font-size:11px;color:#aaa;">
-          © Reframe Psychology Group · <a href="{SITE_URL}" style="color:#7ebac8;">Visit Site</a>
+          © Reframe Psychology Group · <a href="{SITE_URL}" style="color:#7ebac8;">Visit Site</a>{unsub_html}
         </p>
       </td>
     </tr>
@@ -113,24 +149,20 @@ async def send_welcome_email(email_to: str):
         logger.warning(f"Resend not configured — skipping welcome email to {email_to}")
         return
 
+    unsub = _unsubscribe_link(email_to)
     body = f"""
       <h2 style="margin:0 0 16px;color:#1e2328;font-size:24px;font-weight:700;">Welcome aboard! 👋</h2>
       <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 16px;">
         Thank you for subscribing to the <strong>Reframe Psychology Group</strong> newsletter.
       </p>
       <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 24px;">
-        You'll receive our latest articles, mental health tools, and clinical insights directly in your inbox — 
+        You'll receive our latest articles, mental health tools, and clinical insights directly in your inbox —
         no spam, just thoughtful content from our team.
       </p>
       <a href="{SITE_URL}/blog"
          style="display:inline-block;background:#7ebac8;color:#fff;font-weight:700;padding:13px 28px;border-radius:8px;text-decoration:none;font-size:15px;">
         Read Our Latest Articles →
       </a>
-      <hr style="margin:32px 0;border:none;border-top:1px solid #eee;"/>
-      <p style="color:#aaa;font-size:12px;margin:0;">
-        You're receiving this because you subscribed at reframepsychology.com.
-        <a href="{SITE_URL}" style="color:#7ebac8;">Unsubscribe</a>
-      </p>
     """
 
     try:
@@ -138,7 +170,7 @@ async def send_welcome_email(email_to: str):
             "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
             "to": [email_to],
             "subject": "Welcome to Reframe Psychology 🧠",
-            "html": _base_html(body),
+            "html": _base_html(body, unsubscribe_url=unsub),
         })
         logger.info(f"Welcome email sent to {email_to}")
     except Exception as e:
@@ -155,35 +187,64 @@ async def send_article_broadcast(emails: List[str], article_title: str, article_
         return
 
     article_url = f"{SITE_URL}/blog/{article_slug}"
-    body = f"""
-      <h2 style="margin:0 0 8px;color:#1e2328;font-size:22px;font-weight:700;">New Article</h2>
-      <h3 style="margin:0 0 16px;color:#7ebac8;font-size:18px;font-weight:600;">{article_title}</h3>
-      <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 24px;">{article_excerpt or "Click below to read our latest clinical insights."}</p>
-      <a href="{article_url}"
-         style="display:inline-block;background:#7ebac8;color:#fff;font-weight:700;padding:13px 28px;border-radius:8px;text-decoration:none;font-size:15px;">
-        Read Full Article →
-      </a>
-      <hr style="margin:32px 0;border:none;border-top:1px solid #eee;"/>
-      <p style="color:#aaa;font-size:12px;margin:0;">
-        You're receiving this because you subscribed at reframepsychology.com.
-        <a href="{SITE_URL}" style="color:#7ebac8;">Unsubscribe</a>
-      </p>
-    """
-
-    # Resend supports up to 50 recipients per call — batch if needed
     BATCH = 50
     for i in range(0, len(emails), BATCH):
         batch = emails[i:i+BATCH]
-        try:
-            rs.Emails.send({
-                "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
-                "to": batch,
-                "subject": f"New from Reframe: {article_title}",
-                "html": _base_html(body),
-            })
-            logger.info(f"Broadcast sent to batch {i//BATCH + 1} ({len(batch)} recipients)")
-        except Exception as e:
-            logger.error(f"Broadcast batch {i//BATCH + 1} failed: {e}")
+        for email_addr in batch:
+            unsub = _unsubscribe_link(email_addr)
+            body = f"""
+              <h2 style="margin:0 0 8px;color:#1e2328;font-size:22px;font-weight:700;">New Article</h2>
+              <h3 style="margin:0 0 16px;color:#7ebac8;font-size:18px;font-weight:600;">{_safe(article_title)}</h3>
+              <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 24px;">{_safe(article_excerpt or "Click below to read our latest clinical insights.")}</p>
+              <a href="{article_url}"
+                 style="display:inline-block;background:#7ebac8;color:#fff;font-weight:700;padding:13px 28px;border-radius:8px;text-decoration:none;font-size:15px;">
+                Read Full Article →
+              </a>
+            """
+            try:
+                rs.Emails.send({
+                    "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
+                    "to": [email_addr],
+                    "subject": f"New from Reframe: {article_title}",
+                    "html": _base_html(body, unsubscribe_url=unsub),
+                })
+            except Exception as e:
+                logger.error(f"Broadcast failed for {email_addr}: {e}")
+        logger.info(f"Broadcast sent to batch {i//BATCH + 1} ({len(batch)} recipients)")
+
+
+# ---------------------------------------------------------------------------
+# Custom newsletter broadcast (admin sends custom message)
+# ---------------------------------------------------------------------------
+async def send_custom_broadcast(emails: List[str], subject: str, message_html: str):
+    rs = _get_resend()
+    if not rs or not emails:
+        logger.warning("Resend not configured or no emails — skipping custom broadcast")
+        return
+
+    BATCH = 50
+    total_sent = 0
+    for i in range(0, len(emails), BATCH):
+        batch = emails[i:i+BATCH]
+        for email_addr in batch:
+            unsub = _unsubscribe_link(email_addr)
+            body = f"""
+              <div style="color:#4a535e;font-size:15px;line-height:1.8;">
+                {message_html}
+              </div>
+            """
+            try:
+                rs.Emails.send({
+                    "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
+                    "to": [email_addr],
+                    "subject": subject,
+                    "html": _base_html(body, unsubscribe_url=unsub),
+                })
+                total_sent += 1
+            except Exception as e:
+                logger.error(f"Custom broadcast failed for {email_addr}: {e}")
+    logger.info(f"Custom broadcast complete: {total_sent}/{len(emails)} sent")
+    return total_sent
 
 
 # ---------------------------------------------------------------------------
@@ -198,13 +259,13 @@ async def send_inquiry_notification(first_name: str, last_name: str, email_from:
     body = f"""
       <h2 style="margin:0 0 16px;color:#1e2328;">📨 New Contact Inquiry</h2>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;width:140px;">Name</td><td style="color:#333;">{first_name} {last_name}</td></tr>
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Email</td><td><a href="mailto:{email_from}" style="color:#7ebac8;">{email_from}</a></td></tr>
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Subject</td><td style="color:#333;">{subject}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;width:140px;">Name</td><td style="color:#333;">{_safe(first_name)} {_safe(last_name)}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Email</td><td><a href="mailto:{_safe(email_from)}" style="color:#7ebac8;">{_safe(email_from)}</a></td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Subject</td><td style="color:#333;">{_safe(subject)}</td></tr>
       </table>
       <hr style="margin:20px 0;border:none;border-top:1px solid #eee;"/>
       <p style="font-weight:700;color:#555;margin:0 0 8px;">Message:</p>
-      <div style="background:#f7f5f2;padding:16px;border-radius:8px;color:#333;font-size:14px;line-height:1.7;">{message}</div>
+      <div style="background:#f7f5f2;padding:16px;border-radius:8px;color:#333;font-size:14px;line-height:1.7;">{_safe(message)}</div>
       <div style="margin-top:24px;">
         <a href="{SITE_URL}/admin/consultations"
            style="display:inline-block;background:#1e2328;color:#fff;font-weight:700;padding:11px 22px;border-radius:8px;text-decoration:none;font-size:13px;">
@@ -245,20 +306,20 @@ async def send_booking_notification(
     notes_html = f"""
       <hr style="margin:16px 0;border:none;border-top:1px solid #eee;"/>
       <p style="font-weight:700;color:#555;margin:0 0 8px;">Notes:</p>
-      <div style="background:#f7f5f2;padding:14px;border-radius:8px;color:#333;font-size:14px;line-height:1.7;">{notes}</div>
+      <div style="background:#f7f5f2;padding:14px;border-radius:8px;color:#333;font-size:14px;line-height:1.7;">{_safe(notes)}</div>
     """ if notes else ""
 
     body = f"""
       <h2 style="margin:0 0 16px;color:#1e2328;">📅 New Booking Request</h2>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;width:180px;">Name</td><td style="color:#333;">{first_name} {last_name}</td></tr>
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Email</td><td><a href="mailto:{email_from}" style="color:#7ebac8;">{email_from}</a></td></tr>
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Requested Date</td><td style="color:#333;">{requested_date}</td></tr>
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Requested Time</td><td style="color:#333;">{requested_time}</td></tr>
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Therapist</td><td style="color:#333;">{therapist_preference or "No preference"}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;width:180px;">Name</td><td style="color:#333;">{_safe(first_name)} {_safe(last_name)}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Email</td><td><a href="mailto:{_safe(email_from)}" style="color:#7ebac8;">{_safe(email_from)}</a></td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Date</td><td style="color:#333;">{_safe(requested_date)}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Time</td><td style="color:#333;">{_safe(requested_time)} ({TIMEZONE_LABEL})</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Clinician</td><td style="color:#333;">{_safe(therapist_preference or "No preference")}</td></tr>
         <tr><td style="padding:8px 0;font-weight:700;color:#555;">Concern</td><td style="color:#333;">{_safe(presenting_concern or "Not specified")}</td></tr>
         <tr><td style="padding:8px 0;font-weight:700;color:#555;">Timing</td><td style="color:#333;">{_safe(urgency or "Flexible")}</td></tr>
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Preferred Contact</td><td style="color:#333;">{_safe(preferred_contact_method or "Email")}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Contact</td><td style="color:#333;">{_safe(preferred_contact_method or "Email")}</td></tr>
       </table>
       {notes_html}
       <div style="margin-top:24px;">
@@ -282,6 +343,9 @@ async def send_booking_notification(
         logger.error(f"Failed to send booking notification: {e}")
 
 
+# ---------------------------------------------------------------------------
+# Booking received — client receipt email
+# ---------------------------------------------------------------------------
 async def send_booking_received_client_email(
     email_to: str,
     first_name: str,
@@ -299,10 +363,10 @@ async def send_booking_received_client_email(
         return
 
     body = f"""
-      <h2 style="margin:0 0 16px;color:#1e2328;font-size:22px;">We received your consultation request</h2>
-      <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 16px;">
-        Hi {_safe(first_name)}, thank you for reaching out to Reframe Psychology Group.
-        Our team will review your request and follow up with next steps.
+      <h2 style="margin:0 0 8px;color:#1e2328;font-size:22px;">We received your consultation request ✅</h2>
+      <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 20px;">
+        Hi <strong>{_safe(first_name)}</strong>, thank you for reaching out to Reframe Psychology Group.
+        Our team will review your request and follow up within <strong>24 business hours</strong>.
       </p>
       {_booking_summary_table(
         first_name=first_name,
@@ -314,16 +378,19 @@ async def send_booking_received_client_email(
         urgency=urgency,
         preferred_contact_method=preferred_contact_method,
       )}
-      <p style="color:#4a535e;font-size:14px;line-height:1.7;margin:0;">
-        If anything changes before we respond, you can reply directly to this email.
-      </p>
+      <div style="background:#f0f9ff;border-left:4px solid #7ebac8;padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:20px;">
+        <p style="margin:0;color:#4a535e;font-size:13px;line-height:1.6;">
+          💡 <strong>What happens next?</strong> A member of our clinical team will contact you at
+          <strong>{_safe(email_to)}</strong> to confirm your appointment. If anything changes, simply reply to this email.
+        </p>
+      </div>
     """
 
     try:
         rs.Emails.send({
             "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
             "to": [email_to],
-            "subject": "We received your consultation request",
+            "subject": "We received your consultation request — Reframe Psychology",
             "html": _base_html(body),
         })
         logger.info(f"Booking receipt email sent to {email_to}")
@@ -331,6 +398,9 @@ async def send_booking_received_client_email(
         logger.error(f"Failed to send booking receipt email to {email_to}: {e}")
 
 
+# ---------------------------------------------------------------------------
+# Booking confirmed — client confirmation email
+# ---------------------------------------------------------------------------
 async def send_booking_confirmed_client_email(
     email_to: str,
     first_name: str,
@@ -348,10 +418,34 @@ async def send_booking_confirmed_client_email(
         logger.warning(f"Resend not configured - skipping booking confirmation email to {email_to}")
         return
 
+    gcal = _gcal_link(requested_date, requested_time, therapist_preference or "your clinician")
+    gcal_button = ""
+    if gcal:
+        gcal_button = f"""
+        <a href="{gcal}"
+           style="display:inline-block;background:#f0f9ff;color:#7ebac8;font-weight:700;padding:11px 22px;border-radius:8px;text-decoration:none;font-size:13px;border:1px solid #7ebac8;margin-left:10px;">
+          📅 Add to Google Calendar
+        </a>"""
+
+    video_button = ""
+    if video_link:
+        video_button = f"""
+        <div style="margin:20px 0;background:#f0fdf4;border:1px solid #86efac;padding:16px;border-radius:10px;">
+          <p style="margin:0 0 10px;font-weight:700;color:#166534;font-size:14px;">🎥 Your Session Link</p>
+          <a href="{_safe(video_link)}"
+             style="display:inline-block;background:#16a34a;color:#fff;font-weight:700;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;">
+            Join Your Session →
+          </a>
+        </div>"""
+
     body = f"""
-      <h2 style="margin:0 0 16px;color:#1e2328;font-size:22px;">Your consultation is confirmed</h2>
-      <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 16px;">
-        Hi {_safe(first_name)}, your requested consultation time has been confirmed.
+      <div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:24px;">
+        <p style="margin:0;color:#15803d;font-weight:700;font-size:15px;">✅ Your appointment is confirmed</p>
+      </div>
+      <h2 style="margin:0 0 8px;color:#1e2328;font-size:22px;">See you soon, {_safe(first_name)}!</h2>
+      <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 20px;">
+        Your consultation with <strong>{_safe(therapist_preference or "Reframe Psychology")}</strong> has been confirmed.
+        Please review your appointment details below.
       </p>
       {_booking_summary_table(
         first_name=first_name,
@@ -364,8 +458,17 @@ async def send_booking_confirmed_client_email(
         preferred_contact_method=preferred_contact_method,
         video_link=video_link,
       )}
-      <p style="color:#4a535e;font-size:14px;line-height:1.7;margin:0;">
-        Please keep this email for your records. If you need to make a change, reply directly and the practice team will help.
+      {video_button}
+      <div style="margin-top:20px;">
+        <a href="{SITE_URL}"
+           style="display:inline-block;background:#1e2328;color:#fff;font-weight:700;padding:11px 22px;border-radius:8px;text-decoration:none;font-size:13px;">
+          Visit Our Site
+        </a>{gcal_button}
+      </div>
+      <hr style="margin:28px 0;border:none;border-top:1px solid #eee;"/>
+      <p style="color:#888;font-size:12px;margin:0;line-height:1.7;">
+        Need to reschedule? Simply reply to this email and our team will assist you.
+        Please give at least 24 hours notice when possible.
       </p>
     """
 
@@ -373,7 +476,7 @@ async def send_booking_confirmed_client_email(
         rs.Emails.send({
             "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
             "to": [email_to],
-            "subject": "Your consultation is confirmed",
+            "subject": f"✅ Appointment Confirmed — {requested_date} at {requested_time} ({TIMEZONE_LABEL})",
             "html": _base_html(body),
         })
         logger.info(f"Booking confirmation email sent to {email_to}")
@@ -381,6 +484,9 @@ async def send_booking_confirmed_client_email(
         logger.error(f"Failed to send booking confirmation email to {email_to}: {e}")
 
 
+# ---------------------------------------------------------------------------
+# Booking declined — client decline email
+# ---------------------------------------------------------------------------
 async def send_booking_declined_client_email(
     email_to: str,
     first_name: str,
@@ -400,8 +506,8 @@ async def send_booking_declined_client_email(
     body = f"""
       <h2 style="margin:0 0 16px;color:#1e2328;font-size:22px;">Update on your consultation request</h2>
       <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 16px;">
-        Hi {_safe(first_name)}, thank you for reaching out. The requested consultation time is not available.
-        Please reply to this email and our team can help find another option.
+        Hi <strong>{_safe(first_name)}</strong>, thank you for reaching out. Unfortunately, we are unable to confirm
+        the requested time slot. Please reply to this email and our team will work with you to find an alternative.
       </p>
       {_booking_summary_table(
         first_name=first_name,
@@ -413,13 +519,17 @@ async def send_booking_declined_client_email(
         urgency=urgency,
         preferred_contact_method=preferred_contact_method,
       )}
+      <a href="{SITE_URL}/book"
+         style="display:inline-block;background:#7ebac8;color:#fff;font-weight:700;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;">
+        Request a New Time →
+      </a>
     """
 
     try:
         rs.Emails.send({
             "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
             "to": [email_to],
-            "subject": "Update on your consultation request",
+            "subject": "Update on your consultation request — Reframe Psychology",
             "html": _base_html(body),
         })
         logger.info(f"Booking decline email sent to {email_to}")
@@ -427,6 +537,9 @@ async def send_booking_declined_client_email(
         logger.error(f"Failed to send booking decline email to {email_to}: {e}")
 
 
+# ---------------------------------------------------------------------------
+# Clinician booking notification
+# ---------------------------------------------------------------------------
 async def send_booking_clinician_notification(
     email_to: str,
     clinician_name: str,
@@ -442,18 +555,20 @@ async def send_booking_clinician_notification(
         return
 
     body = f"""
-      <h2 style="margin:0 0 16px;color:#1e2328;font-size:22px;">Consultation request update</h2>
+      <h2 style="margin:0 0 16px;color:#1e2328;font-size:22px;">Consultation request update 📋</h2>
       <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 16px;">
-        Hi {_safe(clinician_name)}, a consultation request has been marked <strong>{_safe(status_label)}</strong>.
+        Hi <strong>{_safe(clinician_name)}</strong>, a consultation request has been marked
+        <strong style="color:#7ebac8;">{_safe(status_label)}</strong> and is assigned to you.
       </p>
       <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0 22px;">
         <tr><td style="padding:8px 0;font-weight:700;color:#555;width:170px;">Client</td><td style="color:#333;">{_safe(client_name)}</td></tr>
         <tr><td style="padding:8px 0;font-weight:700;color:#555;">Date</td><td style="color:#333;">{_safe(requested_date)}</td></tr>
-        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Time</td><td style="color:#333;">{_safe(requested_time)}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Time</td><td style="color:#333;">{_safe(requested_time)} ({TIMEZONE_LABEL})</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Booking ID</td><td style="color:#333;">#{booking_id}</td></tr>
       </table>
       <a href="{SITE_URL}/admin/my-requests"
          style="display:inline-block;background:#1e2328;color:#fff;font-weight:700;padding:11px 22px;border-radius:8px;text-decoration:none;font-size:13px;">
-        View Request
+        View in My Requests →
       </a>
     """
 

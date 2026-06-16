@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { Users, PlusCircle, RefreshCw, ShieldOff, Shield, Trash2, X, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
+import { Users, PlusCircle, X, Loader2, CheckCircle2, ExternalLink } from "lucide-react";
 import { BlockUserAction, ResetPasswordAction } from "@/components/admin/AccountActions";
 import DeleteAction from "@/components/admin/DeleteAction";
 import { getApiUrl } from "@/lib/api";
-
 
 interface Author {
     id: number;
@@ -52,10 +51,11 @@ export default function AdminAuthorsPage() {
         e.preventDefault();
         setSaving(true); setError("");
         try {
-            const res = await fetch(`${getApiUrl()}/api/v1/users/`, {
+            // FIX: correct endpoint is /author not /
+            const res = await fetch(`${getApiUrl()}/api/v1/users/author`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ name: form.name, email: form.email, password: form.password, role: "AUTHOR" })
+                body: JSON.stringify({ name: form.name, email: form.email, password: form.password })
             });
             if (res.ok) {
                 setSuccess(true);
@@ -133,12 +133,12 @@ export default function AdminAuthorsPage() {
                                         </span>
                                     )}
                                     <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${author.accepting_new_clients === false ? "bg-slate-100 text-slate-600" : "bg-sky-50 text-sky-700"}`}>
-                                        {author.accepting_new_clients === false ? "Closed to new requests" : "Accepting requests"}
+                                        {author.accepting_new_clients === false ? "Closed" : "Accepting"}
                                     </span>
                                 </div>
                                 {(author.consultation_modes?.length || author.availability_timezone) && (
-                                    <p className="text-[10px] text-muted-foreground mt-2">
-                                        {author.consultation_modes?.join(", ") || "Telehealth"} - {author.availability_timezone || "Timezone not set"}
+                                    <p className="text-[10px] text-muted-foreground mt-1.5">
+                                        {author.consultation_modes?.join(", ") || "Telehealth"} · {author.availability_timezone || "Timezone not set"}
                                     </p>
                                 )}
                             </div>
@@ -163,46 +163,57 @@ export default function AdminAuthorsPage() {
                 </div>
             )}
 
-            {/* Slide-over Drawer */}
+            {/* Provision Drawer */}
             {drawerOpen && (
                 <div className="fixed inset-0 z-50 flex">
                     <div className="flex-1 bg-black/30 backdrop-blur-sm" onClick={() => setDrawerOpen(false)} />
-                    <div className="w-[360px] bg-white shadow-2xl flex flex-col">
-                        <div className="flex items-center justify-between px-5 py-4 border-b">
+                    <div className="w-[380px] bg-white shadow-2xl flex flex-col">
+                        <div className="flex items-center justify-between px-6 py-5 border-b">
                             <div>
                                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">New Account</p>
-                                <h3 className="font-bold text-[15px] text-[#1e2328]">Provision Clinician</h3>
+                                <h3 className="font-bold text-[16px] text-[#1e2328]">Provision Clinician</h3>
                             </div>
-                            <button onClick={() => setDrawerOpen(false)} className="w-7 h-7 rounded-full hover:bg-black/[0.06] flex items-center justify-center">
+                            <button onClick={() => setDrawerOpen(false)} className="w-8 h-8 rounded-full hover:bg-black/[0.06] flex items-center justify-center">
                                 <X className="w-4 h-4 text-muted-foreground" />
                             </button>
                         </div>
-                        <form onSubmit={handleProvision} className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
+                        <form onSubmit={handleProvision} className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
                             <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-[#333a42] uppercase tracking-wider">Display Name</label>
                                 <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                                    placeholder="Dr. Sarah Johnson" className="w-full border border-black/[0.1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7ebac8]/40" />
+                                    placeholder="Dr. Sarah Johnson"
+                                    className="w-full border border-black/[0.1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7ebac8]/40" />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-[#333a42] uppercase tracking-wider">Login Email</label>
                                 <input required type="email" value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
-                                    placeholder="sarah@reframepsychology.com" className="w-full border border-black/[0.1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7ebac8]/40" />
+                                    placeholder="sarah@reframepsychology.com"
+                                    className="w-full border border-black/[0.1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7ebac8]/40" />
                             </div>
                             <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-[#333a42] uppercase tracking-wider">Temporary Password</label>
                                 <input required type="password" value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                                    placeholder="Min 8 characters" className="w-full border border-black/[0.1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7ebac8]/40" />
-                                <p className="text-[10px] text-muted-foreground">The clinician will be required to change this on first login.</p>
+                                    placeholder="Min 8 characters"
+                                    className="w-full border border-black/[0.1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7ebac8]/40" />
+                                <p className="text-[11px] text-muted-foreground">The clinician will be prompted to change this on first login.</p>
                             </div>
-                            {error && <p className="text-xs text-red-500 font-medium">{error}</p>}
+
+                            <div className="bg-[#f7f5f2] rounded-lg p-3 text-[11px] text-muted-foreground space-y-1">
+                                <p className="font-semibold text-[#333a42]">What happens next:</p>
+                                <p>• A blank clinician profile is created</p>
+                                <p>• They log in and complete their bio, photo, specialties</p>
+                                <p>• Admin links them to incoming bookings</p>
+                            </div>
+
+                            {error && <p className="text-xs text-red-500 font-medium bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
                             {success && (
-                                <div className="flex items-center gap-2 text-emerald-600 text-sm font-semibold">
-                                    <CheckCircle2 className="w-4 h-4" /> Account provisioned!
+                                <div className="flex items-center gap-2 text-emerald-600 text-sm font-semibold bg-emerald-50 px-3 py-2 rounded-lg">
+                                    <CheckCircle2 className="w-4 h-4" /> Account provisioned successfully!
                                 </div>
                             )}
                             <button type="submit" disabled={saving}
-                                className="w-full bg-[#1e2328] hover:bg-[#2a3038] text-white rounded-lg py-2.5 text-sm font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
-                                {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Provisioning…</> : "Create Account"}
+                                className="w-full bg-[#1e2328] hover:bg-[#2a3038] text-white rounded-lg py-3 text-sm font-semibold transition-colors disabled:opacity-50 flex items-center justify-center gap-2">
+                                {saving ? <><Loader2 className="w-4 h-4 animate-spin" /> Provisioning…</> : "Create Clinician Account"}
                             </button>
                         </form>
                     </div>
