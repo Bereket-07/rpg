@@ -9,12 +9,18 @@ export function CaliforniaBanner({ data }: CaliforniaBannerProps) {
     const bannerDesc = data?.content?.banner_description || "For adults and couples who manage life well on the surface yet feel stuck in familiar emotional or relational patterns.";
 
     return (
-        <section className="bg-[#e1ddd3] py-24 lg:py-28 font-sans text-[#333a42] border-b border-black/[0.04]">
-            <div className="container mx-auto px-4 max-w-5xl text-center space-y-6">
-                <h3 className="text-3xl sm:text-4xl md:text-5xl lg:text-[54px] font-serif italic font-light tracking-wide text-[#333a42] leading-tight">
+        /* Warm sand/taupe background — matched precisely from screenshot */
+        <section className="bg-[#cec9be] py-14 lg:py-16 font-sans text-[#333a42]">
+            <div className="container mx-auto px-6 max-w-3xl text-center space-y-4">
+                {/* Merriweather italic — screenshot shows ~36px, proportional weight */}
+                <h3
+                    className="font-serif italic font-light text-[#333a42] leading-snug tracking-wide"
+                    style={{ fontSize: "clamp(24px, 3vw, 38px)" }}
+                >
                     {bannerTitle}
                 </h3>
-                <p className="text-base sm:text-lg md:text-xl lg:text-[23px] leading-[1.65] text-[#333a42]/90 max-w-4xl mx-auto font-medium">
+                {/* Raleway body — screenshot shows ~16px, regular weight */}
+                <p className="font-sans text-[15px] sm:text-[16px] leading-[1.7] text-[#333a42]/90 max-w-2xl mx-auto">
                     {bannerDesc}
                 </p>
             </div>

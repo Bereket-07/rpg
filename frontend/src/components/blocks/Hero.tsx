@@ -9,49 +9,56 @@ interface HeroProps {
 }
 
 export function Hero({ data }: HeroProps) {
-    const heroTitle = data?.hero_title || "You’re Not Stuck Because You’re Doing Something Wrong";
-    const heroSubheading = data?.content?.hero_subheading || "You’ve Simply Outgrown the Way You Learned to Cope";
+    const heroTitle = data?.hero_title || "You're Not Stuck Because You're Doing Something Wrong";
+    const heroSubheading = data?.content?.hero_subheading || "You've Simply Outgrown the Way You Learned to Cope";
     const heroDesc = data?.hero_description || "Move beyond insight to change the patterns that shape your life.";
     const heroCtaText = data?.content?.hero_cta_text || "Request a Consultation";
     const heroImage = data?.hero_image_url || "/assets/RPG_Images for UI/Homepage_Image 1 copy.jpg";
 
     return (
-        <section 
-            className="relative min-h-[90vh] w-full flex items-center justify-center bg-cover bg-center font-sans border-b border-black/[0.04] py-28 lg:py-36"
-            style={{ 
-                backgroundImage: `url('${heroImage}')`,
-            }}
+        <section
+            className="relative min-h-[88vh] w-full flex items-center justify-center bg-cover bg-center"
+            style={{ backgroundImage: `url('${heroImage}')` }}
         >
-            {/* Absolute overlay for lighting */}
-            <div className="absolute inset-0 bg-white/5" />
+            {/* Very light overlay — the image is naturally bright, barely tint it */}
+            <div className="absolute inset-0 bg-white/10" />
 
-            <div className="container relative z-10 mx-auto px-4 max-w-7xl text-center">
+            <div className="container relative z-10 mx-auto px-6 sm:px-8 max-w-5xl text-center">
                 <motion.div
-                    initial={{ opacity: 0, y: 25 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1.2, ease: "easeOut" }}
-                    className="space-y-10 md:space-y-12"
+                    transition={{ duration: 1.1, ease: "easeOut" }}
+                    className="space-y-6"
                 >
-                    {/* Big Serif Heading */}
-                    <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-[84px] xl:text-[92px] font-serif text-[#333a42] leading-[1.08] tracking-tight max-w-[1150px] mx-auto font-medium text-balance">
+                    {/* H1 — Merriweather bold serif, matches screenshot proportions */}
+                    <h1
+                        className="font-serif font-bold text-[#333a42] leading-[1.1] tracking-tight text-balance"
+                        style={{ fontSize: "clamp(36px, 5vw, 60px)" }}
+                    >
                         {heroTitle}
                     </h1>
-                    
-                    {/* Italic Serif Subheading */}
-                    <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-[38px] xl:text-[42px] font-serif italic text-[#333a42] max-w-4xl mx-auto font-light leading-relaxed mt-6">
+
+                    {/* Italic serif subheading — Merriweather italic, lighter weight */}
+                    <h2
+                        className="font-serif italic font-light text-[#333a42] leading-snug max-w-3xl mx-auto"
+                        style={{ fontSize: "clamp(20px, 2.8vw, 32px)" }}
+                    >
                         {heroSubheading}
                     </h2>
 
-                    {/* Supporting Description text */}
-                    <p className="mx-auto max-w-3xl text-base sm:text-lg lg:text-[24px] xl:text-[26px] text-[#333a42] leading-relaxed font-medium tracking-wide pt-4">
+                    {/* Body text — Raleway, modest size matching screenshot */}
+                    <p
+                        className="font-sans text-[#333a42] leading-relaxed max-w-xl mx-auto pt-1"
+                        style={{ fontSize: "clamp(14px, 1.4vw, 17px)" }}
+                    >
                         {heroDesc}
                     </p>
 
-                    {/* consultation request CTA Button */}
-                    <div className="pt-8">
-                        <Button 
-                            asChild 
-                            className="bg-[#4a535e] hover:bg-[#333a42] text-white rounded-none font-semibold text-sm tracking-widest uppercase h-14 px-12 border-none shadow-lg transition-all duration-300"
+                    {/* CTA — dark charcoal, square corners, Raleway */}
+                    <div className="pt-4">
+                        <Button
+                            asChild
+                            className="bg-[#3d4853] hover:bg-[#2d3740] text-white rounded-none font-sans font-semibold text-sm tracking-wide h-12 px-10 border-none shadow-none transition-colors duration-200"
                         >
                             <Link href="/contact">{heroCtaText}</Link>
                         </Button>

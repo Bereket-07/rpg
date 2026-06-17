@@ -98,11 +98,11 @@ export function Header() {
         <>
             {/* ── Main header bar ── */}
             <header
-                className={`w-full bg-[#FDF8F5] border-b border-black/[0.04] fixed top-0 left-0 right-0 z-50 font-sans transition-all duration-300 ${
-                    scrolled ? "shadow-[0_2px_24px_rgba(0,0,0,0.07)]" : ""
+                className={`w-full bg-white border-b border-black/[0.06] fixed top-0 left-0 right-0 z-50 font-sans transition-all duration-300 ${
+                    scrolled ? "shadow-[0_1px_16px_rgba(0,0,0,0.06)]" : ""
                 }`}
             >
-                <div className="container mx-auto px-4 sm:px-6 max-w-6xl h-20 sm:h-24 flex items-center justify-between">
+                <div className="container mx-auto px-6 sm:px-8 max-w-6xl h-[72px] flex items-center justify-between">
 
                     {/* Logo */}
                     <Link href="/" className="flex items-center flex-shrink-0 relative z-10">
@@ -114,8 +114,8 @@ export function Header() {
                     </Link>
 
                     {/* Desktop navigation */}
-                    <div className="hidden lg:flex items-center gap-10">
-                        <nav className="flex items-center gap-8">
+                    <div className="hidden lg:flex items-center gap-8">
+                        <nav className="flex items-center gap-7">
                             {navItems.map((item) => {
                                 const isActive = pathname === item.href;
                                 const isTeam = item.href === "/team";
@@ -124,7 +124,7 @@ export function Header() {
                                         <div key={item.href} className="relative py-2 group">
                                             <Link
                                                 href={item.href}
-                                                className={`text-sm font-medium text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-2 flex items-center gap-1.5 ${
+                                                className={`text-[13px] font-medium text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 flex items-center gap-1.5 ${
                                                     isActive ? "text-[#333a42] font-semibold" : ""
                                                 }`}
                                             >
@@ -170,13 +170,13 @@ export function Header() {
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className={`text-sm font-medium text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-2 group ${
+                                        className={`text-[13px] font-medium text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 group ${
                                             isActive ? "text-[#333a42] font-semibold" : ""
                                         }`}
                                     >
                                         {item.name}
-                                        {/* Active underline */}
-                                        <span className={`absolute bottom-[-2px] left-0 h-[1.5px] bg-[#5c6670] transition-all duration-300 ${
+                                        {/* Active underline — matches screenshot short line under active item */}
+                                        <span className={`absolute bottom-[-4px] left-0 h-[2px] bg-[#333a42] transition-all duration-300 ${
                                             isActive ? "w-full" : "w-0 group-hover:w-full"
                                         }`} />
                                     </Link>
@@ -185,7 +185,7 @@ export function Header() {
                         </nav>
                         <Link
                             href="/contact"
-                            className="bg-[#5c6670] hover:bg-[#424c56] text-white rounded-[2px] font-semibold text-sm h-11 px-6 flex items-center transition-all duration-300 shadow-none hover:shadow-[0_4px_16px_rgba(66,76,86,0.25)]"
+                            className="bg-[#3d4853] hover:bg-[#2d3740] text-white rounded-[2px] font-sans font-semibold text-[13px] h-[40px] px-5 flex items-center transition-colors duration-200"
                         >
                             {btnText}
                         </Link>
@@ -219,7 +219,7 @@ export function Header() {
             </header>
 
             {/* ── Spacer so content isn't hidden behind fixed header ── */}
-            <div className="h-20 sm:h-24 lg:h-24" />
+            <div className="h-[72px]" />
 
             {/* ── Mobile full-screen overlay menu ── */}
             {/* Backdrop blur */}
@@ -233,7 +233,7 @@ export function Header() {
             {/* Slide-in drawer from right */}
             <div
                 ref={menuRef}
-                className={`fixed top-0 right-0 h-full w-[85vw] max-w-[360px] bg-[#FDF8F5] z-50 lg:hidden flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[-12px_0_48px_rgba(0,0,0,0.12)] ${
+                className={`fixed top-0 right-0 h-full w-[85vw] max-w-[360px] bg-white z-50 lg:hidden flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[-12px_0_48px_rgba(0,0,0,0.12)] ${
                     menuOpen ? "translate-x-0" : "translate-x-full"
                 }`}
             >
