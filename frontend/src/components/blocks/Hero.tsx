@@ -30,10 +30,10 @@ export function Hero({ data }: HeroProps) {
                     transition={{ duration: 1.1, ease: "easeOut" }}
                     className="space-y-6"
                 >
-                    {/* H1 — Merriweather bold serif, matches screenshot proportions */}
+                    {/* H1 — Merriweather semibold serif, 2-line layout matching reference design */}
                     <h1
-                        className="font-serif font-bold text-[#333a42] leading-[1.1] tracking-tight text-balance"
-                        style={{ fontSize: "clamp(36px, 5vw, 60px)" }}
+                        className="font-serif font-semibold text-[#333a42] leading-[1.1] tracking-tight text-balance"
+                        style={{ fontSize: "clamp(28px, 3.5vw, 50px)" }}
                     >
                         {heroTitle}
                     </h1>
