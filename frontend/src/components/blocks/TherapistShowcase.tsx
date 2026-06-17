@@ -53,11 +53,61 @@ interface TherapistShowcaseProps {
 
 function getTherapistImageClass(slug: string) {
     if (slug && slug.includes("valarie-gardner")) {
-        // Valarie's photo has her face higher up in the frame.
-        // We use object-top and a softer zoom level to make her face fully visible.
         return "w-full h-full object-cover scale-[1.05] object-top origin-top group-hover:scale-[1.1] transition-all duration-500";
     }
     return "w-full h-full object-cover scale-[1.3] origin-center group-hover:scale-[1.35] transition-all duration-500";
+}
+
+function TherapistCard({ member, index }: { member: typeof therapistsRow1Fallback[0]; index: number }) {
+    return (
+        <motion.div
+            key={member.slug}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.8, delay: index * 0.1 }}
+            className="w-[320px] sm:w-[340px] h-[330px] sm:h-[345px] bg-[#d2c9b7] border border-[#c4b9a3]/40 rounded-[16px] shadow-[0_24px_48px_rgba(30,28,24,0.14)] p-6 pt-[110px] sm:pt-[120px] relative flex flex-col items-center text-center pb-6 hover:shadow-[0_28px_56px_rgba(30,28,24,0.22)] hover:-translate-y-1 transition-all duration-300 group"
+        >
+            {/* Circular Overlapping Photo */}
+            <div className="w-[185px] h-[185px] sm:w-[200px] sm:h-[200px] rounded-full border-[8px] border-white shadow-[0_8px_20px_rgba(0,0,0,0.12)] absolute top-[-92px] sm:top-[-100px] left-1/2 -translate-x-1/2 overflow-hidden bg-muted">
+                <img
+                    src={member.image}
+                    alt={member.name}
+                    className={getTherapistImageClass(member.slug)}
+                />
+            </div>
+
+            {/* Card Body */}
+            <div className="flex-grow flex flex-col justify-between w-full h-full pb-1">
+                <div className="flex flex-col items-center">
+                    <h3 className="text-[20px] sm:text-[21px] md:text-[22px] font-sans font-bold text-[#333a42] leading-tight tracking-wide">
+                        {member.name}
+                    </h3>
+
+                    {/* Divider */}
+                    <div className="w-10 h-[1.5px] bg-[#333a42]/30 my-2.5" />
+
+                    <p className="text-[13px] md:text-[14px] font-sans font-semibold text-[#4a535e] leading-snug tracking-wide">
+                        {member.role}
+                    </p>
+                    <p className="text-[12px] md:text-[13px] font-sans text-[#4a535e]/90 leading-relaxed max-w-[270px] pt-1 font-medium tracking-wide">
+                        {member.specialties}
+                    </p>
+                </div>
+
+                {/* Available status — teal dot + label matching design */}
+                <div className="pt-2">
+                    <Link
+                        href={`/team/${member.slug}`}
+                        className="inline-flex items-center gap-1.5 text-[12px] font-sans font-semibold text-[#4a535e] tracking-wide hover:text-[#333a42] transition-colors"
+                    >
+                        <span className="w-2 h-2 rounded-full bg-[#7ebac8] inline-block" />
+                        Available
+                    </Link>
+                </div>
+            </div>
+        </motion.div>
+    );
 }
 
 export function TherapistShowcase({ title }: TherapistShowcaseProps) {
@@ -75,8 +125,7 @@ export function TherapistShowcase({ title }: TherapistShowcaseProps) {
                         const mapped = data.map((auth: any) => {
                             const combinedFallback = [...therapistsRow1Fallback, ...therapistsRow2Fallback];
                             const fallback = combinedFallback.find(f => f.name.includes(auth.name) || auth.name.includes(f.name));
-                            
-                            // Map specialties list to string for overview
+
                             let specialtiesStr = fallback?.specialties || "Individual Therapy";
                             if (auth.specialties_list && auth.specialties_list.length > 0) {
                                 specialtiesStr = auth.specialties_list.map((s: any) => s.title).join(", ");
@@ -85,7 +134,7 @@ export function TherapistShowcase({ title }: TherapistShowcaseProps) {
                             const slug = auth.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
                             return {
-                                slug: slug,
+                                slug,
                                 name: auth.name,
                                 role: auth.role || fallback?.role || "Clinical Psychologist",
                                 specialties: specialtiesStr,
@@ -110,117 +159,28 @@ export function TherapistShowcase({ title }: TherapistShowcaseProps) {
     return (
         <section className="py-28 bg-[#fdf8f5] font-sans text-[#333a42] border-b border-black/[0.04]">
             <div className="container mx-auto px-4 max-w-6xl">
-                
-                {/* Title */}
+
+                {/* Section title */}
                 <div className="text-center mb-32">
                     <h2 className="text-[44px] md:text-[48px] font-serif text-[#333a42] font-normal tracking-wide leading-tight">
                         {title || "Meet the Team"}
                     </h2>
                 </div>
 
-                {/* Grid Layout: Row 1 (3 Columns) and Row 2 (2 Columns) */}
                 <div className="space-y-24">
-                    
-                    {/* Row 1 (3 therapists) */}
+
+                    {/* Row 1 — 3 therapists */}
                     <div className="flex flex-wrap justify-center gap-x-8 gap-y-28 lg:gap-x-12">
                         {row1.map((member, index) => (
-                            <motion.div
-                                key={member.slug}
-                                initial={{ opacity: 0, y: 30 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true, margin: "-50px" }}
-                                transition={{ duration: 0.8, delay: index * 0.1 }}
-                                className="w-[320px] sm:w-[340px] h-[330px] sm:h-[345px] bg-[#d2c9b7] border border-[#c4b9a3]/40 rounded-[16px] shadow-[0_24px_48px_rgba(30,28,24,0.14)] p-6 pt-[110px] sm:pt-[120px] relative flex flex-col items-center text-center pb-6 hover:shadow-[0_28px_56px_rgba(30,28,24,0.22)] hover:-translate-y-1 transition-all duration-300 group"
-                            >
-                                {/* Circular Overlapping Photo */}
-                                <div className="w-[185px] h-[185px] sm:w-[200px] sm:h-[200px] rounded-full border-[8px] border-white shadow-[0_8px_20px_rgba(0,0,0,0.12)] absolute top-[-92px] sm:top-[-100px] left-1/2 -translate-x-1/2 overflow-hidden bg-muted">
-                                    <img
-                                        src={member.image}
-                                        alt={member.name}
-                                        className={getTherapistImageClass(member.slug)}
-                                    />
-                                </div>
-
-                                {/* Card Body */}
-                                <div className="flex-grow flex flex-col justify-between w-full h-full pb-1">
-                                    <div className="flex flex-col items-center">
-                                        <h3 className="text-[20px] sm:text-[21px] md:text-[22px] font-sans font-extrabold text-[#333a42] leading-tight tracking-wide">
-                                            {member.name}
-                                        </h3>
-                                        
-                                        {/* Divider horizontal line */}
-                                        <div className="w-10 h-[1.5px] bg-[#333a42]/30 my-2.5" />
-                                        
-                                        <p className="text-[13px] sm:text-[13px] md:text-[14px] font-sans font-semibold text-[#4a535e] leading-snug tracking-wide">
-                                            {member.role}
-                                        </p>
-                                        <p className="text-[12px] sm:text-[12px] md:text-[13px] font-sans text-[#4a535e]/90 leading-relaxed max-w-[270px] pt-1 font-medium tracking-wide">
-                                            {member.specialties}
-                                        </p>
-                                    </div>
-
-                                    <div className="pt-2">
-                                        <Link 
-                                            href={`/team/${member.slug}`} 
-                                            className="font-serif italic text-[14px] sm:text-[15px] text-[#333a42] hover:text-[#5c6670] transition-colors"
-                                        >
-                                            Read More
-                                        </Link>
-                                    </div>
-                                </div>
-                            </motion.div>
+                            <TherapistCard key={member.slug} member={member} index={index} />
                         ))}
                     </div>
 
-                    {/* Row 2 (2 therapists - centered) */}
+                    {/* Row 2 — remaining therapists centered */}
                     {row2.length > 0 && (
                         <div className="flex flex-wrap justify-center gap-x-8 gap-y-28 lg:gap-x-12">
                             {row2.map((member, index) => (
-                                <motion.div
-                                    key={member.slug}
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true, margin: "-50px" }}
-                                    transition={{ duration: 0.8, delay: index * 0.1 }}
-                                    className="w-[320px] sm:w-[340px] h-[330px] sm:h-[345px] bg-[#d2c9b7] border border-[#c4b9a3]/40 rounded-[16px] shadow-[0_24px_48px_rgba(30,28,24,0.14)] p-6 pt-[110px] sm:pt-[120px] relative flex flex-col items-center text-center pb-6 hover:shadow-[0_28px_56px_rgba(30,28,24,0.22)] hover:-translate-y-1 transition-all duration-300 group"
-                                >
-                                    {/* Circular Overlapping Photo */}
-                                    <div className="w-[185px] h-[185px] sm:w-[200px] sm:h-[200px] rounded-full border-[8px] border-white shadow-[0_8px_20px_rgba(0,0,0,0.12)] absolute top-[-92px] sm:top-[-100px] left-1/2 -translate-x-1/2 overflow-hidden bg-muted">
-                                        <img
-                                            src={member.image}
-                                            alt={member.name}
-                                            className={getTherapistImageClass(member.slug)}
-                                        />
-                                    </div>
-
-                                    {/* Card Body */}
-                                    <div className="flex-grow flex flex-col justify-between w-full h-full pb-1">
-                                        <div className="flex flex-col items-center">
-                                            <h3 className="text-[20px] sm:text-[21px] md:text-[22px] font-sans font-extrabold text-[#333a42] leading-tight tracking-wide">
-                                                {member.name}
-                                            </h3>
-                                            
-                                            {/* Divider horizontal line */}
-                                            <div className="w-10 h-[1.5px] bg-[#333a42]/30 my-2.5" />
-                                            
-                                            <p className="text-[13px] sm:text-[13px] md:text-[14px] font-sans font-semibold text-[#4a535e] leading-snug tracking-wide">
-                                                {member.role}
-                                            </p>
-                                            <p className="text-[12px] sm:text-[12px] md:text-[13px] font-sans text-[#4a535e]/90 leading-relaxed max-w-[270px] pt-1 font-medium tracking-wide">
-                                                {member.specialties}
-                                            </p>
-                                        </div>
-
-                                        <div className="pt-2">
-                                            <Link 
-                                                href={`/team/${member.slug}`} 
-                                                className="font-serif italic text-[14px] sm:text-[15px] text-[#333a42] hover:text-[#5c6670] transition-colors"
-                                            >
-                                                Read More
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </motion.div>
+                                <TherapistCard key={member.slug} member={member} index={index} />
                             ))}
                         </div>
                     )}

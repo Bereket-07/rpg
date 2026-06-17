@@ -72,8 +72,8 @@ export default async function ApproachPage() {
                 <div className="absolute inset-0 bg-white/5 pointer-events-none" />
 
                 <div className="relative z-10 max-w-[1050px] mx-auto text-center">
-                    <h1 
-                        className="text-3xl sm:text-5xl lg:text-[54px] xl:text-[58px] font-serif text-[#333a42] leading-[1.2] tracking-tight font-normal text-balance"
+                    <h1
+                        className="text-3xl sm:text-5xl lg:text-[54px] xl:text-[58px] font-serif italic text-[#333a42] leading-[1.2] tracking-tight font-light text-balance"
                         dangerouslySetInnerHTML={{ __html: heroTitle.replace(/\n/g, "<br/>") }}
                     />
                 </div>
@@ -116,10 +116,8 @@ export default async function ApproachPage() {
                         
                         <ul className="space-y-4 sm:space-y-5 text-left">
                             {attunementPoints.map((item, idx) => (
-                                <li key={idx} className="flex items-start gap-4 text-[15px] sm:text-[16px] lg:text-[17px] font-sans font-medium text-[#4a535e] leading-snug">
-                                    <div className="w-6 h-6 rounded-full bg-[#424c56] flex items-center justify-center text-white shrink-0 mt-0.5 shadow-sm">
-                                        <Check className="w-3.5 h-3.5 stroke-[3]" />
-                                    </div>
+                                <li key={idx} className="flex items-start gap-3.5 text-[15px] sm:text-[16px] lg:text-[17px] font-sans font-medium text-[#4a535e] leading-snug">
+                                    <span className="w-2.5 h-2.5 rounded-full bg-[#7ebac8] shrink-0 mt-1.5" />
                                     <span>{item}</span>
                                 </li>
                             ))}
@@ -167,10 +165,8 @@ export default async function ApproachPage() {
                                 </h3>
                                 <ul className="space-y-3.5">
                                     {leftCardPoints.map((item, idx) => (
-                                        <li key={idx} className="flex items-center gap-3.5 text-[15px] sm:text-[16px] lg:text-[17px] font-sans font-bold text-[#333a42]">
-                                            <div className="w-6 h-6 rounded-full bg-white border border-[#333a42]/30 flex items-center justify-center text-[#333a42] shrink-0 shadow-sm">
-                                                <Check className="w-3.5 h-3.5 stroke-[3]" />
-                                            </div>
+                                        <li key={idx} className="flex items-center gap-3 text-[15px] sm:text-[16px] lg:text-[17px] font-sans font-medium text-[#333a42]">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-[#7ebac8] shrink-0" />
                                             <span>{item}</span>
                                         </li>
                                     ))}
@@ -193,10 +189,8 @@ export default async function ApproachPage() {
                                 </h3>
                                 <ul className="space-y-3.5">
                                     {rightCardPoints.map((item, idx) => (
-                                        <li key={idx} className="flex items-center gap-3.5 text-[15px] sm:text-[16px] lg:text-[17px] font-sans font-bold text-[#333a42]">
-                                            <div className="w-6 h-6 rounded-full bg-white border border-[#333a42]/30 flex items-center justify-center text-[#333a42] shrink-0 shadow-sm">
-                                                <Check className="w-3.5 h-3.5 stroke-[3]" />
-                                            </div>
+                                        <li key={idx} className="flex items-center gap-3 text-[15px] sm:text-[16px] lg:text-[17px] font-sans font-medium text-[#333a42]">
+                                            <span className="w-2.5 h-2.5 rounded-full bg-[#7ebac8] shrink-0" />
                                             <span>{item}</span>
                                         </li>
                                     ))}
