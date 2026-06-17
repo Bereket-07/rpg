@@ -30,18 +30,18 @@ export function Hero({ data }: HeroProps) {
                     transition={{ duration: 1.1, ease: "easeOut" }}
                     className="space-y-6"
                 >
-                    {/* H1 — Merriweather semibold serif, 2-line layout matching reference design */}
+                    {/* H1 — Merriweather italic light — matches reference design exactly */}
                     <h1
-                        className="font-serif font-semibold text-[#333a42] leading-[1.1] tracking-tight text-balance"
-                        style={{ fontSize: "clamp(28px, 3.5vw, 50px)" }}
+                        className="font-serif italic font-light text-[#333a42] leading-[1.1] tracking-tight text-balance"
+                        style={{ fontSize: "clamp(32px, 4.2vw, 56px)" }}
                     >
                         {heroTitle}
                     </h1>
 
-                    {/* Italic serif subheading — Merriweather italic, lighter weight */}
+                    {/* Italic serif subheading — Merriweather italic light, smaller than H1 */}
                     <h2
                         className="font-serif italic font-light text-[#333a42] leading-snug max-w-3xl mx-auto"
-                        style={{ fontSize: "clamp(20px, 2.8vw, 32px)" }}
+                        style={{ fontSize: "clamp(17px, 2.2vw, 28px)" }}
                     >
                         {heroSubheading}
                     </h2>
