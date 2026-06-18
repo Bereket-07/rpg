@@ -23,11 +23,29 @@ interface TeamNavProfile {
     image: string;
 }
 
+const STATIC_SPECIALTIES_NAV = [
+    { id: "mood",        title: "Improving Mood and Well-being" },
+    { id: "anxiety",     title: "Working Through Anxiety And Stress" },
+    { id: "couples",     title: "Couples Therapy: Rebuilding Intimacy And Connections" },
+    { id: "infants",     title: "Parenting Infants & Young Children" },
+    { id: "teens",       title: "Parenting Teens & Young Adults" },
+    { id: "transitions", title: "Navigating Life Transitions" },
+    { id: "trauma",      title: "Overcoming Adverse Life Events And Trauma" },
+];
+
+const STATIC_TEAM_NAV: TeamNavProfile[] = [
+    { slug: "anat-cohen",        name: "Anat Cohen, Ph.D.",          role: "Clinical Psychologist, Co-Founder",       image: "/assets/RPG_Images for UI/Anat copy.jpg" },
+    { slug: "tamara-eromo",      name: "Tamara Eromo, Psy.D.",       role: "Clinical Psychologist, Co-Founder",       image: "/assets/RPG_Images for UI/Tamara copy.jpg" },
+    { slug: "wendy-eifert",      name: "Wendy Eifert, Psy.D.",       role: "Clinical Psychologist",                   image: "/assets/RPG_Images for UI/Wendy copy.jpg" },
+    { slug: "hedieh-hakakian",   name: "Hedieh Hakakian, Psy.D.",    role: "Clinical Psychologist",                   image: "/assets/RPG_Images for UI/Hedieh copy.jpg" },
+    { slug: "valarie-gardner",   name: "Valarie Gardner, M.A., AMFT",role: "Marriage and Family Therapy Associate",   image: "/assets/RPG_Images for UI/Valarie copy.jpg" },
+];
+
 export function Header() {
     const pathname = usePathname();
     const [logoUrl, setLogoUrl] = useState("/assets/RPG Logo_Main Landscape.png");
     const [btnText, setBtnText] = useState("Contact Us");
-    const [teamProfiles, setTeamProfiles] = useState<TeamNavProfile[]>([]);
+    const [teamProfiles, setTeamProfiles] = useState<TeamNavProfile[]>(STATIC_TEAM_NAV);
     const [menuOpen, setMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -102,7 +120,7 @@ export function Header() {
                     scrolled ? "shadow-[0_1px_16px_rgba(0,0,0,0.06)]" : ""
                 }`}
             >
-                <div className="container mx-auto px-6 sm:px-8 max-w-6xl h-[72px] flex items-center justify-between">
+                <div className="w-full px-8 xl:px-14 h-[72px] flex items-center justify-between">
 
                     {/* Logo */}
                     <Link href="/" className="flex items-center flex-shrink-0 relative z-10">
@@ -114,22 +132,23 @@ export function Header() {
                     </Link>
 
                     {/* Desktop navigation */}
-                    <div className="hidden lg:flex items-center gap-8">
-                        <nav className="flex items-center gap-7">
+                    <div className="hidden lg:flex items-center gap-10">
+                        <nav className="flex items-center gap-9">
                             {navItems.map((item) => {
                                 const isActive = pathname === item.href;
                                 const isTeam = item.href === "/team";
+                                const isSpecialties = item.href === "/specialties";
+
                                 if (isTeam) {
                                     return (
                                         <div key={item.href} className="relative py-2 group">
                                             <Link
                                                 href={item.href}
-                                                className={`text-[13px] font-medium text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 flex items-center gap-1.5 ${
+                                                className={`text-[14px] font-medium text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 flex items-center gap-1.5 ${
                                                     isActive ? "text-[#333a42] font-semibold" : ""
                                                 }`}
                                             >
                                                 {item.name}
-                                                <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-hover:rotate-180" />
                                                 <span className={`absolute bottom-[-2px] left-0 h-[1.5px] bg-[#5c6670] transition-all duration-300 ${
                                                     isActive ? "w-full" : "w-0 group-hover:w-full"
                                                 }`} />
@@ -166,11 +185,54 @@ export function Header() {
                                         </div>
                                     );
                                 }
+
+                                if (isSpecialties) {
+                                    return (
+                                        <div key={item.href} className="relative py-2 group">
+                                            <Link
+                                                href={item.href}
+                                                className={`text-[14px] font-medium text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 flex items-center gap-1.5 ${
+                                                    isActive ? "text-[#333a42] font-semibold" : ""
+                                                }`}
+                                            >
+                                                {item.name}
+                                                <span className={`absolute bottom-[-2px] left-0 h-[1.5px] bg-[#5c6670] transition-all duration-300 ${
+                                                    isActive ? "w-full" : "w-0 group-hover:w-full"
+                                                }`} />
+                                            </Link>
+
+                                            <div className="absolute left-1/2 top-full w-[310px] -translate-x-1/2 pt-4 opacity-0 pointer-events-none translate-y-2 group-hover:opacity-100 group-hover:pointer-events-auto group-hover:translate-y-0 transition-all duration-200">
+                                                <div className="bg-[#FDF8F5] border border-black/[0.06] shadow-[0_18px_45px_rgba(30,28,24,0.14)] rounded-[8px] overflow-hidden">
+                                                    <Link
+                                                        href="/specialties"
+                                                        className="flex items-center justify-between px-4 py-3 border-b border-black/[0.05] text-[12px] font-bold uppercase tracking-[0.18em] text-[#5c6670] hover:bg-white/50 transition-colors"
+                                                    >
+                                                        View All
+                                                        <ArrowRight className="w-3.5 h-3.5" />
+                                                    </Link>
+                                                    <div className="max-h-[420px] overflow-y-auto">
+                                                        {STATIC_SPECIALTIES_NAV.map(spec => (
+                                                            <Link
+                                                                key={spec.id}
+                                                                href={`/specialties/${spec.id}`}
+                                                                className="flex items-center gap-3 px-4 py-3 hover:bg-white/60 transition-colors border-b border-black/[0.04] last:border-b-0"
+                                                            >
+                                                                <span className="min-w-0">
+                                                                    <span className="block text-[13px] font-semibold text-[#333a42] leading-snug">{spec.title}</span>
+                                                                </span>
+                                                            </Link>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                }
                                 return (
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className={`text-[13px] font-medium text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 group ${
+                                        className={`text-[14px] font-medium text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 group ${
                                             isActive ? "text-[#333a42] font-semibold" : ""
                                         }`}
                                     >
@@ -185,7 +247,7 @@ export function Header() {
                         </nav>
                         <Link
                             href="/contact"
-                            className="bg-[#3d4853] hover:bg-[#2d3740] text-white rounded-[2px] font-sans font-semibold text-[13px] h-[40px] px-5 flex items-center transition-colors duration-200"
+                            className="bg-[#3d4853] hover:bg-[#2d3740] text-white rounded-[2px] font-sans font-semibold text-[14px] h-[40px] px-6 flex items-center transition-colors duration-200"
                         >
                             {btnText}
                         </Link>

@@ -23,7 +23,7 @@ export const STATIC_TEAM_MEMBERS: TherapistData[] = [
         role: "Clinical Psychologist, Co-Founder",
         credentials: "PEPPERDINE PSY.D. | LICENSED CLINICAL PSYCHOLOGIST (PSY31798)",
         image: "/assets/RPG_Images for UI/Tamara copy.jpg",
-        beyondTherapy: "Relationships are central to my life outside the therapy room as well. I’m a wife and mother of two, and my family life continually reminds me how important patience, repair, and connection are in close relationships. I love bringing people together and often host friends and family for gatherings or game nights. I love the energy of a full house and the simple moments of connection that happen when people gather. I also appreciate the slower pace of everyday moments that balance out the busy ones—staying active outdoors, cooking, reading, or working on a project around the house. Having space for both connection and quiet time helps me stay present in my work and in my life.",
+        beyondTherapy: "Relationships are central to my life outside the therapy room as well. I’m a wife and mother of two, and my family life continually reminds me how important patience, repair, and connection are in close relationships.\n\nI love bringing people together and often host friends and family for gatherings or game nights. I love the energy of a full house and the simple moments of connection that happen when people gather.\n\nI also appreciate the slower pace of everyday moments that balance out the busy ones—staying active outdoors, cooking, reading, or working on a project around the house. Having space for both connection and quiet time helps me stay present in my work and in my life.",
         approach: [
             "Many couples who come to work with me are thoughtful, capable people who care deeply about their relationship but find themselves caught in the same painful cycles. Conversations that begin with good intentions can quickly turn into defensiveness, misunderstanding, or frustration, leaving both partners feeling unheard and increasingly distant.",
             "In therapy, we slow these moments down and explore the emotional and relational dynamics underneath them. My work is grounded in attachment science and relational systems, helping couples understand how past experiences and long-standing patterns shape their responses to one another.",
@@ -53,7 +53,7 @@ export const STATIC_TEAM_MEMBERS: TherapistData[] = [
         role: "Clinical Psychologist, Co-Founder",
         credentials: "CSPP PH.D. | LICENSED CLINICAL PSYCHOLOGIST (PSY15800)",
         image: "/assets/RPG_Images for UI/Anat copy.jpg",
-        beyondTherapy: "Outside of therapy, I try to spend my time in ways that reflect what I value most: connection, curiosity, and meaningful conversation. Much of my time is spent with family and close friends, often over long talks and a good cup of coffee. I enjoy laughing often, greeting every dog I meet on my daily walks, and listening to my favorite audiobooks. These small, everyday moments help keep me grounded, centered, and fully engaged in the transformative work I do with my clients.",
+        beyondTherapy: "Outside of therapy, I try to spend my time in ways that reflect what I value most: connection, curiosity, and meaningful conversation. Much of my time is spent with family and close friends, often over long talks and a good cup of coffee.\n\nI enjoy laughing often, greeting every dog I meet on my daily walks, and listening to my favorite audiobooks. These small, everyday moments help keep me grounded, centered, and fully engaged in the transformative work I do with my clients.",
         approach: [
             "I help people who manage life well on the surface feel more grounded and connected to themselves and others.",
             "Many of my clients are self-aware, yet they still struggle with self-doubt, persistent internal pressure, and emotional exhaustion. Their anxiety or depression quietly influences how they see themselves, relate to others, and move through their daily lives.",
@@ -80,7 +80,7 @@ export const STATIC_TEAM_MEMBERS: TherapistData[] = [
         role: "Clinical Psychologist",
         credentials: "PEPPERDINE PSY.D. | LICENSED CLINICAL PSYCHOLOGIST (PSY34367)",
         image: "/assets/RPG_Images for UI/Wendy copy.jpg",
-        beyondTherapy: "Outside the therapy room, I deeply value the beauty of slow and intentional processes. About a year ago, I started my own sourdough starter, Penelope, and after plenty of trial, error, and flour-covered counters, weekend baking has become one of my favorite rituals. Sharing fresh bread with friends and family is a meaningful reminder that the most worthwhile things often require patience, consistency, and time. That appreciation for the long game is also shaped by my personal life. As the wife of a physician, I have lived alongside the demands, sacrifices, and invisible pressures of a medical career. This has deepened my passion for supporting both providers and the partners who carry the emotional and logistical weight of life in medicine. I also find a great deal of fulfillment in connection and movement. You can often find me on long hikes with friends, at the driving range rediscovering my golf swing, or enjoying a quiet morning coffee while the day begins. At home, my two cats, Cosmo and Calvin, are steady companions and occasional on-screen guests. Whether I’m exploring a National Park or trying a new cuisine, I’m continually drawn to curiosity, culture, and the stories people carry.",
+        beyondTherapy: "Outside the therapy room, I deeply value the beauty of slow and intentional processes. About a year ago, I started my own sourdough starter, Penelope, and after plenty of trial, error, and flour-covered counters, weekend baking has become one of my favorite rituals. Sharing fresh bread with friends and family is a meaningful reminder that the most worthwhile things often require patience, consistency, and time.\n\nThat appreciation for the long game is also shaped by my personal life. As the wife of a physician, I have lived alongside the demands, sacrifices, and invisible pressures of a medical career. This has deepened my passion for supporting both providers and the partners who carry the emotional and logistical weight of life in medicine.\n\nI also find a great deal of fulfillment in connection and movement. You can often find me on long hikes with friends, at the driving range rediscovering my golf swing, or enjoying a quiet morning coffee while the day begins. At home, my two cats, Cosmo and Calvin, are steady companions and occasional on-screen guests. Whether I’m exploring a National Park or trying a new cuisine, I’m continually drawn to curiosity, culture, and the stories people carry.",
         approach: [
             "Many of the individuals who seek my help are high-functioning, thoughtful, and deeply capable. On the outside, they appear successful and composed, yet privately feel burned out by constant pressure, disconnected from themselves, or unsure why their achievements no longer feel fulfilling or aligned.",
             "This is especially true for high-achieving professionals, graduate students, medical providers, and individuals navigating complex cultural expectations. Many have learned to adapt by staying productive, self-reliant, or emotionally “fine,” even when long-standing patterns, family messages, or the habit of pushing difficult feelings aside continue to shape how they experience stress, relationships, and major life transitions.",
@@ -108,7 +108,7 @@ export const STATIC_TEAM_MEMBERS: TherapistData[] = [
         role: "Marriage and Family Therapy Associate",
         credentials: "REGISTERED ASSOCIATE MFT (AMFT140224)",
         image: "/assets/RPG_Images for UI/Valarie copy.jpg",
-        beyondTherapy: "Outside of the clinical setting, I love spending time outdoors, staying active, and exploring California's hiking trails. I'm passionate about nature and finding peace through connection, art, and quiet moments that balance out the fast pace of modern life.",
+        beyondTherapy: "Outside of the clinical setting, I love spending time outdoors, staying active, and exploring California's hiking trails.\n\nI'm passionate about nature and finding peace through connection, art, and quiet moments that balance out the fast pace of modern life.",
         approach: [
             "I believe that every individual holds the capacity for deep healing when provided with a safe, non-judgmental, and attuned clinical environment.",
             "I work closely with individuals and couples to process unresolved hurt and rebuild structural trust. My clinical practice is deeply collaborative and focuses on attachment healing."
@@ -129,7 +129,7 @@ export const STATIC_TEAM_MEMBERS: TherapistData[] = [
         role: "Clinical Psychologist",
         credentials: "LICENSED CLINICAL PSYCHOLOGIST (PSY32551)",
         image: "/assets/RPG_Images for UI/Hedieh copy.jpg",
-        beyondTherapy: "Outside the therapy room, my favorite moments are spent over long family dinners, discovering new books, and traveling to explore new cultures. Cultivating meaningful personal relationships with friends and family keeps me present and attuned to the diverse stories of my clients.",
+        beyondTherapy: "Outside the therapy room, my favorite moments are spent over long family dinners, discovering new books, and traveling to explore new cultures.\n\nCultivating meaningful personal relationships with friends and family keeps me present and attuned to the diverse stories of my clients.",
         approach: [
             "I focus on helping individuals, couples, and parents decode their interpersonal dynamics.",
             "We work together to slow down high-conflict triggers, identify hidden relational needs, and create new ways of interacting that promote family harmony, co-parenting alignment, and mutual respect."
@@ -187,7 +187,7 @@ export default async function TeamListingPage() {
         <div className="bg-[#FDF8F5] min-h-screen font-sans text-[#4a535e] pb-28">
             <div className="w-full text-center mt-20 mb-28">
                 <p className="text-[11px] tracking-[0.25em] uppercase font-bold text-[#7ebac8] mb-3">OUR SPECIALISTS</p>
-                <h1 className="text-[34px] sm:text-[42px] font-serif text-[#333a42] font-normal tracking-tight">Meet the Team</h1>
+                <h1 className="text-[34px] sm:text-[42px] font-serif text-[#333a42] font-light italic tracking-tight">Meet the Team</h1>
             </div>
 
             <section className="bg-[#fdf8f5] font-sans text-[#333a42]">
@@ -197,9 +197,7 @@ export default async function TeamListingPage() {
                             const specialties = member.specialties?.length
                                 ? member.specialties.map(spec => spec.title).join(", ")
                                 : "Individual Therapy";
-                            const imageClass = member.slug.includes("valarie-gardner")
-                                ? "w-full h-full object-cover scale-[1.05] object-top origin-top group-hover:scale-[1.1] transition-all duration-500"
-                                : "w-full h-full object-cover scale-[1.3] origin-center group-hover:scale-[1.35] transition-all duration-500";
+                            const imageClass = "w-full h-full object-cover object-top scale-[1.05] origin-top group-hover:scale-[1.08] transition-all duration-500";
 
                             return (
                                 <article
@@ -212,7 +210,7 @@ export default async function TeamListingPage() {
 
                                     <div className="flex-grow flex flex-col justify-between w-full h-full pb-1">
                                         <div className="flex flex-col items-center">
-                                            <h2 className="text-[20px] sm:text-[21px] md:text-[22px] font-sans font-extrabold text-[#333a42] leading-tight tracking-wide">
+                                            <h2 className="text-[20px] sm:text-[21px] md:text-[22px] font-serif font-bold text-[#333a42] leading-tight tracking-wide">
                                                 {member.name}
                                             </h2>
                                             <div className="w-10 h-[1.5px] bg-[#333a42]/30 my-2.5" />

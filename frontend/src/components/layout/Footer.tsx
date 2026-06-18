@@ -75,86 +75,21 @@ export function Footer() {
     return (
         <footer className="bg-[#424c56] text-white font-sans">
 
-            {/* ── Newsletter band ─────────────────────────────────────────── */}
-            <div className="border-b border-white/[0.07]">
-                <div className="container mx-auto px-6 sm:px-8 max-w-7xl py-10 sm:py-12">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-                        <div className="space-y-1 max-w-sm">
-                            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#7ebac8]">
-                                Stay Informed
-                            </p>
-                            <p className="text-[#e1ddd3] text-[16px] sm:text-[17px] font-medium leading-snug">
-                                Mental health insights, directly to your inbox.
-                            </p>
-                            <p className="text-[#e1ddd3]/50 text-[12px] leading-relaxed">
-                                No spam. Practical tools and expert perspectives, monthly.
-                            </p>
-                        </div>
-
-                        {nlDone ? (
-                            <div className="flex items-center gap-2.5 bg-emerald-500/15 border border-emerald-400/25 rounded-xl px-5 py-3.5">
-                                <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                                <div>
-                                    <p className="text-emerald-300 font-semibold text-sm">You're subscribed!</p>
-                                    <p className="text-emerald-400/70 text-xs mt-0.5">Check your inbox for a welcome email.</p>
-                                </div>
-                            </div>
-                        ) : (
-                            <form onSubmit={handleSubscribe} className="flex flex-col gap-2 w-full sm:w-auto sm:min-w-[380px]">
-                                <div className="flex gap-2">
-                                    <input
-                                        id="newsletter-email"
-                                        type="email"
-                                        value={email}
-                                        onChange={e => setEmail(e.target.value)}
-                                        placeholder="your@email.com"
-                                        required
-                                        className="flex-1 bg-white/[0.07] hover:bg-white/[0.1] focus:bg-white/[0.12] border border-white/[0.1] focus:border-[#7ebac8]/60 rounded-xl px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none transition-all"
-                                    />
-                                    <button
-                                        type="submit"
-                                        disabled={nlLoading}
-                                        className="bg-[#7ebac8] hover:bg-[#6aaab8] active:scale-[0.97] text-white font-semibold px-5 py-3 rounded-xl text-sm transition-all flex items-center gap-2 whitespace-nowrap disabled:opacity-60 shadow-lg shadow-black/20"
-                                    >
-                                        {nlLoading
-                                            ? <Loader2 className="w-4 h-4 animate-spin" />
-                                            : <><Send className="w-3.5 h-3.5" /> Subscribe</>
-                                        }
-                                    </button>
-                                </div>
-                                {nlError && (
-                                    <p className="text-rose-400 text-xs px-1">{nlError}</p>
-                                )}
-                                <p className="text-[#e1ddd3]/30 text-[11px] px-1">
-                                    By subscribing you agree to our privacy policy. Unsubscribe anytime.
-                                </p>
-                            </form>
-                        )}
-                    </div>
-                </div>
-            </div>
-
             {/* ── Main footer grid ─────────────────────────────────────────── */}
             <div className="container mx-auto px-6 sm:px-8 max-w-7xl py-16 sm:py-20 lg:py-24">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12 lg:gap-16 items-start">
 
-                    {/* Column 1: Logo + tagline */}
-                    <div className="flex flex-col items-start space-y-4 sm:col-span-2 lg:col-span-1">
+                    {/* Column 1: Logo */}
+                    <div className="flex flex-col items-start sm:col-span-2 lg:col-span-1">
                         <img
                             src={logoUrl}
                             alt="Reframe Psychology Group Logo"
-                            className="object-contain h-12 sm:h-14 w-auto opacity-100"
+                            className="object-contain h-14 sm:h-16 w-auto brightness-0 invert"
                         />
-                        <p className="text-[#e1ddd3]/70 text-sm leading-relaxed max-w-[260px]">
-                            Attuned, evidence-based psychological care for adults and couples across California.
-                        </p>
                     </div>
 
                     {/* Column 2: Navigation */}
                     <div className="flex flex-col space-y-1">
-                        <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#7ebac8] mb-4">
-                            Navigation
-                        </p>
                         {footerLinks.map((link) => (
                             <Link
                                 key={link.href}
@@ -176,9 +111,6 @@ export function Footer() {
                     {/* Column 3: CTA block */}
                     <div className="flex flex-col items-start lg:items-end space-y-5 lg:pt-2 sm:col-span-2 lg:col-span-1">
                         <div className="lg:text-right space-y-2">
-                            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#7ebac8]">
-                                Get Started
-                            </p>
                             <p className="text-[#e1ddd3] font-normal text-[16px] sm:text-[18px] tracking-wide leading-snug max-w-[240px] lg:max-w-none">
                                 {readyText}
                             </p>

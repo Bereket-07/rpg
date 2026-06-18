@@ -73,7 +73,7 @@ export default async function ApproachPage() {
 
                 <div className="relative z-10 max-w-[1050px] mx-auto text-center">
                     <h1
-                        className="text-3xl sm:text-5xl lg:text-[54px] xl:text-[58px] font-serif italic text-[#333a42] leading-[1.2] tracking-tight font-light text-balance"
+                        className="text-3xl sm:text-5xl lg:text-[54px] xl:text-[58px] font-serif text-[#333a42] leading-[1.2] tracking-tight font-normal text-balance"
                         dangerouslySetInnerHTML={{ __html: heroTitle.replace(/\n/g, "<br/>") }}
                     />
                 </div>
@@ -109,7 +109,7 @@ export default async function ApproachPage() {
                 <div className="absolute inset-0 bg-black/10 pointer-events-none" />
 
                 <div className="container mx-auto max-w-7xl relative z-10 flex justify-end">
-                    <div className="w-full lg:w-1/2 bg-white/95 backdrop-blur-[6px] p-8 sm:p-10 lg:p-12 rounded-[16px] shadow-[0_24px_48px_rgba(30,28,24,0.12)] border border-[#e5e0d8] space-y-8">
+                    <div className="w-full lg:w-1/2 bg-white/95 backdrop-blur-[6px] p-8 sm:p-10 lg:p-12 rounded-none shadow-[0_24px_48px_rgba(30,28,24,0.12)] space-y-8">
                         <h3 className="text-[22px] sm:text-[26px] lg:text-[30px] font-serif text-[#333a42] leading-[1.25] font-normal text-left">
                             {attunementTitle}
                         </h3>
@@ -144,61 +144,59 @@ export default async function ApproachPage() {
                 </div>
             </section>
 
-            {/* Section 5: Dual Attunement Cards */}
-            <section className="py-24 lg:py-32 bg-[#fdf8f5] px-6 border-t border-b border-black/[0.04]">
-                <div className="container mx-auto max-w-7xl">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-0 rounded-[16px] overflow-hidden shadow-[0_24px_48px_rgba(30,28,24,0.12)] border border-[#e5e0d8]">
-                        
-                        {/* Left Card: Emotions */}
-                        <div 
-                            className="relative h-[420px] sm:h-[450px] p-8 sm:p-10 lg:p-12 flex flex-col justify-center bg-cover bg-center border-b md:border-b-0 md:border-r border-[#e5e0d8]"
-                            style={{ 
-                                backgroundImage: `url('${leftCardImage}')`,
-                                backgroundPosition: "center bottom"
-                            }}
-                        >
-                            <div className="absolute inset-0 bg-white/75 backdrop-blur-[2px] pointer-events-none" />
-                            
-                            <div className="relative z-10 space-y-6 text-left">
-                                <h3 className="text-[21px] sm:text-[23px] lg:text-[27px] font-serif text-[#333a42] leading-[1.25] font-semibold max-w-md">
-                                    {leftCardTitle}
-                                </h3>
-                                <ul className="space-y-3.5">
-                                    {leftCardPoints.map((item, idx) => (
-                                        <li key={idx} className="flex items-center gap-3 text-[15px] sm:text-[16px] lg:text-[17px] font-sans font-medium text-[#333a42]">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-[#7ebac8] shrink-0" />
-                                            <span>{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
+            {/* Section 5: Dual Attunement Cards — full bleed */}
+            <section className="w-full">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
 
-                        {/* Right Card: Relationships */}
-                        <div 
-                            className="relative h-[420px] sm:h-[450px] p-8 sm:p-10 lg:p-12 flex flex-col justify-center bg-cover bg-center"
-                            style={{ 
-                                backgroundImage: `url('${rightCardImage}')`,
-                            }}
-                        >
-                            <div className="absolute inset-0 bg-white/75 backdrop-blur-[2px] pointer-events-none" />
-                            
-                            <div className="relative z-10 space-y-6 text-left">
-                                <h3 className="text-[21px] sm:text-[23px] lg:text-[27px] font-serif text-[#333a42] leading-[1.25] font-semibold max-w-md">
-                                    {rightCardTitle}
-                                </h3>
-                                <ul className="space-y-3.5">
-                                    {rightCardPoints.map((item, idx) => (
-                                        <li key={idx} className="flex items-center gap-3 text-[15px] sm:text-[16px] lg:text-[17px] font-sans font-medium text-[#333a42]">
-                                            <span className="w-2.5 h-2.5 rounded-full bg-[#7ebac8] shrink-0" />
-                                            <span>{item}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
+                    {/* Left Card: Emotions */}
+                    <div
+                        className="relative h-[480px] sm:h-[520px] p-8 sm:p-10 lg:p-14 flex flex-col justify-end bg-cover bg-center"
+                        style={{
+                            backgroundImage: `url('${leftCardImage}')`,
+                            backgroundPosition: "center center"
+                        }}
+                    >
+                        <div className="absolute inset-0 bg-white/55 pointer-events-none" />
 
+                        <div className="relative z-10 space-y-5 text-left">
+                            <h3 className="text-[20px] sm:text-[22px] lg:text-[25px] font-serif text-[#333a42] leading-[1.3] font-semibold max-w-sm">
+                                {leftCardTitle}
+                            </h3>
+                            <ul className="space-y-3">
+                                {leftCardPoints.map((item, idx) => (
+                                    <li key={idx} className="flex items-center gap-3 text-[15px] sm:text-[16px] font-sans font-medium text-[#333a42]">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-[#7ebac8] shrink-0" />
+                                        <span>{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
+
+                    {/* Right Card: Relationships */}
+                    <div
+                        className="relative h-[480px] sm:h-[520px] p-8 sm:p-10 lg:p-14 flex flex-col justify-end bg-cover bg-center"
+                        style={{
+                            backgroundImage: `url('${rightCardImage}')`,
+                        }}
+                    >
+                        <div className="absolute inset-0 bg-white/55 pointer-events-none" />
+
+                        <div className="relative z-10 space-y-5 text-left">
+                            <h3 className="text-[20px] sm:text-[22px] lg:text-[25px] font-serif text-[#333a42] leading-[1.3] font-semibold max-w-sm">
+                                {rightCardTitle}
+                            </h3>
+                            <ul className="space-y-3">
+                                {rightCardPoints.map((item, idx) => (
+                                    <li key={idx} className="flex items-center gap-3 text-[15px] sm:text-[16px] font-sans font-medium text-[#333a42]">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-[#7ebac8] shrink-0" />
+                                        <span>{item}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 

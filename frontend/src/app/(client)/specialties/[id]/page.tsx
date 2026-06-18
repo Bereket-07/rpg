@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getApiUrl } from "@/lib/api";
 
@@ -17,10 +18,10 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
         paragraphs: [
             "It's not that your life isn't working.",
             "From the outside, it probably looks like it is. But internally, the energy isn't the same. Things that used to feel engaging and meaningful no longer bring you pleasure or joy.",
-            "Depression doesn’t always look like sadness. It can feel like disconnection, exhaustion, or going through the motions without really being there.",
-            "You may be used to pushing through, staying productive, or overriding how you feel, but underneath, there is a heaviness you can’t quite shake.",
-            "In therapy, we focus on what’s driving that stuckness in real time. We slow things down to notice the ways you’ve learned to cope with depression.",
-            "This isn’t about just managing symptoms, it’s about finding a new way to relate to yourself and others so you can find energy, connection, and meaning again.",
+            "Depression doesn't always look like sadness. It can feel like disconnection, exhaustion, or going through the motions without really being there.",
+            "You may be used to pushing through, staying productive, or overriding how you feel, but underneath, there is a heaviness you can't quite shake.",
+            "In therapy, we focus on what's driving that stuckness in real time. We slow things down to notice the ways you've learned to cope with depression.",
+            "This isn't about just managing symptoms, it's about finding a new way to relate to yourself and others so you can find energy, connection, and meaning again.",
             "So instead of operating on autopilot, you begin to feel more present, more engaged, and more like yourself again, with greater clarity and emotional range."
         ],
         image: "/assets/RPG_Images for UI/mockup-wall-in-the-children-s-room-on-wall-white-c-2026-03-24-01-09-26-utc.jpg"
@@ -119,86 +120,100 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
     }
 ];
 
-async function getSpecialtiesPageData() {
+// Alternating backgrounds matching the listing page
+const BG_MAP: Record<string, { pageBg: string; ctaBg: string }> = {
+    mood:        { pageBg: "bg-white",       ctaBg: "bg-[#f2ede4]" },
+    anxiety:     { pageBg: "bg-[#f2ede4]",   ctaBg: "bg-white" },
+    couples:     { pageBg: "bg-white",       ctaBg: "bg-[#f2ede4]" },
+    infants:     { pageBg: "bg-[#f2ede4]",   ctaBg: "bg-white" },
+    teens:       { pageBg: "bg-white",       ctaBg: "bg-[#f2ede4]" },
+    transitions: { pageBg: "bg-[#f2ede4]",   ctaBg: "bg-white" },
+    trauma:      { pageBg: "bg-white",       ctaBg: "bg-[#f2ede4]" },
+};
+
+async function getSpecialtyData(id: string): Promise<SpecialtyData | null> {
+    const staticMatch = STATIC_SPECIALTIES.find(s => s.id === id) ?? null;
+
     try {
-        const res = await fetch(`${getApiUrl()}/api/v1/settings/pages/specialties`, {
-            cache: "no-store",
-        });
-        if (!res.ok) return null;
-        return await res.json();
-    } catch (err) {
-        console.error("Failed to load dynamic specialties from database:", err);
-        return null;
+        const res = await fetch(`${getApiUrl()}/api/v1/settings/pages/specialties`, { cache: "no-store" });
+        if (!res.ok) return staticMatch;
+        const pageData = await res.json();
+        const cmsSpec = pageData?.content?.[id];
+        if (!cmsSpec) return staticMatch;
+
+        return {
+            id,
+            title: cmsSpec.title || staticMatch?.title || "",
+            paragraphs: cmsSpec.paragraphs?.length ? cmsSpec.paragraphs : (staticMatch?.paragraphs || []),
+            image: cmsSpec.image || staticMatch?.image || "",
+        };
+    } catch {
+        return staticMatch;
     }
 }
 
-export default async function SpecialtiesPage() {
-    const pageData = await getSpecialtiesPageData();
+export default async function SpecialtyDetailPage({ params }: { params: { id: string } }) {
+    const specialty = await getSpecialtyData(params.id);
 
-    const title = pageData?.title || "Specialties";
-    const desc = pageData?.hero_description || "Core Practice Areas";
-    const cmsContent = pageData?.content || {};
+    if (!specialty) {
+        notFound();
+    }
 
-    const specialtiesList = STATIC_SPECIALTIES.map(staticSpec => {
-        const cmsSpec = cmsContent[staticSpec.id];
-        return {
-            id: staticSpec.id,
-            title: cmsSpec?.title || staticSpec.title,
-            paragraphs: cmsSpec?.paragraphs && cmsSpec.paragraphs.length > 0 ? cmsSpec.paragraphs : staticSpec.paragraphs,
-            image: cmsSpec?.image || staticSpec.image
-        };
-    });
-
-    const ctaTitle = cmsContent?.cta_card_title || "When You’re Ready for Something Different";
-    const ctaDesc = cmsContent?.cta_card_desc || "If you're ready to move beyond just getting through your days and want to feel more fully present in your life again, we invite you to take the next step.";
-    const ctaBtn = cmsContent?.cta_card_button || "Book a Consultation";
+    const { pageBg, ctaBg } = BG_MAP[specialty.id] || { pageBg: "bg-white", ctaBg: "bg-[#f2ede4]" };
 
     return (
-        <div className="bg-[#FDF8F5] min-h-screen font-sans text-[#4a535e] pb-20">
+        <div className={`${pageBg} min-h-screen font-sans text-[#4a535e]`}>
 
-            {/* Centered Page Header */}
-            <div className="w-full text-center pt-24 pb-16 px-6 bg-[#FDF8F5]">
-                <h1 className="text-[34px] sm:text-[42px] font-serif text-[#333a42] font-normal tracking-tight">{title}</h1>
-            </div>
+            {/* Main Content — matches listing page section layout exactly */}
+            <section className={`${pageBg} py-24 border-b border-black/[0.03]`}>
+                <div className="container mx-auto px-6 max-w-6xl">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-stretch">
 
-            {/* Card Grid */}
-            <div className="container mx-auto px-6 max-w-5xl">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    {specialtiesList.map((spec) => (
-                        <Link
-                            key={spec.id}
-                            href={`/specialties/${spec.id}`}
-                            className="group relative overflow-hidden min-h-[280px] sm:min-h-[320px] flex flex-col justify-between p-7 sm:p-8 border border-black/[0.04] hover:border-black/[0.08] transition-all duration-300"
-                        >
-                            {/* Background image */}
+                        {/* Left Column: Text + CTA */}
+                        <div className="lg:col-span-6 space-y-8 text-left">
+                            <h1 className="text-[32px] sm:text-[38px] font-serif text-[#333a42] font-normal leading-tight">
+                                {specialty.title}
+                            </h1>
+
+                            <div className="space-y-5 text-sm sm:text-base text-[#4a535e] leading-relaxed font-normal">
+                                {specialty.paragraphs.map((para, idx) => (
+                                    <p key={idx}>{para}</p>
+                                ))}
+                            </div>
+
+                            {/* CTA Card */}
+                            <div className={`${ctaBg} p-8 sm:p-10 rounded-none border border-black/[0.02] shadow-sm space-y-6`}>
+                                <div className="space-y-2">
+                                    <p className="text-[14px] font-bold text-[#333a42] tracking-wide font-sans">
+                                        When You&apos;re Ready for Something Different
+                                    </p>
+                                    <p className="text-[12px] sm:text-[13px] text-[#4a535e]/85 leading-relaxed">
+                                        If you&apos;re ready to move beyond just getting through your days and want to feel more fully present in your life again, we invite you to take the next step.
+                                    </p>
+                                </div>
+                                <div className="pt-2">
+                                    <Link
+                                        href="/contact"
+                                        className="bg-[#333a42] hover:bg-[#4a535e] text-white rounded-none font-semibold h-12 w-fit px-8 flex items-center justify-center gap-2 text-[13px] font-sans tracking-wide transition-all shadow-md hover:shadow-lg"
+                                    >
+                                        Book a Consultation
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Column: Full-height image */}
+                        <div className="lg:col-span-6 relative min-h-[400px]">
                             <img
-                                src={spec.image}
-                                alt={spec.title}
-                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                                src={specialty.image}
+                                alt={specialty.title}
+                                className="absolute inset-0 w-full h-full object-cover"
                             />
-                            {/* Gradient overlay — solid left, fades right */}
-                            <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, #e8e3d8 52%, rgba(232,227,216,0.6) 72%, rgba(232,227,216,0) 100%)' }} />
+                        </div>
 
-                            {/* Text content */}
-                            <div className="relative z-10 space-y-3 max-w-[75%]">
-                                <h2 className="text-[18px] sm:text-[20px] font-serif text-[#333a42] font-semibold leading-snug">
-                                    {spec.title}
-                                </h2>
-                                <p className="text-[13px] sm:text-[14px] text-[#4a535e] leading-relaxed line-clamp-4">
-                                    {spec.paragraphs.slice(0, 2).join(" ")}
-                                </p>
-                            </div>
-
-                            {/* READ MORE */}
-                            <div className="relative z-10 mt-6">
-                                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#4a535e] group-hover:text-[#333a42] transition-colors duration-200">
-                                    Read More
-                                </span>
-                            </div>
-                        </Link>
-                    ))}
+                    </div>
                 </div>
-            </div>
+            </section>
 
         </div>
     );

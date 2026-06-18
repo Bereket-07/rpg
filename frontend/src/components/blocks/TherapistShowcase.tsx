@@ -52,10 +52,7 @@ interface TherapistShowcaseProps {
 }
 
 function getTherapistImageClass(slug: string) {
-    if (slug && slug.includes("valarie-gardner")) {
-        return "w-full h-full object-cover scale-[1.05] object-top origin-top group-hover:scale-[1.1] transition-all duration-500";
-    }
-    return "w-full h-full object-cover scale-[1.3] origin-center group-hover:scale-[1.35] transition-all duration-500";
+    return "w-full h-full object-cover object-top scale-[1.05] origin-top group-hover:scale-[1.08] transition-all duration-500";
 }
 
 function TherapistCard({ member, index }: { member: typeof therapistsRow1Fallback[0]; index: number }) {
@@ -80,7 +77,7 @@ function TherapistCard({ member, index }: { member: typeof therapistsRow1Fallbac
             {/* Card Body */}
             <div className="flex-grow flex flex-col justify-between w-full h-full pb-1">
                 <div className="flex flex-col items-center">
-                    <h3 className="text-[20px] sm:text-[21px] md:text-[22px] font-sans font-bold text-[#333a42] leading-tight tracking-wide">
+                    <h3 className="text-[20px] sm:text-[21px] md:text-[22px] font-serif font-bold text-[#333a42] leading-tight tracking-wide">
                         {member.name}
                     </h3>
 
@@ -95,14 +92,13 @@ function TherapistCard({ member, index }: { member: typeof therapistsRow1Fallbac
                     </p>
                 </div>
 
-                {/* Available status — teal dot + label matching design */}
+                {/* Read More — italic serif, matches design exactly */}
                 <div className="pt-2">
                     <Link
                         href={`/team/${member.slug}`}
-                        className="inline-flex items-center gap-1.5 text-[12px] font-sans font-semibold text-[#4a535e] tracking-wide hover:text-[#333a42] transition-colors"
+                        className="font-serif italic text-[14px] sm:text-[15px] text-[#333a42] hover:text-[#5c6670] transition-colors"
                     >
-                        <span className="w-2 h-2 rounded-full bg-[#7ebac8] inline-block" />
-                        Available
+                        Read More
                     </Link>
                 </div>
             </div>
@@ -162,7 +158,7 @@ export function TherapistShowcase({ title }: TherapistShowcaseProps) {
 
                 {/* Section title */}
                 <div className="text-center mb-32">
-                    <h2 className="text-[44px] md:text-[48px] font-serif text-[#333a42] font-normal tracking-wide leading-tight">
+                    <h2 className="text-[44px] md:text-[48px] font-serif text-[#333a42] font-light italic tracking-wide leading-tight">
                         {title || "Meet the Team"}
                     </h2>
                 </div>
