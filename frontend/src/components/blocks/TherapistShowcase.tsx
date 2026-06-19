@@ -122,10 +122,8 @@ export function TherapistShowcase({ title }: TherapistShowcaseProps) {
                             const combinedFallback = [...therapistsRow1Fallback, ...therapistsRow2Fallback];
                             const fallback = combinedFallback.find(f => f.name.includes(auth.name) || auth.name.includes(f.name));
 
-                            let specialtiesStr = fallback?.specialties || "Individual Therapy";
-                            if (auth.specialties_list && auth.specialties_list.length > 0) {
-                                specialtiesStr = auth.specialties_list.slice(0, 3).map((s: any) => s.title).join(", ");
-                            }
+                            // Always use the curated fallback specialties for card display
+                            const specialtiesStr = fallback?.specialties || "Individual Therapy";
 
                             const slug = auth.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 

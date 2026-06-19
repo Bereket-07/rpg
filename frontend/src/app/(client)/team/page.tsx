@@ -39,12 +39,9 @@ export const STATIC_TEAM_MEMBERS: TherapistData[] = [
             "She is currently adjunct clinical faculty at Pepperdine University's Graduate School of Education and Psychology, supervising doctoral level trainees since 2016."
         ],
         specialties: [
-            { title: "Couples Therapy & Relationship Repair", desc: "Breaking out of recurring conflict cycles, communication breakdowns, and patterns of disconnection." },
-            { title: "Emotional Intimacy & Attachment", desc: "Using an attachment-based approach to deepen connection, strengthen bonding, and create meaningful repair." },
-            { title: "Trust, Resentment & Relationship Strain", desc: "Rebuilding trust, working through unresolved hurt, and navigating the impact of long-standing tension." },
-            { title: "Relational Patterns & Self-Understanding", desc: "Helping individuals make sense of their attachment style, emotional responses, and patterns in relationships." },
-            { title: "Parenting & Family Dynamics", desc: "Supporting parents in navigating child behavior, parent-child connection, and managing co-parenting stress and shifting family roles." },
-            { title: "Life Transitions & Relationship Change", desc: "Supporting couples and individuals through transitions such as becoming parents, career shifts, and evolving identities." }
+            { title: "Couples Therapy", desc: "Breaking conflict cycles, communication breakdowns, and patterns of disconnection." },
+            { title: "Parenting Support", desc: "Supporting parents in navigating child behavior and co-parenting stress." },
+            { title: "Individual Therapy", desc: "Understanding emotional and interpersonal patterns for more balanced relationships." },
         ]
     },
     {
@@ -68,10 +65,8 @@ export const STATIC_TEAM_MEMBERS: TherapistData[] = [
             "As a clinical professor at Pepperdine University's Graduate School of Education and Psychology, Dr. Cohen has served as the director of the Pepperdine Community Counseling Center in Encino since 2002. The center, which has transformed into a telehealth clinic, benefits from her proven track record as an experienced clinical supervisor and leader in the field of clinical training in psychology. Dr. Cohen is passionate about community outreach and has developed pro bono parent-education workshops for local schools. She talks to parents about how they can protect their children from bullying and address various mental health challenges impacting their children and teens."
         ],
         specialties: [
-            { title: "Functional Anxiety", desc: "Perfectionism, overthinking, burnout, and high-achievement stress." },
-            { title: "Functional Depression", desc: "Grief and loss, midlife dissatisfaction, emotional numbness, and relational disconnection." },
-            { title: "Adjustment & Stress Rebuilding after change", desc: "Divorce or breakup recovery, career stress, parenting transitions (empty nest), caregiver overwhelm." },
-            { title: "Women's Issues Across the Lifespan", desc: "Role and identity shift at various stages of womanhood (e.g., motherhood, perimenopause and menopause transitions, divorce or breakup)." }
+            { title: "Individual Therapy", desc: "Personalized support for anxiety, depression, and life transitions." },
+            { title: "Parenting Support", desc: "Helping parents navigate parenting challenges and family dynamics." },
         ]
     },
     {
@@ -95,11 +90,8 @@ export const STATIC_TEAM_MEMBERS: TherapistData[] = [
             "Dr. Eifert has a passion for education and training and has embraced multiple roles, including teaching, developing training curriculums, and providing clinical supervision. She is currently adjunct clinical faculty at Pepperdine University's Graduate School of Education and Psychology."
         ],
         specialties: [
-            { title: "High-Achieving Professionals & Emerging Adults", desc: "Burnout, perfectionism, and the gap between success and fulfillment." },
-            { title: "Trauma, Avoidance & Attachment", desc: "Helping resilient adults move beyond survival patterns and safely reclaim their story." },
-            { title: "Identity, Culture & Life Transitions", desc: "Deconstructing inherited values, navigating first-gen pressure, and building an authentic adult identity." },
-            { title: "Relational Patterns & Boundaries", desc: "Healing anxious attachment, overfunctioning, and relational roles that no longer fit." },
-            { title: "Life in Medicine", desc: "Supporting providers and partners through burnout, resentment, and the emotional cost of medical culture." }
+            { title: "Individual Therapy", desc: "Supporting high-functioning adults through burnout, perfectionism, and life transitions." },
+            { title: "Couples Therapy", desc: "Helping couples navigate conflict, attachment wounds, and relational patterns." },
         ]
     },
     {
@@ -119,8 +111,8 @@ export const STATIC_TEAM_MEMBERS: TherapistData[] = [
         ],
         specialties: [
             { title: "Individual Therapy", desc: "Navigating self-esteem, attachment styles, anxiety, and depression." },
-            { title: "EMDR & Trauma Recovery", desc: "Processing adverse childhood events and traumatic blocks via certified EMDR protocols." },
-            { title: "Couples & Relationship Growth", desc: "Strengthening emotional responsiveness, repair, and trust in relationships." }
+            { title: "Couples Therapy", desc: "Strengthening emotional responsiveness, repair, and trust in relationships." },
+            { title: "Parenting Support, EMDR", desc: "Processing trauma and supporting families through attachment-based care." },
         ]
     },
     {
@@ -139,9 +131,9 @@ export const STATIC_TEAM_MEMBERS: TherapistData[] = [
             "She works with clients on both individual and systemic relational levels."
         ],
         specialties: [
+            { title: "Individual Therapy", desc: "Supporting individuals through self-esteem, anxiety, and interpersonal growth." },
             { title: "Couples Therapy", desc: "Breaking conflict cycles and improving deep emotional communication." },
-            { title: "Parenting & Co-Parenting Stress", desc: "Supporting parent-child bonding, navigating adolescent behavior, and managing co-parenting roles." },
-            { title: "Interpersonal Growth", desc: "Identifying recurring attachment habits and consciously replacing them." }
+            { title: "Parenting Support", desc: "Supporting parent-child bonding and managing co-parenting roles." },
         ]
     }
 ];
@@ -171,7 +163,7 @@ async function getClinicians() {
                 beyondTherapy: auth.beyond_therapy || staticFallback?.beyondTherapy || "",
                 approach: auth.approach_paragraphs && auth.approach_paragraphs.length > 0 ? auth.approach_paragraphs : (staticFallback?.approach || []),
                 background: auth.background_paragraphs && auth.background_paragraphs.length > 0 ? auth.background_paragraphs : (staticFallback?.background || []),
-                specialties: auth.specialties_list && auth.specialties_list.length > 0 ? auth.specialties_list : (staticFallback?.specialties || [])
+                specialties: staticFallback?.specialties || []
             };
         });
     } catch (err) {
