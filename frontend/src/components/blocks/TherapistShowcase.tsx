@@ -124,7 +124,7 @@ export function TherapistShowcase({ title }: TherapistShowcaseProps) {
 
                             let specialtiesStr = fallback?.specialties || "Individual Therapy";
                             if (auth.specialties_list && auth.specialties_list.length > 0) {
-                                specialtiesStr = auth.specialties_list.map((s: any) => s.title).join(", ");
+                                specialtiesStr = auth.specialties_list.slice(0, 3).map((s: any) => s.title).join(", ");
                             }
 
                             const slug = auth.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -158,7 +158,7 @@ export function TherapistShowcase({ title }: TherapistShowcaseProps) {
 
                 {/* Section title */}
                 <div className="text-center mb-32">
-                    <h2 className="text-[44px] md:text-[48px] font-serif text-[#333a42] font-light italic tracking-wide leading-tight">
+                    <h2 className="text-[44px] md:text-[48px] font-serif text-[#333a42] font-semibold tracking-wide leading-tight">
                         {title || "Meet the Team"}
                     </h2>
                 </div>
