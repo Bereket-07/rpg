@@ -7,6 +7,7 @@ from app.models.user import User
 router = APIRouter()
 
 UPLOAD_DIRECTORY = "static/uploads"
+SITE_URL = os.getenv("SITE_URL", "").rstrip("/")
 os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
 
 ALLOWED_TYPES = {
@@ -42,7 +43,7 @@ async def upload_file(
     with open(file_path, "wb") as buffer:
         buffer.write(contents)
 
-    base_url = str(request.base_url).rstrip("/")
+    base_url = SITE_URL or str(request.base_url).rstrip("/")
     return {
         "url": f"{base_url}/static/uploads/{unique_filename}",
         "filename": unique_filename,

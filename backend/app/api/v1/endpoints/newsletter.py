@@ -1,5 +1,6 @@
 import hashlib
-from typing import List
+from datetime import datetime
+from typing import List, Optional
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -23,7 +24,7 @@ class SubscriberResponse(BaseModel):
     id: int
     email: EmailStr
     is_active: bool
-    subscribed_at: str = ""
+    subscribed_at: Optional[datetime] = None
 
     class Config:
         from_attributes = True

@@ -13,6 +13,7 @@ interface FullArticle {
     slug: string;
     content: string;
     excerpt: string;
+    cover_image_url?: string;
     published_at: string;
     category: { name: string };
     author: { name: string, bio: string, profile_image_url?: string };
@@ -174,10 +175,32 @@ export default async function DynamicArticlePage({ params }: { params: { slug: s
         notFound();
     }
 
+    const publishDate = article.published_at
+        ? new Date(article.published_at).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+        : "May 28, 2026";
+
     return (
-        <div className="bg-[#FDF8F5] min-h-screen font-sans text-[#4a535e] py-16 px-6">
-            <article className="container mx-auto max-w-3xl bg-white rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.03)] border border-black/[0.02] p-8 sm:p-12 md:p-16">
-                
+        <div className="bg-[#FDF8F5] min-h-screen font-sans text-[#4a535e] pb-24">
+
+            {/* ── Hero image (full-width, outside the card) ── */}
+            {article.cover_image_url ? (
+                <div className="w-full relative overflow-hidden" style={{ maxHeight: "520px" }}>
+                    <img
+                        src={article.cover_image_url}
+                        alt={article.title}
+                        className="w-full object-cover"
+                        style={{ maxHeight: "520px" }}
+                    />
+                    {/* gradient fade to page bg */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#FDF8F5] via-transparent to-transparent" />
+                </div>
+            ) : (
+                <div className="pt-16" />
+            )}
+
+            <div className="px-6">
+            <article className={`container mx-auto max-w-3xl bg-white rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.04)] border border-black/[0.02] p-8 sm:p-12 md:p-16 ${article.cover_image_url ? "-mt-16 relative z-10" : ""}`}>
+
                 {/* Back Link */}
                 <div className="mb-8">
                     <Link href="/blog" className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-[#7ebac8] hover:text-[#5fa2b0] transition-colors duration-300">
@@ -197,10 +220,10 @@ export default async function DynamicArticlePage({ params }: { params: { slug: s
                     <p className="text-[17px] sm:text-[18px] text-[#4a535e]/80 italic font-sans leading-relaxed">
                         {article.excerpt}
                     </p>
-                    
+
                     {/* Date / Reading context */}
                     <p className="text-[12px] text-[#4a535e]/60 pt-1">
-                        Published on {article.published_at ? new Date(article.published_at).toLocaleDateString("en-US", { year: 'numeric', month: 'long', day: 'numeric' }) : "May 28, 2026"}
+                        Published on {publishDate}
                     </p>
                 </div>
 
@@ -245,6 +268,7 @@ export default async function DynamicArticlePage({ params }: { params: { slug: s
                 </div>
 
             </article>
+            </div>
         </div>
     );
 }

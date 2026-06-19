@@ -26,10 +26,11 @@ def _get_resend():
         logger.error("resend package not installed. Run: pip install resend")
         return None
 
-MAIL_FROM_NAME = os.getenv("MAIL_FROM_NAME", "Reframe Psychology")
-MAIL_FROM      = os.getenv("MAIL_FROM", "onboarding@resend.dev")
-SITE_URL       = os.getenv("SITE_URL", "http://localhost:3000")
-TIMEZONE_LABEL = os.getenv("PRACTICE_TIMEZONE_LABEL", "America/Los_Angeles")
+MAIL_FROM_NAME  = os.getenv("MAIL_FROM_NAME", "Reframe Psychology")
+MAIL_FROM       = os.getenv("MAIL_FROM", "onboarding@resend.dev")
+ADMIN_EMAIL     = os.getenv("ADMIN_EMAIL", MAIL_FROM)
+SITE_URL        = os.getenv("SITE_URL", "http://localhost:3000")
+TIMEZONE_LABEL  = os.getenv("PRACTICE_TIMEZONE_LABEL", "America/Los_Angeles")
 
 
 def _safe(value: Optional[str]) -> str:
@@ -277,7 +278,7 @@ async def send_inquiry_notification(first_name: str, last_name: str, email_from:
     try:
         rs.Emails.send({
             "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
-            "to": [MAIL_FROM],
+            "to": [ADMIN_EMAIL],
             "reply_to": email_from,
             "subject": f"New Inquiry: {subject} — {first_name} {last_name}",
             "html": _base_html(body),
@@ -416,7 +417,7 @@ async def send_booking_notification(
     try:
         rs.Emails.send({
             "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
-            "to": [MAIL_FROM],
+            "to": [ADMIN_EMAIL],
             "reply_to": email_from,
             "subject": f"New Booking: {first_name} {last_name} — {requested_date} at {requested_time}",
             "html": _base_html(body),

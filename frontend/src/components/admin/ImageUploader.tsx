@@ -1,32 +1,53 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { UploadCloud, X, Loader2, Image as ImageIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { UploadCloud, X, Loader2, ImageIcon, RefreshCw } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { getApiUrl } from "@/lib/api";
 
-
 interface ImageUploaderProps {
-    value?: string | null;
-    onChange: (url: string) => void;
-    label?: string;
+    /** Existing image URL (e.g. when editing an article) */
+    currentImageUrl?: string | null;
+    /** Called with the new public URL after a successful upload */
+    onUpload: (url: string) => void;
+    /** Aspect ratio class — default is wide cover (16:9) */
+    aspectRatio?: "video" | "square" | "portrait";
 }
 
-export default function ImageUploader({ value, onChange, label = "Profile Image" }: ImageUploaderProps) {
+export default function ImageUploader({
+    currentImageUrl,
+    onUpload,
+    aspectRatio = "video",
+}: ImageUploaderProps) {
     const { data: session } = useSession();
     const [isDragging, setIsDragging] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(value || null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [preview, setPreview] = useState<string | null>(currentImageUrl || null);
+    const [error, setError] = useState("");
+    const inputRef = useRef<HTMLInputElement>(null);
 
-    const handleFile = async (file: File) => {
+    const aspectCls =
+        aspectRatio === "square"
+            ? "aspect-square"
+            : aspectRatio === "portrait"
+            ? "aspect-[3/4]"
+            : "aspect-[16/6]";
+
+    async function handleFile(file: File) {
         if (!file.type.startsWith("image/")) {
-            alert("Please upload an image file (jpeg, png, webp, gif)");
+            setError("Only image files are allowed (JPEG, PNG, WEBP, GIF).");
             return;
         }
-
+        if (file.size > 8 * 1024 * 1024) {
+            setError("Image must be under 8 MB.");
+            return;
+        }
+        setError("");
         setIsUploading(true);
+
+        // Instant local preview
+        const localUrl = URL.createObjectURL(file);
+        setPreview(localUrl);
 
         try {
             const formData = new FormData();
@@ -34,120 +55,141 @@ export default function ImageUploader({ value, onChange, label = "Profile Image"
 
             const res = await fetch(`${getApiUrl()}/api/v1/upload/`, {
                 method: "POST",
-                headers: {
-                    Authorization: `Bearer ${session?.accessToken}`,
-                },
+                headers: { Authorization: `Bearer ${(session as any)?.accessToken}` },
                 body: formData,
             });
 
-            if (!res.ok) throw new Error("Upload failed");
+            if (!res.ok) {
+                const body = await res.json().catch(() => ({}));
+                throw new Error(body.detail || `Upload failed (${res.status})`);
+            }
 
             const data = await res.json();
-
-            // Assuming the backend returns something like { "url": `${getApiUrl()}/static/uploads/image.jpg` }
-            setPreviewUrl(data.url);
-            onChange(data.url);
-        } catch (error) {
-            console.error("Error uploading image:", error);
-            alert("Failed to upload image. Please try again.");
+            setPreview(data.url);
+            onUpload(data.url);
+        } catch (err: any) {
+            setError(err.message || "Upload failed. Please try again.");
+            setPreview(currentImageUrl || null);
         } finally {
             setIsUploading(false);
         }
-    };
+    }
 
-    const handleDragOver = (e: React.DragEvent) => {
+    function handleRemove() {
+        setPreview(null);
+        onUpload("");
+        setError("");
+        if (inputRef.current) inputRef.current.value = "";
+    }
+
+    function handleDragOver(e: React.DragEvent) {
         e.preventDefault();
         setIsDragging(true);
-    };
-
-    const handleDragLeave = (e: React.DragEvent) => {
+    }
+    function handleDragLeave(e: React.DragEvent) {
         e.preventDefault();
         setIsDragging(false);
-    };
-
-    const handleDrop = async (e: React.DragEvent) => {
+    }
+    function handleDrop(e: React.DragEvent) {
         e.preventDefault();
         setIsDragging(false);
-
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            await handleFile(e.dataTransfer.files[0]);
-        }
-    };
-
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files.length > 0) {
-            await handleFile(e.target.files[0]);
-        }
-    };
-
-    const handleRemove = () => {
-        setPreviewUrl(null);
-        onChange("");
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
-        }
-    };
+        const file = e.dataTransfer.files?.[0];
+        if (file) handleFile(file);
+    }
+    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (file) handleFile(file);
+    }
 
     return (
         <div className="space-y-2">
-            <span className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                {label}
-            </span>
-
-            {previewUrl ? (
-                <div className="relative rounded-md overflow-hidden border border-input shadow-sm max-w-[250px]">
+            {preview ? (
+                /* ── Preview state ── */
+                <div className={`relative w-full ${aspectCls} rounded-xl overflow-hidden border border-black/[0.08] bg-[#f4f1ed] group`}>
                     <img
-                        src={previewUrl}
-                        alt="Uploaded preview"
-                        className="w-full h-auto object-cover aspect-video"
+                        src={preview}
+                        alt="Cover preview"
+                        className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button
-                            type="button"
-                            variant="destructive"
-                            size="sm"
-                            onClick={handleRemove}
-                            className="flex items-center gap-2 shadow-lg"
-                        >
-                            <X className="w-4 h-4" /> Remove
-                        </Button>
-                    </div>
+
+                    {/* Upload spinner overlay */}
+                    {isUploading && (
+                        <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-2 z-10">
+                            <Loader2 className="w-6 h-6 text-white animate-spin" />
+                            <span className="text-white text-[12px] font-semibold">Uploading…</span>
+                        </div>
+                    )}
+
+                    {/* Hover controls */}
+                    {!isUploading && (
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100 z-10">
+                            <button
+                                type="button"
+                                onClick={() => inputRef.current?.click()}
+                                className="flex items-center gap-1.5 bg-white text-[#333a42] text-[12px] font-semibold px-3 py-1.5 rounded-lg hover:bg-[#f4f1ed] transition-colors shadow-sm"
+                            >
+                                <RefreshCw className="w-3.5 h-3.5" /> Replace
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleRemove}
+                                className="flex items-center gap-1.5 bg-red-500 text-white text-[12px] font-semibold px-3 py-1.5 rounded-lg hover:bg-red-600 transition-colors shadow-sm"
+                            >
+                                <X className="w-3.5 h-3.5" /> Remove
+                            </button>
+                        </div>
+                    )}
                 </div>
             ) : (
+                /* ── Drop zone ── */
                 <div
-                    className={`
-                        relative flex flex-col items-center justify-center w-full max-w-[350px]
-                        h-32 border-2 border-dashed rounded-lg transition-colors
-                        ${isDragging ? "border-primary bg-primary/10" : "border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/50"}
-                        ${isUploading ? "opacity-50 pointer-events-none" : "cursor-pointer"}
+                    className={`relative w-full ${aspectCls} rounded-xl border-2 border-dashed transition-all duration-200 flex flex-col items-center justify-center cursor-pointer
+                        ${isDragging
+                            ? "border-[#7ebac8] bg-[#f0f9ff]"
+                            : "border-black/[0.1] bg-[#fafaf9] hover:border-[#7ebac8]/60 hover:bg-[#f0f9ff]/60"
+                        }
+                        ${isUploading ? "pointer-events-none opacity-60" : ""}
                     `}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
+                    onClick={() => inputRef.current?.click()}
                 >
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                        {isUploading ? (
-                            <Loader2 className="w-8 h-8 text-primary animate-spin mb-2" />
-                        ) : (
-                            <UploadCloud className="w-8 h-8 text-muted-foreground mb-2" />
-                        )}
-                        <p className="mb-1 text-sm text-muted-foreground">
-                            <span className="font-semibold text-primary">Click to upload</span> or drag and drop
-                        </p>
-                        <p className="text-xs text-muted-foreground/75">
-                            PNG, JPG, or WEBP (Max 5MB)
-                        </p>
-                    </div>
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        className="hidden"
-                        accept="image/jpeg, image/png, image/webp, image/gif"
-                        onChange={handleFileChange}
-                    />
+                    {isUploading ? (
+                        <>
+                            <Loader2 className="w-7 h-7 text-[#7ebac8] animate-spin mb-2" />
+                            <p className="text-[13px] font-semibold text-[#4a535e]">Uploading…</p>
+                        </>
+                    ) : (
+                        <>
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-3 transition-colors ${isDragging ? "bg-[#7ebac8]/20" : "bg-[#f2ede4]"}`}>
+                                {isDragging
+                                    ? <UploadCloud className="w-5 h-5 text-[#7ebac8]" />
+                                    : <ImageIcon className="w-5 h-5 text-[#7ebac8]" />
+                                }
+                            </div>
+                            <p className="text-[13px] font-semibold text-[#333a42]">
+                                {isDragging ? "Drop to upload" : "Click or drag & drop"}
+                            </p>
+                            <p className="text-[11px] text-muted-foreground mt-0.5">
+                                PNG, JPG, WEBP — max 8 MB
+                            </p>
+                        </>
+                    )}
                 </div>
             )}
+
+            {error && (
+                <p className="text-[12px] text-red-500 font-medium">{error}</p>
+            )}
+
+            <input
+                ref={inputRef}
+                type="file"
+                className="hidden"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                onChange={handleChange}
+            />
         </div>
     );
 }
