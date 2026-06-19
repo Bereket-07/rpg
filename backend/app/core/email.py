@@ -288,6 +288,89 @@ async def send_inquiry_notification(first_name: str, last_name: str, email_from:
 
 
 # ---------------------------------------------------------------------------
+# Contact inquiry received — client receipt email
+# ---------------------------------------------------------------------------
+async def send_inquiry_received_client_email(email_to: str, first_name: str, last_name: str, subject: str):
+    rs = _get_resend()
+    if not rs:
+        logger.warning(f"Resend not configured — skipping inquiry receipt email to {email_to}")
+        return
+
+    body = f"""
+      <h2 style="margin:0 0 8px;color:#1e2328;font-size:22px;">We received your message ✅</h2>
+      <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 20px;">
+        Hi <strong>{_safe(first_name)}</strong>, thank you for reaching out to Reframe Psychology Group.
+        Our team will review your inquiry and follow up within <strong>24 business hours</strong>.
+      </p>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;margin:16px 0 22px;">
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;width:140px;">Name</td><td style="color:#333;">{_safe(first_name)} {_safe(last_name)}</td></tr>
+        <tr><td style="padding:8px 0;font-weight:700;color:#555;">Subject</td><td style="color:#333;">{_safe(subject)}</td></tr>
+      </table>
+      <div style="background:#f0f9ff;border-left:4px solid #7ebac8;padding:14px 18px;border-radius:0 8px 8px 0;margin-bottom:24px;">
+        <p style="margin:0;color:#4a535e;font-size:13px;line-height:1.6;">
+          💡 <strong>What happens next?</strong> A member of our clinical team will contact you at
+          <strong>{_safe(email_to)}</strong> shortly. If anything changes, simply reply to this email.
+        </p>
+      </div>
+      <a href="{SITE_URL}/contact"
+         style="display:inline-block;background:#1e2328;color:#fff;font-weight:700;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;">
+        Visit Our Site →
+      </a>
+    """
+
+    try:
+        rs.Emails.send({
+            "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
+            "to": [email_to],
+            "subject": "We received your inquiry — Reframe Psychology",
+            "html": _base_html(body),
+        })
+        logger.info(f"Inquiry receipt email sent to {email_to}")
+    except Exception as e:
+        logger.error(f"Failed to send inquiry receipt email to {email_to}: {e}")
+
+
+# ---------------------------------------------------------------------------
+# Contact inquiry responded — client notification email
+# ---------------------------------------------------------------------------
+async def send_inquiry_responded_client_email(email_to: str, first_name: str, last_name: str, subject: str):
+    rs = _get_resend()
+    if not rs:
+        logger.warning(f"Resend not configured — skipping inquiry responded email to {email_to}")
+        return
+
+    body = f"""
+      <div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:12px 16px;border-radius:0 8px 8px 0;margin-bottom:24px;">
+        <p style="margin:0;color:#15803d;font-weight:700;font-size:15px;">✅ Our team has responded to your inquiry</p>
+      </div>
+      <h2 style="margin:0 0 8px;color:#1e2328;font-size:22px;">Hi {_safe(first_name)}, we've followed up!</h2>
+      <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 20px;">
+        A member of our clinical team has reviewed and responded to your inquiry:
+        <strong>{_safe(subject)}</strong>.
+      </p>
+      <p style="color:#4a535e;font-size:15px;line-height:1.7;margin:0 0 24px;">
+        Please check your inbox for a reply from us, or feel free to reach back out if you have any
+        additional questions.
+      </p>
+      <a href="{SITE_URL}/contact"
+         style="display:inline-block;background:#1e2328;color:#fff;font-weight:700;padding:12px 24px;border-radius:8px;text-decoration:none;font-size:14px;">
+        Contact Us Again →
+      </a>
+    """
+
+    try:
+        rs.Emails.send({
+            "from": f"{MAIL_FROM_NAME} <{MAIL_FROM}>",
+            "to": [email_to],
+            "subject": "We've responded to your inquiry — Reframe Psychology",
+            "html": _base_html(body),
+        })
+        logger.info(f"Inquiry responded email sent to {email_to}")
+    except Exception as e:
+        logger.error(f"Failed to send inquiry responded email to {email_to}: {e}")
+
+
+# ---------------------------------------------------------------------------
 # Booking notification (to practice)
 # ---------------------------------------------------------------------------
 async def send_booking_notification(

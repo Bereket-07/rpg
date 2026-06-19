@@ -138,27 +138,22 @@ const MOCK_ARTICLES: Record<string, FullArticle> = {
 };
 
 async function getArticle(slug: string): Promise<FullArticle | null> {
-    // 1. Check local static fallback first
-    if (MOCK_ARTICLES[slug]) {
-        return MOCK_ARTICLES[slug];
-    }
-
-    // 2. Fetch from Fast API
+    // 1. Fetch from API first
     try {
         const res = await fetch(`${getApiUrl()}/api/v1/articles/${slug}`, {
-            next: { revalidate: 60 }
+            cache: "no-store",
         });
-
-        if (!res.ok) {
-            if (res.status === 404) return null;
-            throw new Error("Failed to fetch article");
+        if (res.ok) return res.json();
+        if (res.status === 404) {
+            // 2. Fall back to static mock for legacy slugs
+            return MOCK_ARTICLES[slug] ?? null;
         }
-
-        return res.json();
     } catch (error) {
         console.error("Error fetching individual article:", error);
-        return null;
+        // 2. Fall back to static mock on network error
+        return MOCK_ARTICLES[slug] ?? null;
     }
+    return null;
 }
 
 // Generate Next-SEO Metadata Dynamically

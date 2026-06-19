@@ -2,207 +2,284 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Checkbox } from "@/components/ui/checkbox";
+import { useSession } from "next-auth/react";
+import { ArrowLeft, Loader2, Users, Globe, FileText } from "lucide-react";
+import Link from "next/link";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import ImageUploader from "@/components/admin/ImageUploader";
 import { getApiUrl } from "@/lib/api";
 
+function toSlug(s: string) {
+    return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+const inputCls = "w-full border border-black/[0.1] rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#7ebac8]/40 bg-white text-[#333a42] placeholder:text-muted-foreground/60";
+const labelCls = "block text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-1.5";
 
 export default function ComposeArticlePage() {
     const router = useRouter();
-    const [isLoading, setIsLoading] = useState(false);
-    const [authors, setAuthors] = useState<any[]>([]);
-    const [categories, setCategories] = useState<any[]>([]);
-    const [published, setPublished] = useState(false);
+    const { data: session } = useSession();
 
-    // Form states
-    const [title, setTitle] = useState("");
-    const [slug, setSlug] = useState("");
-    const [excerpt, setExcerpt] = useState("");
-    const [content, setContent] = useState("");
-    const [authorId, setAuthorId] = useState("");
-    const [categoryId, setCategoryId] = useState("");
-    const [metaTitle, setMetaTitle] = useState("");
+    const [authors, setAuthors]         = useState<any[]>([]);
+    const [categories, setCategories]   = useState<any[]>([]);
+    const [subscribers, setSubscribers] = useState(0);
+
+    const [title, setTitle]             = useState("");
+    const [slug, setSlug]               = useState("");
+    const [slugManual, setSlugManual]   = useState(false);
+    const [excerpt, setExcerpt]         = useState("");
+    const [content, setContent]         = useState("");
+    const [authorId, setAuthorId]       = useState("");
+    const [categoryId, setCategoryId]   = useState("");
+    const [coverImageUrl, setCoverImageUrl]   = useState("");
+    const [metaTitle, setMetaTitle]           = useState("");
     const [metaDescription, setMetaDescription] = useState("");
-    const [focusKeyword, setFocusKeyword] = useState("");
-    const [coverImageUrl, setCoverImageUrl] = useState("");
+    const [focusKeyword, setFocusKeyword]     = useState("");
 
-    // Auto-generate slug from title
+    const [saving, setSaving]     = useState(false);
+    const [saveMode, setSaveMode] = useState<"draft" | "publish">("draft");
+    const [error, setError]       = useState("");
+
+    // Auto-slug from title
     useEffect(() => {
-        if (!slug && title) {
-            setSlug(title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, ''));
-        }
+        if (!slugManual && title) setSlug(toSlug(title));
+    }, [title, slugManual]);
+
+    // Auto-populate SEO meta title
+    useEffect(() => {
+        if (!metaTitle && title) setMetaTitle(title.slice(0, 60));
     }, [title]);
 
     useEffect(() => {
-        async function fetchRelations() {
-            try {
-                const [authRes, catRes] = await Promise.all([
-                    fetch(`${getApiUrl()}/api/v1/authors`),
-                    fetch(`${getApiUrl()}/api/v1/categories`)
-                ]);
-                if (authRes.ok) setAuthors(await authRes.json());
-                if (catRes.ok) setCategories(await catRes.json());
-            } catch (error) {
-                console.error("Failed to load relations", error);
+        const token = (session as any)?.accessToken;
+        const headers: HeadersInit = token ? { Authorization: `Bearer ${token}` } : {};
+        async function load() {
+            const [authRes, catRes, nlRes] = await Promise.allSettled([
+                fetch(`${getApiUrl()}/api/v1/authors`),
+                fetch(`${getApiUrl()}/api/v1/categories`),
+                fetch(`${getApiUrl()}/api/v1/newsletter`, { headers }),
+            ]);
+            if (authRes.status === "fulfilled" && authRes.value.ok) setAuthors(await authRes.value.json());
+            if (catRes.status === "fulfilled" && catRes.value.ok) setCategories(await catRes.value.json());
+            if (nlRes.status === "fulfilled" && nlRes.value?.ok) {
+                const subs = await nlRes.value.json();
+                setSubscribers(subs.filter((s: any) => s.is_active).length);
             }
         }
-        fetchRelations();
-    }, []);
+        load();
+    }, [session]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsLoading(true);
-
+    async function handleSubmit(publishNow: boolean) {
+        if (!title.trim() || !content.trim() || !authorId || !categoryId) {
+            setError("Please fill in title, content, author and category.");
+            return;
+        }
+        setSaveMode(publishNow ? "publish" : "draft");
+        setSaving(true);
+        setError("");
         const payload = {
-            title,
-            slug,
-            content,
-            excerpt,
+            title, slug, content, excerpt,
             cover_image_url: coverImageUrl || undefined,
-            published,
+            published: publishNow,
             author_id: parseInt(authorId),
             category_id: parseInt(categoryId),
-            seo_meta: {
-                meta_title: metaTitle,
-                meta_description: metaDescription,
-                focus_keyword: focusKeyword
-            }
+            seo_meta: { meta_title: metaTitle, meta_description: metaDescription, focus_keyword: focusKeyword },
         };
-
         try {
             const res = await fetch(`${getApiUrl()}/api/v1/articles`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
             });
-
-            if (res.ok) {
-                router.push("/admin/articles");
-                router.refresh();
-            } else {
-                alert("Failed to create article.");
+            if (res.ok) { router.push("/admin/articles"); router.refresh(); }
+            else {
+                const data = await res.json().catch(() => ({}));
+                setError(data.detail || "Failed to create article.");
             }
-        } catch (error) {
-            alert("Error connecting to server.");
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        } catch { setError("Could not connect to the server."); }
+        finally { setSaving(false); }
+    }
 
     return (
-        <div className="max-w-4xl mx-auto space-y-6 pb-20">
-            <div className="flex items-center justify-between pl-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Compose Article</h1>
-                    <p className="text-muted-foreground mt-1">Write a new content marketing blog post.</p>
+        <div className="max-w-6xl pb-20">
+
+            {/* Top bar */}
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                    <Link href="/admin/articles"
+                        className="flex items-center gap-1.5 text-[12px] text-muted-foreground hover:text-[#333a42] font-medium transition-colors">
+                        <ArrowLeft className="w-3.5 h-3.5" /> Articles
+                    </Link>
+                    <span className="text-black/20">›</span>
+                    <span className="text-[12px] font-semibold text-[#333a42]">New Article</span>
+                </div>
+                <div className="flex items-center gap-2">
+                    <button onClick={() => handleSubmit(false)} disabled={saving}
+                        className="flex items-center gap-2 bg-white border border-black/[0.1] hover:border-black/20 text-[#333a42] px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-50">
+                        {saving && saveMode === "draft" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <FileText className="w-3.5 h-3.5" />}
+                        Save Draft
+                    </button>
+                    <button onClick={() => handleSubmit(true)} disabled={saving}
+                        className="flex items-center gap-2 bg-[#1e2328] hover:bg-[#2d3540] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-50 shadow-sm">
+                        {saving && saveMode === "publish" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Globe className="w-3.5 h-3.5" />}
+                        Publish
+                    </button>
                 </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <Card className="border-primary/20">
-                    <CardHeader>
-                        <CardTitle>Core Content</CardTitle>
-                        <CardDescription>The main body of your blog post.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="title">Article Title</Label>
-                            <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} required />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="slug">URL Slug (Auto-generated)</Label>
-                            <Input id="slug" value={slug} onChange={(e) => setSlug(e.target.value)} required />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="excerpt">Excerpt (Short summary for cards)</Label>
-                            <Textarea id="excerpt" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} rows={2} required />
-                        </div>
-                        <div className="space-y-2">
-                            <Label>Cover Image (appears on article card & header)</Label>
-                            <ImageUploader currentImageUrl={coverImageUrl} onUpload={setCoverImageUrl} />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="content">Full Body Content</Label>
-                            <RichTextEditor value={content} onChange={setContent} />
-                        </div>
-                    </CardContent>
-                </Card>
+            {/* Title block */}
+            <div className="bg-white rounded-xl border border-black/[0.06] px-6 py-5 mb-5">
+                <input
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
+                    placeholder="Article title…"
+                    className="w-full text-[26px] font-bold text-[#1e2328] placeholder:text-muted-foreground/25 bg-transparent border-none outline-none leading-tight"
+                />
+                <div className="flex items-center gap-1.5 mt-2.5">
+                    <span className="text-[11px] text-muted-foreground font-mono">/blog/</span>
+                    <input
+                        value={slug}
+                        onChange={e => { setSlug(e.target.value); setSlugManual(true); }}
+                        placeholder="url-slug"
+                        className="text-[11px] font-mono text-[#7ebac8] bg-transparent border-none outline-none flex-1 min-w-0"
+                    />
+                    {slug && (
+                        <Link href={`/blog/${slug}`} target="_blank"
+                            className="text-[10px] text-muted-foreground hover:text-[#7ebac8] transition-colors shrink-0">
+                            Preview ↗
+                        </Link>
+                    )}
+                </div>
+            </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Organization</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label>Category</Label>
-                                <Select onValueChange={setCategoryId} required>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select clinical topic" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {categories.map((cat) => (
-                                            <SelectItem key={cat.id} value={cat.id.toString()}>{cat.name}</SelectItem>
-                                        ))}
-                                        {categories.length === 0 && <SelectItem value="none" disabled>No Categories Found</SelectItem>}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Author</Label>
-                                <Select onValueChange={setAuthorId} required>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select clinician" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {authors.map((auth) => (
-                                            <SelectItem key={auth.id} value={auth.id.toString()}>{auth.name}</SelectItem>
-                                        ))}
-                                        {authors.length === 0 && <SelectItem value="none" disabled>No Authors Found</SelectItem>}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+            {/* Newsletter notice */}
+            {subscribers > 0 && (
+                <div className="flex items-center gap-2.5 bg-[#f0f9ff] border border-[#7ebac8]/30 rounded-lg px-4 py-2.5 mb-5">
+                    <Users className="w-4 h-4 text-[#7ebac8] shrink-0" />
+                    <p className="text-[13px] text-[#4a535e]">
+                        Publishing will automatically notify <strong className="text-[#1e2328]">{subscribers} active subscribers</strong> by email.
+                    </p>
+                </div>
+            )}
 
-                            <div className="flex items-center space-x-2 pt-4 border-t mt-4">
-                                <Checkbox id="publish" checked={published} onCheckedChange={(c) => setPublished(c as boolean)} />
-                                <Label htmlFor="publish" className="font-medium">Publish immediately</Label>
-                            </div>
-                        </CardContent>
-                    </Card>
+            {/* Two-column layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-5">
 
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>SEO Meta Settings</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="meta_title">Meta Title (Max 60 chars)</Label>
-                                <Input id="meta_title" value={metaTitle} onChange={(e) => setMetaTitle(e.target.value)} placeholder="Therapy for Anxiety | Reframe" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="meta_description">Meta Description (Max 160 chars)</Label>
-                                <Textarea id="meta_description" value={metaDescription} onChange={(e) => setMetaDescription(e.target.value)} rows={3} placeholder="Learn actionable techniques to navigate anxiety..." />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="focus_keyword">Focus Keyword</Label>
-                                <Input id="focus_keyword" value={focusKeyword} onChange={(e) => setFocusKeyword(e.target.value)} placeholder="anxiety treatment, panic attacks" />
-                            </div>
-                        </CardContent>
-                    </Card>
+                {/* Left: content */}
+                <div className="space-y-5">
+
+                    <div className="bg-white rounded-xl border border-black/[0.06] p-5 space-y-3">
+                        <p className={labelCls}>Summary / Excerpt</p>
+                        <textarea
+                            value={excerpt}
+                            onChange={e => setExcerpt(e.target.value)}
+                            rows={2}
+                            placeholder="Short summary shown on the blog card and in newsletter emails…"
+                            className={`${inputCls} resize-none`}
+                        />
+                    </div>
+
+                    <div className="bg-white rounded-xl border border-black/[0.06] p-5 space-y-3">
+                        <p className={labelCls}>Cover Image</p>
+                        <ImageUploader currentImageUrl={coverImageUrl} onUpload={setCoverImageUrl} />
+                    </div>
+
+                    <div className="bg-white rounded-xl border border-black/[0.06] p-5 space-y-3">
+                        <p className={labelCls}>Body Content</p>
+                        <RichTextEditor value={content} onChange={setContent} />
+                    </div>
+
                 </div>
 
-                <div className="flex justify-end gap-4 mt-8">
-                    <Button variant="outline" type="button" onClick={() => router.back()}>Cancel</Button>
-                    <Button type="submit" size="lg" disabled={isLoading}>{isLoading ? "Saving..." : "Save Article"}</Button>
+                {/* Right: sidebar */}
+                <div className="space-y-4 lg:sticky lg:top-6 self-start">
+
+                    {/* Organization */}
+                    <div className="bg-white rounded-xl border border-black/[0.06] p-5 space-y-4">
+                        <p className={labelCls}>Organization</p>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[12px] font-semibold text-[#333a42]">Topic / Category</label>
+                            <select value={categoryId} onChange={e => setCategoryId(e.target.value)}
+                                className={`${inputCls} appearance-none cursor-pointer`}>
+                                <option value="">Select a topic…</option>
+                                {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            </select>
+                            {categories.length === 0 && (
+                                <Link href="/admin/categories" className="text-[11px] text-[#7ebac8] hover:underline">
+                                    + Create a topic first
+                                </Link>
+                            )}
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[12px] font-semibold text-[#333a42]">Author / Clinician</label>
+                            <select value={authorId} onChange={e => setAuthorId(e.target.value)}
+                                className={`${inputCls} appearance-none cursor-pointer`}>
+                                <option value="">Select an author…</option>
+                                {authors.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
+                            </select>
+                        </div>
+                    </div>
+
+                    {/* SEO */}
+                    <div className="bg-white rounded-xl border border-black/[0.06] p-5 space-y-4">
+                        <p className={labelCls}>SEO</p>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[12px] font-semibold text-[#333a42]">
+                                Meta Title
+                                <span className={`ml-1.5 text-[10px] font-normal ${metaTitle.length > 60 ? "text-rose-500" : "text-muted-foreground"}`}>
+                                    {metaTitle.length}/60
+                                </span>
+                            </label>
+                            <input value={metaTitle} onChange={e => setMetaTitle(e.target.value)}
+                                placeholder="Page title for Google…" className={inputCls} />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[12px] font-semibold text-[#333a42]">
+                                Meta Description
+                                <span className={`ml-1.5 text-[10px] font-normal ${metaDescription.length > 160 ? "text-rose-500" : "text-muted-foreground"}`}>
+                                    {metaDescription.length}/160
+                                </span>
+                            </label>
+                            <textarea value={metaDescription} onChange={e => setMetaDescription(e.target.value)}
+                                rows={3} placeholder="Search result snippet…"
+                                className={`${inputCls} resize-none`} />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[12px] font-semibold text-[#333a42]">Focus Keyword</label>
+                            <input value={focusKeyword} onChange={e => setFocusKeyword(e.target.value)}
+                                placeholder="anxiety treatment, CBT…" className={inputCls} />
+                        </div>
+                    </div>
+
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-[13px] text-red-600">
+                            {error}
+                        </div>
+                    )}
+
+                    {/* Action buttons */}
+                    <div className="flex flex-col gap-2.5">
+                        <button onClick={() => handleSubmit(true)} disabled={saving}
+                            className="w-full flex items-center justify-center gap-2 bg-[#1e2328] hover:bg-[#2d3540] text-white rounded-lg py-3 text-sm font-semibold transition-all disabled:opacity-50 shadow-sm">
+                            {saving && saveMode === "publish"
+                                ? <><Loader2 className="w-4 h-4 animate-spin" /> Publishing…</>
+                                : <><Globe className="w-4 h-4" /> Publish Article</>}
+                        </button>
+                        <button onClick={() => handleSubmit(false)} disabled={saving}
+                            className="w-full flex items-center justify-center gap-2 bg-white border border-black/[0.1] hover:border-black/20 text-[#333a42] rounded-lg py-3 text-sm font-semibold transition-all disabled:opacity-50">
+                            {saving && saveMode === "draft"
+                                ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving…</>
+                                : <><FileText className="w-4 h-4" /> Save as Draft</>}
+                        </button>
+                    </div>
+
                 </div>
-            </form>
+            </div>
         </div>
     );
 }

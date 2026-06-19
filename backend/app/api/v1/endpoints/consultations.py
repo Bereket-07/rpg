@@ -103,6 +103,14 @@ async def submit_inquiry(
         db_inquiry.subject or "General Inquiry",
         db_inquiry.message
     )
+    # Send receipt to client
+    background_tasks.add_task(
+        email_module.send_inquiry_received_client_email,
+        db_inquiry.email,
+        db_inquiry.first_name,
+        db_inquiry.last_name,
+        db_inquiry.subject or "General Inquiry",
+    )
     return db_inquiry
 
 @router.get("/inquiries", response_model=List[ContactInquiryResponse])
@@ -122,6 +130,7 @@ async def get_inquiries(
 async def update_inquiry_status(
     inquiry_id: int,
     inquiry_in: ContactInquiryUpdate,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user)
 ):
@@ -155,6 +164,15 @@ async def update_inquiry_status(
     db.add(inquiry)
     await db.commit()
     await db.refresh(inquiry)
+    # When admin marks inquiry as responded, notify the client
+    if "status" in update_data and update_data["status"] == "responded" and previous_status != "responded":
+        background_tasks.add_task(
+            email_module.send_inquiry_responded_client_email,
+            inquiry.email,
+            inquiry.first_name,
+            inquiry.last_name,
+            inquiry.subject or "General Inquiry",
+        )
     return inquiry
 
 @router.delete("/inquiries/{inquiry_id}")

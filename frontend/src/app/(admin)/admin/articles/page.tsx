@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import {
-    PlusCircle, Search, FileText, CheckCircle2, Circle,
-    Clock, Pencil, Trash2, Filter, Image as ImageIcon
+    PlusCircle, Search, FileText, Clock, Pencil, Image as ImageIcon, Globe, EyeOff
 } from "lucide-react";
 import DeleteAction from "@/components/admin/DeleteAction";
 import { getApiUrl } from "@/lib/api";
@@ -36,16 +35,33 @@ export default function AdminArticlesPage() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
+    const [toggling, setToggling] = useState<number | null>(null);
+
+    async function loadArticles() {
+        const res = await fetch(`${getApiUrl()}/api/v1/articles`, { cache: "no-store" });
+        if (res.ok) setArticles(await res.json());
+    }
 
     useEffect(() => {
-        async function load() {
-            try {
-                const res = await fetch(`${getApiUrl()}/api/v1/articles`, { cache: "no-store" });
-                if (res.ok) setArticles(await res.json());
-            } finally { setLoading(false); }
-        }
-        load();
+        loadArticles().finally(() => setLoading(false));
     }, []);
+
+    async function togglePublish(article: Article) {
+        setToggling(article.id);
+        try {
+            const token = (session as any)?.accessToken;
+            const res = await fetch(`${getApiUrl()}/api/v1/articles/${article.slug}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ published: !article.published }),
+            });
+            if (res.ok) {
+                setArticles(prev => prev.map(a =>
+                    a.id === article.id ? { ...a, published: !a.published } : a
+                ));
+            }
+        } finally { setToggling(null); }
+    }
 
     const filtered = articles.filter(a => {
         const matchesFilter = filter === "all" || (filter === "published" ? a.published : !a.published);
@@ -195,6 +211,23 @@ export default function AdminArticlesPage() {
                                     className="flex-1 flex items-center justify-center gap-1.5 text-[12px] font-semibold text-[#333a42] hover:text-[#7ebac8] transition-colors py-1">
                                     <Pencil className="w-3 h-3" /> Edit
                                 </Link>
+                                <span className="w-px h-4 bg-black/[0.06]" />
+                                <button
+                                    onClick={() => togglePublish(article)}
+                                    disabled={toggling === article.id}
+                                    title={article.published ? "Unpublish" : "Publish"}
+                                    className={`flex-1 flex items-center justify-center gap-1.5 text-[12px] font-semibold transition-colors py-1 ${
+                                        article.published
+                                            ? "text-emerald-600 hover:text-amber-600"
+                                            : "text-muted-foreground hover:text-emerald-600"
+                                    }`}>
+                                    {toggling === article.id
+                                        ? <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                        : article.published
+                                            ? <><Globe className="w-3 h-3" /> Live</>
+                                            : <><EyeOff className="w-3 h-3" /> Draft</>
+                                    }
+                                </button>
                                 <span className="w-px h-4 bg-black/[0.06]" />
                                 <DeleteAction endpoint={`articles/${article.slug}`} itemName={article.title} />
                             </div>
