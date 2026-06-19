@@ -187,7 +187,7 @@ export default async function TeamListingPage() {
         <div className="bg-[#FDF8F5] min-h-screen font-sans text-[#4a535e] pb-28">
             <div className="w-full text-center mt-20 mb-28">
                 <p className="text-[11px] tracking-[0.25em] uppercase font-bold text-[#7ebac8] mb-3">OUR SPECIALISTS</p>
-                <h1 className="text-[34px] sm:text-[42px] font-serif text-[#333a42] font-light italic tracking-tight">Meet the Team</h1>
+                <h1 className="text-[34px] sm:text-[42px] font-serif text-[#333a42] font-semibold tracking-tight">Meet the Team</h1>
             </div>
 
             <section className="bg-[#fdf8f5] font-sans text-[#333a42]">
@@ -195,7 +195,7 @@ export default async function TeamListingPage() {
                     <div className="flex flex-wrap justify-center gap-x-8 gap-y-28 lg:gap-x-12">
                         {teamMembers.map((member) => {
                             const specialties = member.specialties?.length
-                                ? member.specialties.map(spec => spec.title).join(", ")
+                                ? member.specialties.slice(0, 3).map(spec => spec.title).join(", ")
                                 : "Individual Therapy";
                             const imageClass = "w-full h-full object-cover object-top scale-[1.05] origin-top group-hover:scale-[1.08] transition-all duration-500";
 
