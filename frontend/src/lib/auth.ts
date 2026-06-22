@@ -11,6 +11,7 @@ declare module "next-auth" {
             id: string;
             role: "ADMIN" | "AUTHOR";
             must_change_password?: boolean;
+            author_id?: number | null;
         } & DefaultSession["user"];
         accessToken?: string;
     }
@@ -19,6 +20,7 @@ declare module "next-auth" {
         role: "ADMIN" | "AUTHOR";
         accessToken?: string;
         must_change_password?: boolean;
+        author_id?: number | null;
     }
 }
 declare module "next-auth/jwt" {
@@ -28,6 +30,7 @@ declare module "next-auth/jwt" {
         accessToken?: string;
         must_change_password?: boolean;
         provider?: string;
+        author_id?: number | null;
     }
 }
 
@@ -119,6 +122,7 @@ export const authOptions: NextAuthOptions = {
                             role: data.user_info.role as "ADMIN" | "AUTHOR",
                             accessToken: data.access_token,
                             must_change_password: data.user_info.must_change_password,
+                            author_id: data.user_info.author_id ?? null,
                         };
                     }
                     return null;
@@ -150,6 +154,7 @@ export const authOptions: NextAuthOptions = {
                 token.accessToken = user.accessToken;
                 token.must_change_password = user.must_change_password || false;
                 token.provider = account?.provider || "credentials";
+                token.author_id = user.author_id ?? null;
             }
             // For Google sign-in, exchange email for a backend JWT
             if (account?.provider === "google" && token.email && !token.accessToken) {
@@ -169,6 +174,7 @@ export const authOptions: NextAuthOptions = {
                 session.user.id = token.id as string;
                 session.user.role = token.role as "ADMIN" | "AUTHOR";
                 session.user.must_change_password = token.must_change_password as boolean;
+                session.user.author_id = token.author_id ?? null;
             }
             session.accessToken = token.accessToken;
             return session;

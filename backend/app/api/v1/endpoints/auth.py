@@ -46,7 +46,8 @@ async def login_access_token(
             "id": user.id,
             "email": user.email,
             "role": user.role.value,
-            "must_change_password": user.must_change_password
+            "must_change_password": user.must_change_password,
+            "author_id": user.author_id,
         }
     }
 
@@ -121,5 +122,5 @@ async def google_login(payload: GoogleLoginRequest, db: AsyncSession = Depends(d
     return {
         "access_token": security.create_access_token(token_data, expires_delta=access_token_expires),
         "token_type": "bearer",
-        "user_info": {"id": user.id, "email": user.email, "role": user.role.value, "must_change_password": False},
+        "user_info": {"id": user.id, "email": user.email, "role": user.role.value, "must_change_password": False, "author_id": user.author_id},
     }

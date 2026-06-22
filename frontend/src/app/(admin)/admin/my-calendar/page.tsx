@@ -53,13 +53,13 @@ export default function MyCalendarPage() {
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState("");
     const token = (session as any)?.accessToken;
-    const authorId = (session as any)?.user?.author_id;
+    const authorId = session?.user?.author_id;
     const isAdmin = (session as any)?.user?.role === "ADMIN";
 
     const monthKey = `${viewDate.getFullYear()}-${String(viewDate.getMonth() + 1).padStart(2, "0")}`;
 
     const loadData = useCallback(async () => {
-        if (!token || !authorId) return;
+        if (!token || !authorId) { setLoading(false); return; }
         setLoading(true);
         try {
             const [slotsRes, bookRes] = await Promise.all([
