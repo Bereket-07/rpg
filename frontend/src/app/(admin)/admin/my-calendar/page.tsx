@@ -119,6 +119,10 @@ export default function MyCalendarPage() {
 
     async function handleBlock(e: React.FormEvent) {
         e.preventDefault();
+        if (!authorId) {
+            setSaveError("Your account is not linked to a clinician profile. Please log out and back in, or ask an admin to link your account.");
+            return;
+        }
         setSaving(true); setSaveError("");
         try {
             const res = await fetch(`${getApiUrl()}/api/v1/availability/${authorId}/blocked-slots`, {
@@ -136,15 +140,20 @@ export default function MyCalendarPage() {
                 setShowBlockModal(false);
                 await loadData();
             } else {
-                const d = await res.json();
-                setSaveError(d.detail || "Failed to save block");
+                const d = await res.json().catch(() => ({}));
+                const msg = typeof d.detail === "string"
+                    ? d.detail
+                    : Array.isArray(d.detail)
+                        ? d.detail.map((e: any) => e.msg || JSON.stringify(e)).join(", ")
+                        : "Failed to save block";
+                setSaveError(msg);
             }
         } catch { setSaveError("Connection error"); }
         finally { setSaving(false); }
     }
 
     async function deleteBlock(slotId: number) {
-        if (!confirm("Remove this block?")) return;
+        if (!authorId || !confirm("Remove this block?")) return;
         await fetch(`${getApiUrl()}/api/v1/availability/${authorId}/blocked-slots/${slotId}`, {
             method: "DELETE",
             headers: { Authorization: `Bearer ${token}` },
