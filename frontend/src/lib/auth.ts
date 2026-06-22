@@ -114,6 +114,7 @@ export const authOptions: NextAuthOptions = {
                         }),
                     });
                     const data = await res.json();
+                    console.log("[auth] login response status:", res.status, "has access_token:", !!data.access_token, "user_info:", JSON.stringify(data.user_info));
                     if (res.ok && data.access_token) {
                         return {
                             id: data.user_info.id.toString(),
@@ -125,8 +126,10 @@ export const authOptions: NextAuthOptions = {
                             author_id: data.user_info.author_id ?? null,
                         };
                     }
+                    console.log("[auth] login failed - detail:", data.detail);
                     return null;
-                } catch {
+                } catch (err) {
+                    console.error("[auth] authorize error:", err);
                     return null;
                 }
             },
