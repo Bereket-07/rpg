@@ -2,9 +2,11 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# We don't copy the code in the Dockerfile for development
-# because we rely on docker-compose volume mounts to sync changes live.
+# Install dependencies into the image so node_modules exists before
+# the source-code volume is mounted. The anonymous /app/node_modules
+# volume in docker-compose protects these from being overwritten.
+COPY package*.json ./
+RUN npm install
 
-# Expose port and start Next.js using the mounted node_modules
 EXPOSE 3000
 CMD ["npm", "run", "dev"]
