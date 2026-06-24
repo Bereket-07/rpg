@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 interface HeroProps {
@@ -9,59 +8,63 @@ interface HeroProps {
 }
 
 export function Hero({ data }: HeroProps) {
-    const heroTitle = data?.hero_title || "You're Not Stuck Because You're Doing Something Wrong";
-    const heroSubheading = data?.content?.hero_subheading || "You've Simply Outgrown the Way You Learned to Cope";
+    const heroTitle = data?.hero_title || "You\u2019re Not Stuck Because You\u2019re Doing Something Wrong";
+    const heroSubheading = data?.content?.hero_subheading || "You\u2019ve Simply Outgrown the Way You Learned to Cope";
     const heroDesc = data?.hero_description || "Move beyond insight to change the patterns that shape your life.";
     const heroCtaText = data?.content?.hero_cta_text || "Request a Consultation";
     const heroImage = data?.hero_image_url || "/assets/RPG_Images for UI/Homepage_Image 1 copy.jpg";
 
     return (
         <section
-            className="relative min-h-[88vh] w-full flex items-center justify-center bg-cover bg-center"
-            style={{ backgroundImage: `url('${heroImage}')` }}
+            className="relative w-full flex items-center justify-center bg-cover bg-center"
+            style={{
+                backgroundImage: `url('${heroImage}')`,
+                minHeight: "calc(100vh - 72px)",
+            }}
         >
-            {/* Very light overlay — the image is naturally bright, barely tint it */}
+            {/* Very light overlay */}
             <div className="absolute inset-0 bg-white/10" />
 
-            <div className="container relative z-10 mx-auto px-6 sm:px-8 max-w-5xl text-center">
+            <div className="relative z-10 mx-auto px-6 w-full max-w-[860px] text-center">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1.1, ease: "easeOut" }}
-                    className="space-y-6"
+                    className="flex flex-col items-center"
                 >
-                    {/* H1 — Merriweather italic light — matches reference design exactly */}
+                    {/* H1 — 52px, Merriweather Semibold Italic, 120% line-height */}
                     <h1
-                        className="font-serif italic font-light text-[#333a42] leading-[1.1] tracking-tight text-balance"
-                        style={{ fontSize: "clamp(32px, 4.2vw, 56px)" }}
+                        className="font-serif italic text-[#333a42]"
+                        style={{ fontSize: "52px", lineHeight: "1.2", fontWeight: 600 }}
                     >
                         {heroTitle}
                     </h1>
 
-                    {/* Italic serif subheading — Merriweather italic light, smaller than H1 */}
-                    <h2
-                        className="font-serif italic font-light text-[#333a42] leading-snug max-w-3xl mx-auto"
-                        style={{ fontSize: "clamp(17px, 2.2vw, 28px)" }}
+                    {/* H3 — 28px, Merriweather Italic */}
+                    <h3
+                        className="font-serif italic font-normal text-[#333a42]"
+                        style={{ fontSize: "28px", lineHeight: "1.2", marginTop: "24px" }}
                     >
                         {heroSubheading}
-                    </h2>
+                    </h3>
 
-                    {/* Body text — Raleway, modest size matching screenshot */}
+                    {/* B2 body — 25px, Raleway Medium */}
                     <p
-                        className="font-sans text-[#333a42] leading-relaxed max-w-xl mx-auto pt-1"
-                        style={{ fontSize: "clamp(14px, 1.4vw, 17px)" }}
+                        className="font-sans font-medium text-[#333a42] max-w-[420px]"
+                        style={{ fontSize: "25px", lineHeight: "1.5", marginTop: "40px" }}
                     >
                         {heroDesc}
                     </p>
 
-                    {/* CTA — dark charcoal, square corners, Raleway */}
-                    <div className="pt-4">
-                        <Button
-                            asChild
-                            className="bg-[#3d4853] hover:bg-[#2d3740] text-white rounded-none font-sans font-semibold text-sm tracking-wide h-12 px-10 border-none shadow-none transition-colors duration-200"
+                    {/* Button — 16px, Raleway Medium */}
+                    <div style={{ marginTop: "32px" }}>
+                        <Link
+                            href="/contact"
+                            className="inline-flex items-center justify-center bg-[#3d4853] hover:bg-[#2d3740] text-white font-sans font-medium transition-colors duration-200"
+                            style={{ fontSize: "16px", height: "44px", paddingLeft: "32px", paddingRight: "32px" }}
                         >
-                            <Link href="/contact">{heroCtaText}</Link>
-                        </Button>
+                            {heroCtaText}
+                        </Link>
                     </div>
                 </motion.div>
             </div>

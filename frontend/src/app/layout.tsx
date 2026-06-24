@@ -10,10 +10,12 @@ const merriweather = localFont({
   src: [
     {
       path: "../../public/assets/Merriweather/Merriweather-VariableFont_opsz,wdth,wght.ttf",
+      weight: "100 900",
       style: "normal",
     },
     {
       path: "../../public/assets/Merriweather/Merriweather-Italic-VariableFont_opsz,wdth,wght.ttf",
+      weight: "100 900",
       style: "italic",
     }
   ],
@@ -24,10 +26,12 @@ const raleway = localFont({
   src: [
     {
       path: "../../public/assets/Raleway/Raleway-VariableFont_wght.ttf",
+      weight: "100 900",
       style: "normal",
     },
     {
       path: "../../public/assets/Raleway/Raleway-Italic-VariableFont_wght.ttf",
+      weight: "100 900",
       style: "italic",
     }
   ],
@@ -102,6 +106,11 @@ export default async function RootLayout({
   const loadGoogleFonts = fontSans !== "Raleway" || fontSerif !== "Merriweather";
   const googleFontsUrl = `https://fonts.googleapis.com/css2?family=${fontSans.replace(/\s+/g, "+")}:wght@300;400;500;600;700;800&family=${fontSerif.replace(/\s+/g, "+")}:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&display=swap`;
 
+  // When using local fonts (default), reference CSS variables so next/font/local works.
+  // When using Google Fonts (admin override), reference font names directly.
+  const sansFamily = loadGoogleFonts ? `'${fontSans}', sans-serif` : `var(--font-raleway), sans-serif`;
+  const serifFamily = loadGoogleFonts ? `'${fontSerif}', serif` : `var(--font-merriweather), serif`;
+
   return (
     <html lang="en">
       <head>
@@ -120,10 +129,10 @@ export default async function RootLayout({
             --foreground: ${textHsl} !important;
           }
           body, .font-sans {
-            font-family: '${fontSans}', sans-serif !important;
+            font-family: ${sansFamily} !important;
           }
           .font-serif {
-            font-family: '${fontSerif}', serif !important;
+            font-family: ${serifFamily} !important;
           }
         ` }} />
       </head>

@@ -156,19 +156,19 @@ export default async function SpecialtiesPage() {
     return (
         <div className="bg-[#FDF8F5] min-h-screen font-sans text-[#4a535e] pb-20">
 
-            {/* Centered Page Header */}
-            <div className="w-full text-center pt-24 pb-16 px-6 bg-[#FDF8F5]">
-                <h1 className="text-[34px] sm:text-[42px] font-serif text-[#333a42] font-normal tracking-tight">{title}</h1>
+            {/* Page Header — H1 52px Merriweather Semibold */}
+            <div className="w-full text-center pt-24 pb-16 px-8">
+                <h1 className="font-serif font-semibold text-[#333a42]" style={{ fontSize: "52px" }}>{title}</h1>
             </div>
 
             {/* Card Grid */}
-            <div className="container mx-auto px-6 max-w-5xl">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    {specialtiesList.map((spec) => (
-                        <Link
+            <div className="container mx-auto px-10 max-w-6xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                    {specialtiesList.map((spec) => (                        <Link
                             key={spec.id}
                             href={`/specialties/${spec.id}`}
-                            className="group relative overflow-hidden min-h-[280px] sm:min-h-[320px] flex flex-col justify-between p-7 sm:p-8 border border-black/[0.04] hover:border-black/[0.08] transition-all duration-300"
+                            className="group relative overflow-hidden flex flex-col justify-between p-10 transition-all duration-300 aspect-[4/3]"
+                            style={{ boxShadow: "0 20px 60px rgba(60,50,40,0.18), 0 6px 20px rgba(60,50,40,0.10)" }}
                         >
                             {/* Background image */}
                             <img
@@ -176,27 +176,40 @@ export default async function SpecialtiesPage() {
                                 alt={spec.title}
                                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                             />
-                            {/* Gradient overlay — solid left, fades right */}
-                            <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, #e8e3d8 52%, rgba(232,227,216,0.6) 72%, rgba(232,227,216,0) 100%)' }} />
+                            {/* Gradient overlay — #D6CFC2 solid left → transparent right */}
+                            <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, #D6CFC2 0%, #D6CFC2 50%, rgba(214,207,194,0.7) 72%, rgba(214,207,194,0) 100%)' }} />
 
                             {/* Text content */}
-                            <div className="relative z-10 space-y-3 max-w-[75%]">
-                                <h2 className="text-[18px] sm:text-[20px] font-serif text-[#333a42] font-semibold leading-snug">
+                            <div className="relative z-10 space-y-5 max-w-[78%]">
+                                {/* H4 — Merriweather Semibold */}
+                                <h2 className="font-serif font-semibold text-[#333a42] leading-snug" style={{ fontSize: "26px" }}>
                                     {spec.title}
                                 </h2>
-                                <p className="text-[13px] sm:text-[14px] text-[#4a535e] leading-relaxed line-clamp-4">
+                                {/* Body — Raleway Regular */}
+                                <p className="font-sans font-normal text-[#4a535e] leading-relaxed line-clamp-6" style={{ fontSize: "18px" }}>
                                     {spec.paragraphs.slice(0, 2).join(" ")}
                                 </p>
                             </div>
 
                             {/* READ MORE */}
-                            <div className="relative z-10 mt-6">
-                                <span className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#4a535e] group-hover:text-[#333a42] transition-colors duration-200">
+                            <div className="relative z-10">
+                                <span className="font-sans font-normal text-[#4a535e] uppercase tracking-[0.18em] group-hover:text-[#333a42] transition-colors duration-200" style={{ fontSize: "13px" }}>
                                     Read More
                                 </span>
                             </div>
                         </Link>
                     ))}
+
+                    {/* Logo placeholder in empty grid cell */}
+                    {specialtiesList.length % 2 !== 0 && (
+                        <div className="hidden sm:flex aspect-[4/3] items-center justify-center">
+                            <img
+                                src="/assets/RPG Logo_Main Portrait.png"
+                                alt="Reframe Psychology Group"
+                                className="w-64"
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
 

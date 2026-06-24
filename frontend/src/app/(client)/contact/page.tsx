@@ -90,7 +90,6 @@ export default function ContactPage() {
                 }),
             });
             if (res.ok) {
-                // Subscribe to newsletter if opted in
                 if (newsletterOptIn && clientEmail) {
                     try {
                         await fetch(`${getApiUrl()}/api/v1/newsletter/`, {

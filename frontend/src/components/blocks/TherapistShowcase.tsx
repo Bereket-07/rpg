@@ -51,56 +51,87 @@ interface TherapistShowcaseProps {
     title?: string;
 }
 
-function getTherapistImageClass(slug: string) {
-    return "w-full h-full object-cover object-top scale-[1.05] origin-top group-hover:scale-[1.08] transition-all duration-500";
-}
+/* Photo: 170px diameter, 85px above card top = 85px overlapping into card body */
 
 function TherapistCard({ member, index }: { member: typeof therapistsRow1Fallback[0]; index: number }) {
     return (
         <motion.div
-            key={member.slug}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.8, delay: index * 0.1 }}
-            className="w-[320px] sm:w-[340px] h-[330px] sm:h-[345px] bg-[#d2c9b7] border border-[#c4b9a3]/40 rounded-[16px] shadow-[0_24px_48px_rgba(30,28,24,0.14)] p-6 pt-[110px] sm:pt-[120px] relative flex flex-col items-center text-center pb-6 hover:shadow-[0_28px_56px_rgba(30,28,24,0.22)] hover:-translate-y-1 transition-all duration-300 group"
+            className="relative w-[380px] group"
+            style={{ height: "525px" }}
         >
-            {/* Circular Overlapping Photo */}
-            <div className="w-[185px] h-[185px] sm:w-[200px] sm:h-[200px] rounded-full border-[8px] border-white shadow-[0_8px_20px_rgba(0,0,0,0.12)] absolute top-[-92px] sm:top-[-100px] left-1/2 -translate-x-1/2 overflow-hidden bg-muted">
+            {/* Card body with gradient stroke border */}
+            <div
+                className="absolute bottom-0 left-0 right-0 rounded-[16px] flex flex-col items-center text-center shadow-[0_24px_48px_rgba(30,28,24,0.14)] group-hover:shadow-[0_28px_56px_rgba(30,28,24,0.22)] group-hover:-translate-y-1 transition-all duration-300"
+                style={{
+                    top: "100px",
+                    background: "linear-gradient(#D6CFC2, #D6CFC2) padding-box, linear-gradient(to bottom, #D6CFC2, #FFFAF5) border-box",
+                    border: "1px solid transparent",
+                    padding: "120px 24px 24px 24px",
+                }}
+            >
+                <div className="flex-grow flex flex-col justify-between w-full h-full pb-1">
+                    <div className="flex flex-col items-center">
+                        {/* Name — 30px Raleway Bold */}
+                        <h3
+                            className="font-sans font-bold text-[#333a42] leading-tight tracking-wide"
+                            style={{ fontSize: "30px" }}
+                        >
+                            {member.name}
+                        </h3>
+
+                        {/* Divider */}
+                        <div className="w-10 h-[1.5px] bg-[#333a42]/45 my-2" />
+
+                        {/* Role — 22px Raleway Medium */}
+                        <p
+                            className="font-sans font-medium text-[#333a42]/85 leading-snug tracking-wide"
+                            style={{ fontSize: "22px" }}
+                        >
+                            {member.role}
+                        </p>
+
+                        {/* Specialties — 20px Raleway Light */}
+                        <p
+                            className="font-sans font-light text-[#4a535e] leading-snug max-w-[320px] pt-1 tracking-wide"
+                            style={{ fontSize: "20px" }}
+                        >
+                            {member.specialties}
+                        </p>
+                    </div>
+
+                    {/* Read More — 14px Merriweather Italic */}
+                    <div className="pt-2">
+                        <Link
+                            href={`/team/${member.slug}`}
+                            className="font-serif italic text-[#333a42] hover:text-[#5c6670] transition-colors"
+                            style={{ fontSize: "14px" }}
+                        >
+                            Read More
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
+            {/* Circular photo — 200px, white border, transparent outside */}
+            <div
+                className="absolute left-1/2 -translate-x-1/2 z-10 rounded-full overflow-hidden bg-transparent group-hover:-translate-y-1 transition-all duration-300"
+                style={{
+                    width: "200px",
+                    height: "200px",
+                    top: "0px",
+                    border: "8px solid white",
+                    boxShadow: "0 8px 20px rgba(0,0,0,0.12)",
+                }}
+            >
                 <img
                     src={member.image}
                     alt={member.name}
-                    className={getTherapistImageClass(member.slug)}
+                    className="w-full h-full object-cover object-top rounded-full transition-transform duration-500 group-hover:scale-[1.05]"
                 />
-            </div>
-
-            {/* Card Body */}
-            <div className="flex-grow flex flex-col justify-between w-full h-full pb-1">
-                <div className="flex flex-col items-center">
-                    <h3 className="text-[20px] sm:text-[21px] md:text-[22px] font-serif font-bold text-[#333a42] leading-tight tracking-wide">
-                        {member.name}
-                    </h3>
-
-                    {/* Divider */}
-                    <div className="w-10 h-[1.5px] bg-[#333a42]/30 my-2.5" />
-
-                    <p className="text-[13px] md:text-[14px] font-sans font-semibold text-[#4a535e] leading-snug tracking-wide">
-                        {member.role}
-                    </p>
-                    <p className="text-[12px] md:text-[13px] font-sans text-[#4a535e]/90 leading-relaxed max-w-[270px] pt-1 font-medium tracking-wide">
-                        {member.specialties}
-                    </p>
-                </div>
-
-                {/* Read More — italic serif, matches design exactly */}
-                <div className="pt-2">
-                    <Link
-                        href={`/team/${member.slug}`}
-                        className="font-serif italic text-[14px] sm:text-[15px] text-[#333a42] hover:text-[#5c6670] transition-colors"
-                    >
-                        Read More
-                    </Link>
-                </div>
             </div>
         </motion.div>
     );
@@ -121,10 +152,7 @@ export function TherapistShowcase({ title }: TherapistShowcaseProps) {
                         const mapped = data.map((auth: any) => {
                             const combinedFallback = [...therapistsRow1Fallback, ...therapistsRow2Fallback];
                             const fallback = combinedFallback.find(f => f.name.includes(auth.name) || auth.name.includes(f.name));
-
-                            // Always use the curated fallback specialties for card display
                             const specialtiesStr = fallback?.specialties || "Individual Therapy";
-
                             const slug = auth.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
                             return {
@@ -151,35 +179,34 @@ export function TherapistShowcase({ title }: TherapistShowcaseProps) {
     }, []);
 
     return (
-        <section className="py-28 bg-[#fdf8f5] font-sans text-[#333a42] border-b border-black/[0.04]">
-            <div className="container mx-auto px-4 max-w-6xl">
+        <section className="py-24 bg-[#fdf8f5] font-sans text-[#333a42]">
+            <div className="container mx-auto px-6 max-w-7xl">
 
-                {/* Section title */}
-                <div className="text-center mb-32">
-                    <h2 className="text-[44px] md:text-[48px] font-serif text-[#333a42] font-semibold tracking-wide leading-tight">
+                {/* Section title — 52px Merriweather Semibold */}
+                <div className="text-center mb-28">
+                    <h2
+                        className="font-serif font-semibold text-[#333a42]"
+                        style={{ fontSize: "52px", lineHeight: "1.2" }}
+                    >
                         {title || "Meet the Team"}
                     </h2>
                 </div>
 
-                <div className="space-y-24">
+                {/* Row 1 — 3 therapists centered using flex */}
+                <div className="flex flex-wrap sm:flex-nowrap justify-center gap-x-4 md:gap-x-8 lg:gap-x-12 gap-y-28">
+                    {row1.map((member, index) => (
+                        <TherapistCard key={member.slug} member={member} index={index} />
+                    ))}
+                </div>
 
-                    {/* Row 1 — 3 therapists */}
-                    <div className="flex flex-wrap justify-center gap-x-8 gap-y-28 lg:gap-x-12">
-                        {row1.map((member, index) => (
+                {/* Row 2 — remaining therapists centered using flex */}
+                {row2.length > 0 && (
+                    <div className="flex flex-wrap sm:flex-nowrap justify-center gap-x-4 md:gap-x-8 lg:gap-x-12 gap-y-28 mt-28">
+                        {row2.map((member, index) => (
                             <TherapistCard key={member.slug} member={member} index={index} />
                         ))}
                     </div>
-
-                    {/* Row 2 — remaining therapists centered */}
-                    {row2.length > 0 && (
-                        <div className="flex flex-wrap justify-center gap-x-8 gap-y-28 lg:gap-x-12">
-                            {row2.map((member, index) => (
-                                <TherapistCard key={member.slug} member={member} index={index} />
-                            ))}
-                        </div>
-                    )}
-
-                </div>
+                )}
 
             </div>
         </section>

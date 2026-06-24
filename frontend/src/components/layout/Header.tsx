@@ -116,7 +116,7 @@ export function Header() {
         <>
             {/* ── Main header bar ── */}
             <header
-                className={`w-full bg-white border-b border-black/[0.06] fixed top-0 left-0 right-0 z-50 font-sans transition-all duration-300 ${
+                className={`w-full bg-[#FFFAF5] border-b border-black/[0.06] fixed top-0 left-0 right-0 z-[9999] font-sans transition-all duration-300 ${
                     scrolled ? "shadow-[0_1px_16px_rgba(0,0,0,0.06)]" : ""
                 }`}
             >
@@ -127,7 +127,8 @@ export function Header() {
                         <img
                             src={logoUrl}
                             alt="Reframe Psychology Group Logo"
-                            className="object-contain h-11 sm:h-14 w-auto"
+                            style={{ width: "175px" }}
+                            className="object-contain h-auto"
                         />
                     </Link>
 
@@ -144,8 +145,8 @@ export function Header() {
                                         <div key={item.href} className="relative py-2 group">
                                             <Link
                                                 href={item.href}
-                                                className={`text-[14px] font-medium text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 flex items-center gap-1.5 ${
-                                                    isActive ? "text-[#333a42] font-semibold" : ""
+                                                className={`text-[18px] font-semibold text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 flex items-center gap-1.5 ${
+                                                    isActive ? "text-[#333a42]" : ""
                                                 }`}
                                             >
                                                 {item.name}
@@ -191,8 +192,8 @@ export function Header() {
                                         <div key={item.href} className="relative py-2 group">
                                             <Link
                                                 href={item.href}
-                                                className={`text-[14px] font-medium text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 flex items-center gap-1.5 ${
-                                                    isActive ? "text-[#333a42] font-semibold" : ""
+                                                className={`text-[18px] font-semibold text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 flex items-center gap-1.5 ${
+                                                    isActive ? "text-[#333a42]" : ""
                                                 }`}
                                             >
                                                 {item.name}
@@ -232,8 +233,8 @@ export function Header() {
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className={`text-[14px] font-medium text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 group ${
-                                            isActive ? "text-[#333a42] font-semibold" : ""
+                                        className={`text-[18px] font-semibold text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 group ${
+                                            isActive ? "text-[#333a42]" : ""
                                         }`}
                                     >
                                         {item.name}
@@ -247,7 +248,7 @@ export function Header() {
                         </nav>
                         <Link
                             href="/contact"
-                            className="bg-[#3d4853] hover:bg-[#2d3740] text-white rounded-[2px] font-sans font-semibold text-[14px] h-[40px] px-6 flex items-center transition-colors duration-200"
+                            className="bg-[#3d4853] hover:bg-[#2d3740] text-white rounded-[6px] font-sans font-medium text-[16px] h-[44px] px-7 flex items-center transition-colors duration-200"
                         >
                             {btnText}
                         </Link>
@@ -281,7 +282,7 @@ export function Header() {
             </header>
 
             {/* ── Spacer so content isn't hidden behind fixed header ── */}
-            <div className="h-[72px]" />
+            <div className="h-[72px] bg-[#FFFAF5]" />
 
             {/* ── Mobile full-screen overlay menu ── */}
             {/* Backdrop blur */}

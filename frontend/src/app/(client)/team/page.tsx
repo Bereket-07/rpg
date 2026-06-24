@@ -39,9 +39,12 @@ export const STATIC_TEAM_MEMBERS: TherapistData[] = [
             "She is currently adjunct clinical faculty at Pepperdine University's Graduate School of Education and Psychology, supervising doctoral level trainees since 2016."
         ],
         specialties: [
-            { title: "Couples Therapy", desc: "Breaking conflict cycles, communication breakdowns, and patterns of disconnection." },
-            { title: "Parenting Support", desc: "Supporting parents in navigating child behavior and co-parenting stress." },
-            { title: "Individual Therapy", desc: "Understanding emotional and interpersonal patterns for more balanced relationships." },
+            { title: "Couples Therapy & Relationship Repair", desc: "Breaking out of recurring conflict cycles, communication breakdowns, and patterns of disconnection." },
+            { title: "Emotional Intimacy & Attachment", desc: "Using an attachment-based approach to deepen connection, strengthen bonding, and create meaningful repair." },
+            { title: "Trust, Resentment & Relationship Strain", desc: "Rebuilding trust, working through unresolved hurt, and navigating the impact of long-standing tension." },
+            { title: "Relational Patterns & Self-Understanding", desc: "Helping individuals make sense of their attachment style, emotional responses, and patterns in relationships." },
+            { title: "Parenting & Family Dynamics", desc: "Supporting parents in navigating child behavior, strengthening parent-child connection, and managing co-parenting stress and shifting family roles." },
+            { title: "Life Transitions & Relationship Change", desc: "Supporting couples and individuals through transitions such as becoming parents, career shifts, and evolving identities." },
         ]
     },
     {
@@ -172,197 +175,87 @@ async function getClinicians() {
     }
 }
 
+function TherapistCard({ member }: { member: TherapistData }) {
+    const specialties = member.specialties?.length
+        ? member.specialties.slice(0, 3).map(spec => spec.title).join(", ")
+        : "Individual Therapy";
+
+    return (
+        <article
+            key={member.slug}
+            style={{
+                background: 'linear-gradient(#D6CFC2, #D6CFC2) padding-box, linear-gradient(to bottom, #D6CFC2, #FFFAF5) border-box',
+                border: '1px solid transparent'
+            }}
+            className="w-[380px] h-[425px] rounded-[16px] shadow-[0_24px_48px_rgba(30,28,24,0.14)] p-6 pt-[120px] relative flex flex-col items-center text-center pb-6 hover:shadow-[0_28px_56px_rgba(30,28,24,0.22)] hover:-translate-y-1 transition-all duration-300 group"
+        >
+            {/* Circular Photo Container with transparent background and circular mask */}
+            <div className="w-[185px] h-[185px] sm:w-[200px] sm:h-[200px] rounded-full border-[8px] border-white shadow-[0_8px_20px_rgba(0,0,0,0.12)] absolute top-[-92px] sm:top-[-100px] left-1/2 -translate-x-1/2 overflow-hidden bg-transparent">
+                <img 
+                    src={member.image} 
+                    alt={member.name} 
+                    className="w-full h-full object-cover object-top rounded-full transition-transform duration-500 group-hover:scale-[1.05]" 
+                />
+            </div>
+
+            <div className="flex-grow flex flex-col justify-between w-full h-full pb-1">
+                <div className="flex flex-col items-center">
+                    <h2 className="text-[30px] font-sans font-bold text-[#333a42] leading-tight tracking-wide">
+                        {member.name}
+                    </h2>
+                    <div className="w-10 h-[1.5px] bg-[#333a42]/45 my-2" />
+                    <p className="text-[22px] font-sans font-medium text-[#333a42]/85 leading-snug tracking-wide">
+                        {member.role}
+                    </p>
+                    <p className="text-[20px] font-sans font-light text-[#4a535e] leading-snug max-w-[320px] pt-1 tracking-wide">
+                        {specialties}
+                    </p>
+                </div>
+
+                <div className="pt-2">
+                    <Link
+                        href={`/team/${member.slug}`}
+                        className="font-serif italic text-[14px] text-[#333a42] hover:text-[#5c6670] transition-colors"
+                    >
+                        Read More
+                    </Link>
+                </div>
+            </div>
+        </article>
+    );
+}
+
 export default async function TeamListingPage() {
     const teamMembers = await getClinicians();
+    const row1 = teamMembers.slice(0, 3);
+    const row2 = teamMembers.slice(3);
 
     return (
         <div className="bg-[#FDF8F5] min-h-screen font-sans text-[#4a535e] pb-28">
             <div className="w-full text-center mt-20 mb-28">
                 <p className="text-[11px] tracking-[0.25em] uppercase font-bold text-[#7ebac8] mb-3">OUR SPECIALISTS</p>
-                <h1 className="text-[34px] sm:text-[42px] font-serif text-[#333a42] font-semibold tracking-tight">Meet the Team</h1>
+                <h1 className="text-[38px] sm:text-[52px] font-serif text-[#333a42] font-semibold tracking-tight">Meet the Team</h1>
             </div>
 
             <section className="bg-[#fdf8f5] font-sans text-[#333a42]">
-                <div className="container mx-auto px-4 max-w-6xl">
-                    <div className="flex flex-wrap justify-center gap-x-8 gap-y-28 lg:gap-x-12">
-                        {teamMembers.map((member) => {
-                            const specialties = member.specialties?.length
-                                ? member.specialties.slice(0, 3).map(spec => spec.title).join(", ")
-                                : "Individual Therapy";
-                            const imageClass = "w-full h-full object-cover object-top scale-[1.05] origin-top group-hover:scale-[1.08] transition-all duration-500";
-
-                            return (
-                                <article
-                                    key={member.slug}
-                                    className="w-[320px] sm:w-[340px] h-[330px] sm:h-[345px] bg-[#d2c9b7] border border-[#c4b9a3]/40 rounded-[16px] shadow-[0_24px_48px_rgba(30,28,24,0.14)] p-6 pt-[110px] sm:pt-[120px] relative flex flex-col items-center text-center pb-6 hover:shadow-[0_28px_56px_rgba(30,28,24,0.22)] hover:-translate-y-1 transition-all duration-300 group"
-                                >
-                                    <div className="w-[185px] h-[185px] sm:w-[200px] sm:h-[200px] rounded-full border-[8px] border-white shadow-[0_8px_20px_rgba(0,0,0,0.12)] absolute top-[-92px] sm:top-[-100px] left-1/2 -translate-x-1/2 overflow-hidden bg-muted">
-                                        <img src={member.image} alt={member.name} className={imageClass} />
-                                    </div>
-
-                                    <div className="flex-grow flex flex-col justify-between w-full h-full pb-1">
-                                        <div className="flex flex-col items-center">
-                                            <h2 className="text-[20px] sm:text-[21px] md:text-[22px] font-serif font-bold text-[#333a42] leading-tight tracking-wide">
-                                                {member.name}
-                                            </h2>
-                                            <div className="w-10 h-[1.5px] bg-[#333a42]/30 my-2.5" />
-                                            <p className="text-[13px] sm:text-[13px] md:text-[14px] font-sans font-semibold text-[#4a535e] leading-snug tracking-wide">
-                                                {member.role}
-                                            </p>
-                                            <p className="text-[12px] sm:text-[12px] md:text-[13px] font-sans text-[#4a535e]/90 leading-relaxed max-w-[270px] pt-1 font-medium tracking-wide">
-                                                {specialties}
-                                            </p>
-                                        </div>
-
-                                        <div className="pt-2">
-                                            <Link
-                                                href={`/team/${member.slug}`}
-                                                className="font-serif italic text-[14px] sm:text-[15px] text-[#333a42] hover:text-[#5c6670] transition-colors"
-                                            >
-                                                Read More
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </article>
-                            );
-                        })}
+                <div className="container mx-auto px-4 max-w-7xl">
+                    {/* Row 1 — 3 therapists centered */}
+                    <div className="flex flex-wrap sm:flex-nowrap justify-center gap-x-4 md:gap-x-8 lg:gap-x-12 gap-y-28">
+                        {row1.map((member) => (
+                            <TherapistCard key={member.slug} member={member} />
+                        ))}
                     </div>
+
+                    {/* Row 2 — remaining therapists centered */}
+                    {row2.length > 0 && (
+                        <div className="flex flex-wrap sm:flex-nowrap justify-center gap-x-4 md:gap-x-8 lg:gap-x-12 gap-y-28 mt-28">
+                            {row2.map((member) => (
+                                <TherapistCard key={member.slug} member={member} />
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
-        </div>
-    );
-
-    return (
-        <div className="bg-[#FDF8F5] min-h-screen font-sans text-[#4a535e] pb-24">
-            
-            {/* Centered Page Header */}
-            <div className="w-full text-center mt-20 mb-16">
-                <p className="text-[11px] tracking-[0.25em] uppercase font-bold text-[#7ebac8] mb-3">OUR SPECIALISTS</p>
-                <h1 className="text-[34px] sm:text-[42px] font-serif text-[#333a42] font-normal tracking-tight">Meet the Team</h1>
-            </div>
-
-            {/* Loop through all therapists and render their full details sequentially */}
-            <div className="space-y-0">
-                {teamMembers.map((profile) => {
-                    const backgroundList = profile.background || [];
-                    const half = Math.ceil(backgroundList.length / 2);
-                    const leftCol = backgroundList.slice(0, half);
-                    const rightCol = backgroundList.slice(half);
-
-                    return (
-                        <div key={profile.slug} className="w-full border-t border-black/[0.04]">
-                            
-                            {/* Section 1: Portrait & Therapeutic Approach - White Background */}
-                            <section className="bg-white py-24">
-                                <div className="container mx-auto px-6 max-w-6xl">
-                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-16 items-start">
-                                        
-                                        {/* Left Column: Portrait & Title */}
-                                        <div className="md:col-span-5 lg:col-span-4 space-y-6 text-left">
-                                            <div className="relative w-full aspect-[4/5] rounded-[16px] overflow-hidden shadow-[0_12px_32px_rgba(0,0,0,0.06)] border border-black/[0.03]">
-                                                <img 
-                                                    src={profile.image} 
-                                                    alt={profile.name} 
-                                                    className="w-full h-full object-cover grayscale-[8%] hover:grayscale-0 transition-all duration-500"
-                                                />
-                                            </div>
-                                            <div className="pb-6 max-w-[280px]">
-                                                <h2 className="text-[22px] font-serif text-[#333a42] font-semibold leading-tight">
-                                                    {profile.slug === "tamara-eromo" ? `‘${profile.name}` : profile.name}
-                                                </h2>
-                                                <p className="text-[15px] font-sans text-[#4a535e] mt-1">{profile.role}</p>
-                                                <div className="w-12 h-[1px] bg-[#333a42]/30 mt-5" />
-                                            </div>
-                                        </div>
-
-                                        {/* Right Column: Dynamic paragraphs of Approach */}
-                                        <div className="md:col-span-7 lg:col-span-8 space-y-6 text-left md:pt-2">
-                                            <h2 className="text-2xl lg:text-[28px] font-serif text-[#333a42] font-normal">Approach</h2>
-                                            <div className="space-y-5 text-base sm:text-[17px] text-[#4a535e] leading-relaxed font-normal">
-                                                {profile.approach.map((para, idx) => (
-                                                    <p key={idx}>{para}</p>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </section>
-
-                            {/* Section 2: Beyond Therapy full-bleed Quote section - Sage-green background */}
-                            {profile.beyondTherapy && (
-                                <section className="bg-[#dbded7] py-20 border-t border-b border-black/[0.02]">
-                                    <div className="container mx-auto px-6 max-w-5xl text-center space-y-6">
-                                        <h2 className="text-2xl lg:text-[28px] font-serif text-[#333a42] font-normal tracking-tight">Beyond Therapy</h2>
-                                        
-                                        <div className="relative max-w-4xl mx-auto px-12 sm:px-16 flex items-start gap-4">
-                                            <span className="text-[54px] font-serif font-bold text-[#424c56]/60 leading-none select-none absolute left-0 top-0 font-serif">“</span>
-                                            <p className="text-[15px] sm:text-[16px] lg:text-[17px] text-[#4a535e] leading-relaxed font-medium text-left">
-                                                {profile.beyondTherapy}
-                                            </p>
-                                            <span className="text-[54px] font-serif font-bold text-[#424c56]/60 leading-none select-none absolute right-0 bottom-0 font-serif">”</span>
-                                        </div>
-                                    </div>
-                                </section>
-                            )}
-
-                            {/* Section 3: Specialty Areas of Practice Grid - Cream background */}
-                            {profile.specialties && profile.specialties.length > 0 && (
-                                <section className="bg-[#fdf8f5] py-24 border-b border-black/[0.03]">
-                                    <div className="container mx-auto px-6 max-w-6xl text-center">
-                                        <h2 className="text-2xl lg:text-[30px] font-serif text-[#333a42] mb-16 font-normal">Specialty Areas of Practice</h2>
-                                        
-                                        <div className={profile.specialties.length === 4 ? "grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto" : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"}>
-                                            {profile.specialties.map((spec, idx) => (
-                                                <div key={idx} className="bg-[#f2ede4] p-8 flex flex-col justify-between items-center text-center rounded-none border border-[#e5e0d8]/40 shadow-sm">
-                                                    <div className="space-y-4 w-full">
-                                                        <h3 className="font-serif text-[17px] text-[#333a42] font-semibold tracking-wide leading-snug">
-                                                            {spec.title}
-                                                        </h3>
-                                                        <div className="w-8 h-[1px] bg-[#333a42]/30 mx-auto" />
-                                                        <p className="text-[14px] text-[#4a535e] leading-relaxed">
-                                                            {spec.desc}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </section>
-                            )}
-
-                            {/* Section 4: Background and Education Column Layout - White Background */}
-                            {backgroundList.length > 0 && (
-                                <section className="bg-white py-24">
-                                    <div className="container mx-auto px-6 max-w-5xl text-center">
-                                        <div className="flex flex-col items-center mb-12">
-                                            <div className="w-14 h-14 rounded-full bg-[#f2ede4] flex items-center justify-center text-[#333a42] mb-4 shadow-sm border border-black/[0.01]">
-                                                <GraduationCap className="w-8 h-8 stroke-[1.5]" />
-                                            </div>
-                                            <h2 className="text-2xl lg:text-[28px] font-serif text-[#333a42] font-normal">Background and Education</h2>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 text-left text-sm sm:text-base leading-relaxed text-[#4a535e] font-normal">
-                                            <div className="space-y-4">
-                                                {leftCol.map((para, idx) => (
-                                                    <p key={idx}>{para}</p>
-                                                ))}
-                                            </div>
-                                            <div className="space-y-4">
-                                                {rightCol.map((para, idx) => (
-                                                    <p key={idx}>{para}</p>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </section>
-                            )}
-
-                        </div>
-                    );
-                })}
-            </div>
-
         </div>
     );
 }

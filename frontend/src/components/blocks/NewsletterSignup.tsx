@@ -43,10 +43,10 @@ export function NewsletterSignup({
         }
     }
 
-    const bg = dark ? "bg-[#424c56]" : "bg-[#7ebac8]";
+    const bg = dark ? "bg-[#424c56]" : "bg-[#424c56]";
     const textPrimary = "text-white";
-    const textMuted = dark ? "text-white/60" : "text-white/80";
-    const inputBg = dark ? "bg-white/[0.08] border-white/[0.12] focus:border-[#7ebac8]/60" : "bg-white/20 border-white/30 focus:border-white/70";
+    const textMuted = "text-white/60";
+    const inputBg = "bg-white/[0.08] border-white/[0.12] focus:border-white/40";
 
     return (
         <section className={`${bg} py-14 sm:py-16`}>
@@ -64,7 +64,7 @@ export function NewsletterSignup({
                 ) : (
                     <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8 lg:gap-14">
                         <div className="flex-1 space-y-2">
-                            <p className={`text-[10px] uppercase tracking-[0.2em] font-bold ${dark ? "text-[#7ebac8]" : "text-white/70"}`}>
+                            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-white/50">
                                 Newsletter
                             </p>
                             <h2 className={`text-2xl sm:text-[28px] font-serif font-normal leading-snug ${textPrimary}`}>
