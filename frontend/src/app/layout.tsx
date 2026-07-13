@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import Script from "next/script";
 import "./globals.css";
 import { getApiUrl } from "@/lib/api";
 
@@ -138,6 +139,11 @@ export default async function RootLayout({
       </head>
       <body className={`${raleway.variable} ${merriweather.variable} font-sans antialiased text-foreground bg-background min-h-screen flex flex-col`}>
         {children}
+        {/* SimplePractice widget script — loads once, works sitewide */}
+        <Script
+          src="https://widget-cdn.simplepractice.com/assets/integration-1.0.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

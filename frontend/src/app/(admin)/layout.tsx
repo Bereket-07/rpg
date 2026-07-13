@@ -101,17 +101,17 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                     }
                 ` }} />
 
-                {/* ── Dark Sidebar ─────────────────────────────────────────── */}
-                <aside className="w-60 shrink-0 bg-[#1e2328] flex flex-col min-h-screen border-r border-white/[0.04]">
+                {/* ── Light Sidebar ─────────────────────────────────────────── */}
+                <aside className="w-60 shrink-0 bg-white flex flex-col min-h-screen border-r border-[#ede8e0]" style={{ boxShadow: "2px 0 20px rgba(0,0,0,0.04)" }}>
                     {/* Logo area */}
-                    <div className="h-16 flex items-center px-5 border-b border-white/[0.06] shrink-0">
+                    <div className="h-16 flex items-center px-5 border-b border-[#f0ebe3] shrink-0">
                         <div className="flex items-center gap-2.5">
-                            <div className="w-7 h-7 rounded-lg bg-[#7ebac8]/20 flex items-center justify-center">
-                                <span className="text-[#7ebac8] font-bold text-sm">R</span>
+                            <div className="w-[34px] h-[34px] rounded-[10px] flex items-center justify-center" style={{ background: "linear-gradient(135deg, #7ebac8, #5aabb8)" }}>
+                                <span className="text-white font-extrabold text-sm">R</span>
                             </div>
                             <div>
-                                <p className="text-white font-semibold text-[13px] leading-tight tracking-tight">Reframe</p>
-                                <p className="text-[#4a6070] text-[10px] font-medium tracking-widest uppercase">Admin</p>
+                                <p className="text-[#333a42] font-bold text-[13px] leading-tight">Reframe</p>
+                                <p className="text-[#9aa0a8] text-[10px] font-medium tracking-[0.1em] uppercase mt-0.5">Admin</p>
                             </div>
                         </div>
                     </div>
@@ -119,36 +119,54 @@ export default async function AdminLayout({ children }: { children: React.ReactN
                     {/* Nav */}
                     <AdminSidebar />
 
-                    {/* User pill */}
-                    <div className="shrink-0 px-3 py-3 border-t border-white/[0.06]">
-                        <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white/[0.04]">
-                            <div className="w-7 h-7 rounded-full bg-[#7ebac8]/25 flex items-center justify-center shrink-0">
-                                <span className="text-[#7ebac8] text-xs font-bold">
+                    {/* User area */}
+                    <div className="shrink-0 px-4 py-4 border-t border-[#f0ebe3]">
+                        <div className="flex items-center gap-2.5 mb-3">
+                            <div className="w-8 h-8 rounded-full bg-[#f0ebe3] flex items-center justify-center shrink-0">
+                                <span className="text-[#5c6670] text-xs font-bold">
                                     {session.user?.name?.charAt(0)?.toUpperCase() || "A"}
                                 </span>
                             </div>
                             <div className="min-w-0">
-                                <p className="text-[#c8d6e0] text-[12px] font-semibold truncate leading-tight">{session.user?.name || "Admin"}</p>
-                                <p className="text-[#3d4f5f] text-[10px] truncate leading-tight">{session.user?.email}</p>
+                                <p className="text-[#333a42] text-[12.5px] font-semibold truncate leading-tight">{session.user?.name || "Admin"}</p>
+                                <p className="text-[#9aa0a8] text-[11px] truncate leading-tight">{session.user?.email}</p>
                             </div>
                         </div>
+                        <Link href="/api/auth/signout" className="flex items-center gap-2 text-[12px] text-[#9aa0a8] hover:text-rose-400 transition-colors">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                            Sign out
+                        </Link>
                     </div>
                 </aside>
 
                 {/* ── Main Content ─────────────────────────────────────────── */}
-                <main className="flex-1 flex flex-col overflow-hidden bg-[#f4f1ed] min-h-screen">
+                <main className="flex-1 flex flex-col overflow-hidden bg-[#f5f3f0] min-h-screen">
                     {/* Top bar */}
-                    <header className="h-16 flex items-center justify-between px-8 border-b border-black/[0.06] bg-white shrink-0">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <span className="font-medium text-[#333a42]">Reframe Psychology</span>
-                            <span className="text-black/20">›</span>
-                            <span className="text-[#7ebac8] font-semibold capitalize">Admin</span>
+                    <header className="h-16 flex items-center justify-between px-8 border-b border-[#ede8e0] bg-white shrink-0" style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.03)" }}>
+                        <div>
+                            <span className="font-bold text-[18px] text-[#333a42]">Dashboard</span>
+                            <span className="ml-3 text-[13px] text-[#9aa0a8]">
+                                Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}, {session.user?.name?.split(" ")[0] || "Admin"}
+                            </span>
                         </div>
                         <div className="flex items-center gap-3">
+                            {/* Search */}
+                            <div className="flex items-center gap-2 bg-[#f5f3f0] rounded-lg px-3 py-2 w-52">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9aa0a8" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                                <span className="text-[13px] text-[#b0b8c1]">Search...</span>
+                            </div>
+                            {/* Bell */}
+                            <div className="relative">
+                                <div className="w-9 h-9 rounded-lg bg-[#f5f3f0] flex items-center justify-center cursor-pointer">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5c6670" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                                </div>
+                                <div className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#7ebac8] border-2 border-white" />
+                            </div>
+                            {/* View Live Site */}
                             <Link href="/" target="_blank"
-                                className="text-[12px] text-muted-foreground hover:text-[#7ebac8] transition-colors font-medium flex items-center gap-1.5">
-                                <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
+                                className="flex items-center gap-1.5 bg-[#333a42] hover:bg-[#4a535e] text-white text-[12.5px] font-semibold px-4 py-2 rounded-lg transition-colors">
                                 View Live Site
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M7 17 17 7"/><path d="M7 7h10v10"/></svg>
                             </Link>
                         </div>
                     </header>

@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Mail, Phone, MapPin, Send, ShieldCheck, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Mail, Phone, MapPin, ShieldCheck } from "lucide-react";
 import { getApiUrl } from "@/lib/api";
+
+// SimplePractice practice-wide widget constants
+const SP_SCOPE_ID = "64787fd5-84f6-42ba-9955-816d91404e11";
+const SP_APP_ID   = "7c72cb9f9a9b913654bb89d6c7b4e71a77911b30192051da35384b4d0c6d505b";
+const SP_BASE_URL = "https://reframe.clientsecure.me";
 
 export default function ContactPage() {
     const [pageTitle, setPageTitle]       = useState("Get in Touch");
@@ -62,56 +67,6 @@ export default function ContactPage() {
         fetchContactPageData();
     }, []);
 
-    const [newsletterOptIn, setNewsletterOptIn] = useState(false);
-
-    const [submitting,   setSubmitting]   = useState(false);
-    const [submitted,    setSubmitted]    = useState(false);
-    const [submitError,  setSubmitError]  = useState("");
-    const firstNameRef = useRef<HTMLInputElement>(null);
-    const lastNameRef  = useRef<HTMLInputElement>(null);
-    const emailRef     = useRef<HTMLInputElement>(null);
-    const subjectRef   = useRef<HTMLInputElement>(null);
-    const messageRef   = useRef<HTMLTextAreaElement>(null);
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setSubmitting(true); setSubmitError("");
-        const clientEmail = emailRef.current?.value || "";
-        try {
-            const res = await fetch(`${getApiUrl()}/api/v1/consultations/inquiries`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    first_name: firstNameRef.current?.value || "",
-                    last_name:  lastNameRef.current?.value  || "",
-                    email:      clientEmail,
-                    subject:    subjectRef.current?.value   || "",
-                    message:    messageRef.current?.value   || "",
-                }),
-            });
-            if (res.ok) {
-                if (newsletterOptIn && clientEmail) {
-                    try {
-                        await fetch(`${getApiUrl()}/api/v1/newsletter/`, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ email: clientEmail }),
-                        });
-                    } catch { /* newsletter subscription failure is non-blocking */ }
-                }
-                setSubmitted(true);
-            } else {
-                setSubmitError("Something went wrong. Please try again or email us directly.");
-            }
-        } catch {
-            setSubmitError("Could not reach the server. Please email us directly.");
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    const inputClass = "w-full bg-[#faf8f5] border border-[#e2ddd6] text-[#333a42] placeholder:text-[#9aa0a8] text-[14px] px-4 py-3 outline-none focus:border-[#7ebac8] focus:bg-white transition-all duration-200 rounded-none font-sans";
-    const labelClass = "block text-[11px] font-bold uppercase tracking-[0.16em] text-[#5c6670] mb-2";
 
     return (
         <div className="bg-[#FDF8F5] min-h-screen font-sans text-[#4a535e]">
@@ -199,11 +154,11 @@ export default function ContactPage() {
                     </div>
                 </div>
 
-                {/* ── Right: Form ────────────────────────────────────────── */}
+                {/* ── Right: SimplePractice Widget ───────────────────────── */}
                 <div className="lg:col-span-7">
                     <div className="bg-white border border-black/[0.06] shadow-[0_8px_40px_rgba(0,0,0,0.05)] p-8 sm:p-10 space-y-8">
 
-                        {/* Form header */}
+                        {/* Header */}
                         <div className="space-y-2 pb-6 border-b border-black/[0.05]">
                             <h2 className="text-[24px] sm:text-[28px] font-serif text-[#333a42] font-normal">
                                 {formTitle}
@@ -213,104 +168,48 @@ export default function ContactPage() {
                             </p>
                         </div>
 
-                        {submitted ? (
-                            <div className="py-14 text-center space-y-5">
-                                <div className="w-16 h-16 rounded-full bg-[#f2ede4] flex items-center justify-center mx-auto">
-                                    <Send className="w-6 h-6 text-[#7ebac8]" />
-                                </div>
-                                <div className="space-y-2">
-                                    <p className="text-[20px] font-serif text-[#333a42]">Message Sent</p>
-                                    <p className="text-[14px] text-[#5c6670] max-w-xs mx-auto leading-relaxed">
-                                        Thank you for reaching out. A member of our team will follow up within 24 business hours.
-                                    </p>
-                                </div>
-                            </div>
-                        ) : (
-                            <form className="space-y-6" onSubmit={handleSubmit}>
+                        {/* SimplePractice contact widget — HIPAA-compliant */}
+                        <div className="space-y-4">
+                            <p className="text-[13px] text-[#5c6670] leading-relaxed">
+                                Our intake form is securely managed through SimplePractice, our HIPAA-compliant client portal. Click below to submit your inquiry safely.
+                            </p>
 
-                                {/* Name row */}
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                                    <div>
-                                        <label className={labelClass} htmlFor="first-name">First Name</label>
-                                        <input id="first-name" ref={firstNameRef} type="text" placeholder="Jane" required className={inputClass} />
-                                    </div>
-                                    <div>
-                                        <label className={labelClass} htmlFor="last-name">Last Name</label>
-                                        <input id="last-name" ref={lastNameRef} type="text" placeholder="Doe" required className={inputClass} />
-                                    </div>
-                                </div>
+                            {/* Contact form button */}
+                            <a
+                                href={SP_BASE_URL}
+                                data-spwidget-scope-id={SP_SCOPE_ID}
+                                data-spwidget-scope-uri="reframe"
+                                data-spwidget-application-id={SP_APP_ID}
+                                data-spwidget-channel="embedded_widget"
+                                data-spwidget-type="Contact form"
+                                data-spwidget-contact
+                                data-spwidget-scope-global
+                                data-spwidget-autobind
+                                className="w-full flex items-center justify-center gap-2.5 bg-[#333a42] hover:bg-[#4a535e] text-white font-sans font-semibold text-[14px] tracking-wide py-4 transition-all duration-200 cursor-pointer"
+                            >
+                                <Mail className="w-4 h-4" />
+                                Send a Secure Inquiry
+                            </a>
 
-                                {/* Email */}
-                                <div>
-                                    <label className={labelClass} htmlFor="email-field">Email Address</label>
-                                    <input id="email-field" ref={emailRef} type="email" placeholder="jane@example.com" required className={inputClass} />
-                                </div>
+                            {/* Appointment request button */}
+                            <a
+                                href={SP_BASE_URL}
+                                data-spwidget-scope-id={SP_SCOPE_ID}
+                                data-spwidget-scope-uri="reframe"
+                                data-spwidget-application-id={SP_APP_ID}
+                                data-spwidget-type="OAR"
+                                data-spwidget-scope-global
+                                data-spwidget-autobind
+                                className="w-full flex items-center justify-center gap-2.5 bg-[#7ebac8] hover:bg-[#5aabb8] text-white font-sans font-semibold text-[14px] tracking-wide py-4 transition-all duration-200 cursor-pointer"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                                Request an Appointment
+                            </a>
 
-                                {/* Subject */}
-                                <div>
-                                    <label className={labelClass} htmlFor="subject">Subject</label>
-                                    <input id="subject" ref={subjectRef} type="text" placeholder="e.g. Schedule Intake, Billing Question..." required className={inputClass} />
-                                </div>
-
-                                {/* Message */}
-                                <div>
-                                    <label className={labelClass} htmlFor="message">Your Inquiry</label>
-                                    <textarea
-                                        id="message"
-                                        ref={messageRef}
-                                        rows={5}
-                                        placeholder="Tell us a little bit about what you are seeking..."
-                                        required
-                                        className={`${inputClass} resize-none`}
-                                    />
-                                </div>
-
-                                {/* Newsletter opt-in */}
-                                <label className="flex items-start gap-3 cursor-pointer group">
-                                    <div className="relative mt-0.5 shrink-0">
-                                        <input
-                                            type="checkbox"
-                                            checked={newsletterOptIn}
-                                            onChange={e => setNewsletterOptIn(e.target.checked)}
-                                            className="sr-only peer"
-                                        />
-                                        <div className="w-4 h-4 border border-[#e2ddd6] bg-[#faf8f5] peer-checked:bg-[#333a42] peer-checked:border-[#333a42] transition-all duration-150 flex items-center justify-center">
-                                            {newsletterOptIn && (
-                                                <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 10 8" stroke="currentColor" strokeWidth={2}>
-                                                    <path d="M1 4l2.5 2.5L9 1" />
-                                                </svg>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <span className="text-[13px] text-[#5c6670] leading-snug select-none group-hover:text-[#333a42] transition-colors duration-150">
-                                        Subscribe me to the Reframe Psychology newsletter — clinical insights and mental health resources, no spam.
-                                    </span>
-                                </label>
-
-                                {submitError && (
-                                    <p className="text-[13px] text-red-500">{submitError}</p>
-                                )}
-
-                                <button
-                                    type="submit"
-                                    disabled={submitting}
-                                    className="w-full bg-[#333a42] hover:bg-[#4a535e] text-white font-semibold text-[14px] tracking-wide h-13 py-4 flex items-center justify-center gap-2.5 transition-all duration-200 disabled:opacity-60"
-                                >
-                                    {submitting ? (
-                                        <span className="opacity-70">Sending…</span>
-                                    ) : (
-                                        <>
-                                            <span>{formButton}</span>
-                                            <ArrowRight className="w-4 h-4" />
-                                        </>
-                                    )}
-                                </button>
-
-                                <p className="text-[11px] text-[#5c6670]/50 text-center leading-relaxed">
-                                    By submitting this form you agree to our privacy policy. We will never share your information.
-                                </p>
-                            </form>
-                        )}
+                            <p className="text-[11px] text-[#5c6670]/50 text-center leading-relaxed pt-2">
+                                All submissions are encrypted and handled directly through SimplePractice. Your information is never stored on this website.
+                            </p>
+                        </div>
                     </div>
                 </div>
 

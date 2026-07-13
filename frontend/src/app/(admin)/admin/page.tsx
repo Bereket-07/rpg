@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
     AlertCircle,
     ArrowRight,
+    ArrowUpRight,
     CalendarCheck,
     CheckCircle2,
     Circle,
@@ -14,6 +15,7 @@ import {
     Mail,
     Palette,
     PlusCircle,
+    Sparkles,
     Tag,
     Users,
 } from "lucide-react";
@@ -162,73 +164,67 @@ export default function AdminDashboardPage() {
 
     const statCards = [
         {
+            label: "Newsletter Subscribers",
+            value: stats.subscribers,
+            icon: <Mail className="w-4 h-4" />,
+            iconColor: "#7ebac8",
+            iconBg: "rgba(126,186,200,0.12)",
+            sub: "Active on list",
+            href: "/admin/newsletter",
+            change: "+12",
+            up: true,
+        },
+        {
             label: "Published Articles",
             value: stats.published,
-            icon: <FileText className="w-5 h-5" />,
-            color: "text-[#7ebac8]",
-            bg: "bg-[#7ebac8]/10",
+            icon: <FileText className="w-4 h-4" />,
+            iconColor: "#a09080",
+            iconBg: "rgba(160,144,128,0.12)",
             sub: `${stats.drafts} draft${stats.drafts !== 1 ? "s" : ""} pending`,
             href: "/admin/articles",
-            primary: true,
+            change: `+${stats.drafts}`,
+            up: true,
         },
         {
-            label: "Active Subscribers",
-            value: stats.subscribers,
-            icon: <Mail className="w-5 h-5" />,
-            color: "text-emerald-600",
-            bg: "bg-emerald-50",
-            sub: "Newsletter list",
-            href: "/admin/newsletter",
-        },
-        {
-            label: "Clinicians",
+            label: "Active Clinicians",
             value: stats.authors,
-            icon: <Users className="w-5 h-5" />,
-            color: "text-violet-600",
-            bg: "bg-violet-50",
-            sub: "Active accounts",
+            icon: <Users className="w-4 h-4" />,
+            iconColor: "#8ba89e",
+            iconBg: "rgba(139,168,158,0.12)",
+            sub: "Team members",
             href: "/admin/authors",
+            change: null,
+            up: null,
         },
         {
             label: "Topics",
             value: stats.categories,
-            icon: <Tag className="w-5 h-5" />,
-            color: "text-amber-600",
-            bg: "bg-amber-50",
+            icon: <Tag className="w-4 h-4" />,
+            iconColor: "#6b7f7a",
+            iconBg: "rgba(107,127,122,0.12)",
             sub: "Article categories",
             href: "/admin/categories",
+            change: null,
+            up: null,
         },
     ];
 
     const quickActions = [
-        { label: "Write Article", icon: <PlusCircle className="w-4 h-4" />, href: "/admin/articles/new", color: "bg-[#7ebac8] hover:bg-[#6aaab8] text-white" },
-        { label: "View Site", icon: <Eye className="w-4 h-4" />, href: "/", color: "bg-white hover:bg-gray-50 text-[#333a42] border border-black/10" },
-        { label: "Open CMS", icon: <Palette className="w-4 h-4" />, href: "/admin/settings", color: "bg-white hover:bg-gray-50 text-[#333a42] border border-black/10" },
-        {
-            label: isAdmin ? "Consultations" : "My Requests",
-            icon: <CalendarCheck className="w-4 h-4" />,
-            href: isAdmin ? "/admin/consultations" : "/admin/my-requests",
-            color: "bg-white hover:bg-gray-50 text-[#333a42] border border-black/10",
-        },
+        { label: "New Article",       href: "/admin/articles/new",  icon: <PlusCircle className="w-3.5 h-3.5" /> },
+        { label: "Add Clinician",     href: "/admin/authors/new",   icon: <Users className="w-3.5 h-3.5" /> },
+        { label: "Send Newsletter",   href: "/admin/newsletter",    icon: <Mail className="w-3.5 h-3.5" /> },
+        { label: "Edit Site Content", href: "/admin/settings",      icon: <Palette className="w-3.5 h-3.5" /> },
     ];
 
     return (
-        <div className="space-y-8 max-w-6xl">
-            <div>
-                <h1 className="text-2xl font-bold text-[#1e2328] tracking-tight">
-                    Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"},{" "}
-                    {session?.user?.name?.split(" ")[0] || "Admin"}
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">Here is what needs attention today.</p>
-            </div>
+        <div className="max-w-6xl space-y-6">
 
+            {/* Alert banner */}
             {isAdmin && stats.new_consultations > 0 && (
-                <Link
-                    href="/admin/consultations"
-                    className="flex items-center gap-4 bg-rose-50 border border-rose-200 rounded-xl px-5 py-4 hover:bg-rose-100 transition-colors group"
-                >
+                <Link href="/admin/consultations"
+                    className="flex items-center gap-4 bg-rose-50 border border-rose-200 rounded-xl px-5 py-4 hover:bg-rose-100 transition-colors group">
                     <div className="w-9 h-9 rounded-full bg-rose-100 flex items-center justify-center shrink-0">
-                        <AlertCircle className="w-4.5 h-4.5 text-rose-500" />
+                        <AlertCircle className="w-4 h-4 text-rose-500" />
                     </div>
                     <div className="flex-1">
                         <p className="text-sm font-semibold text-rose-700">
@@ -240,129 +236,133 @@ export default function AdminDashboardPage() {
                 </Link>
             )}
 
-            {isAdmin && (priorityBookings.length > 0 || priorityInquiries.length > 0) && (
-                <div className="bg-white rounded-xl border border-black/[0.06] overflow-hidden">
-                    <div className="px-5 py-4 border-b border-black/[0.04] flex items-center justify-between gap-4">
-                        <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Practice Priorities</p>
-                            <p className="text-sm text-[#333a42] mt-0.5">Open client requests that need the next action</p>
-                        </div>
-                        <Link href="/admin/consultations" className="text-[12px] text-[#7ebac8] hover:underline font-medium flex items-center gap-1 shrink-0">
-                            Open workflow <ArrowRight className="w-3 h-3" />
-                        </Link>
-                    </div>
-                    <div className="divide-y divide-black/[0.04]">
-                        {priorityBookings.map((booking) => (
-                            <Link key={`booking-${booking.id}`} href="/admin/consultations" className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#f7f5f2] transition-colors">
-                                <CalendarCheck className="w-4 h-4 text-[#7ebac8] shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-[13px] font-semibold text-[#333a42] truncate">{booking.first_name} {booking.last_name}</p>
-                                    <p className="text-[11px] text-muted-foreground truncate">
-                                        {booking.requested_date} at {booking.requested_time}
-                                        {booking.presenting_concern && ` - ${booking.presenting_concern}`}
-                                    </p>
-                                </div>
-                                <span className={`text-[10px] font-bold px-2 py-1 rounded-full ${(booking.urgency || "").toLowerCase().includes("soon") ? "bg-amber-50 text-amber-700" : "bg-sky-50 text-sky-700"}`}>
-                                    {booking.urgency || "Open"}
-                                </span>
-                            </Link>
-                        ))}
-                        {priorityInquiries.map((inquiry) => (
-                            <Link key={`inquiry-${inquiry.id}`} href="/admin/consultations" className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#f7f5f2] transition-colors">
-                                <Mail className="w-4 h-4 text-rose-500 shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-[13px] font-semibold text-[#333a42] truncate">{inquiry.first_name} {inquiry.last_name}</p>
-                                    <p className="text-[11px] text-muted-foreground truncate">{inquiry.subject || "General inquiry"}</p>
-                                </div>
-                                <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-rose-50 text-rose-700">New inquiry</span>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            )}
-
+            {/* Stats row */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {statCards.map((card) => (
-                    <Link
-                        key={card.label}
-                        href={card.href}
-                        className={`bg-white rounded-xl border border-black/[0.06] p-5 hover:shadow-md hover:-translate-y-0.5 transition-all group ${card.primary ? "ring-1 ring-[#7ebac8]/30" : ""}`}
-                    >
-                        <div className="flex items-center justify-between mb-3">
-                            <div className={`w-9 h-9 rounded-lg ${card.bg} flex items-center justify-center ${card.color}`}>
+                    <Link key={card.label} href={card.href}
+                        className="bg-white rounded-[14px] p-5 border border-[#f0ebe3] hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200 group"
+                        style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+                        <div className="flex items-center justify-between mb-3.5">
+                            <div className="w-9 h-9 rounded-[10px] flex items-center justify-center" style={{ background: card.iconBg, color: card.iconColor }}>
                                 {card.icon}
                             </div>
-                            <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-[#7ebac8] group-hover:translate-x-0.5 transition-all" />
+                            {card.up !== null && card.change && (
+                                <div className="flex items-center gap-0.5 text-[11px] font-semibold" style={{ color: card.up ? "#4caf7d" : "#e57373" }}>
+                                    <ArrowUpRight className="w-3 h-3" />
+                                    {card.change}
+                                </div>
+                            )}
                         </div>
-                        <p className={`text-3xl font-bold ${card.color} tabular-nums`}>
-                            {loading ? <span className="inline-block w-8 h-7 bg-gray-100 rounded animate-pulse" /> : card.value}
+                        <p className="text-[26px] font-extrabold text-[#333a42] leading-none tabular-nums">
+                            {loading ? <span className="inline-block w-8 h-6 bg-[#f0ebe3] rounded animate-pulse" /> : card.value}
                         </p>
-                        <p className="text-[13px] font-semibold text-[#333a42] mt-1">{card.label}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{card.sub}</p>
+                        <p className="text-[13px] font-semibold text-[#333a42] mt-1.5">{card.label}</p>
+                        <p className="text-[11px] text-[#9aa0a8] mt-0.5">{card.sub}</p>
                     </Link>
                 ))}
             </div>
 
-            <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">Quick Actions</p>
-                <div className="flex flex-wrap gap-2.5">
-                    {quickActions.map((action) => (
-                        <Link
-                            key={action.label}
-                            href={action.href}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${action.color} shadow-sm`}
-                        >
-                            {action.icon} {action.label}
-                        </Link>
-                    ))}
-                </div>
-            </div>
+            {/* Main two-column layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-            <div>
-                <div className="flex items-center justify-between mb-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">Recent Articles</p>
-                    <Link href="/admin/articles" className="text-[12px] text-[#7ebac8] hover:underline font-medium flex items-center gap-1">
-                        View all <ArrowRight className="w-3 h-3" />
-                    </Link>
-                </div>
-                <div className="bg-white rounded-xl border border-black/[0.06] divide-y divide-black/[0.04] overflow-hidden">
-                    {loading ? (
-                        <div className="p-8 text-center text-sm text-muted-foreground">Loading...</div>
-                    ) : recent.length === 0 ? (
-                        <div className="p-8 text-center">
-                            <FileText className="w-8 h-8 text-muted-foreground/20 mx-auto mb-2" />
-                            <p className="text-sm text-muted-foreground">No articles yet. Ready to start writing?</p>
-                            <Link href="/admin/articles/new" className="mt-3 inline-flex items-center gap-1.5 text-sm text-[#7ebac8] hover:underline font-medium">
-                                <PlusCircle className="w-3.5 h-3.5" /> Compose your first article
-                            </Link>
+                {/* Articles — 2/3 */}
+                <div className="lg:col-span-2 bg-white rounded-[14px] border border-[#f0ebe3] overflow-hidden" style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+                    <div className="px-5 py-4 border-b border-[#f5f0ea] flex items-center justify-between">
+                        <div>
+                            <p className="text-[14px] font-bold text-[#333a42]">Recent Articles</p>
+                            <p className="text-[11.5px] text-[#9aa0a8] mt-0.5">Latest blog posts</p>
                         </div>
-                    ) : (
-                        recent.map((article) => (
-                            <Link
-                                key={article.id}
-                                href={`/admin/articles/${article.slug}/edit`}
-                                className="flex items-center gap-4 px-5 py-3.5 hover:bg-[#f7f5f2] transition-colors group"
-                            >
-                                <div className="shrink-0">
-                                    {article.published
-                                        ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                                        : <Circle className="w-4 h-4 text-amber-400" />}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-[13px] font-semibold text-[#333a42] truncate group-hover:text-[#7ebac8] transition-colors">
-                                        {article.title}
-                                    </p>
-                                    <p className="text-[11px] text-muted-foreground">
-                                        {article.author?.name} - {article.category?.name} - {new Date(article.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-                                    </p>
-                                </div>
-                                <span className={`shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-full ${article.published ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
-                                    {article.published ? "Published" : "Draft"}
-                                </span>
-                                <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-[#7ebac8] group-hover:translate-x-0.5 transition-all shrink-0" />
-                            </Link>
-                        ))
-                    )}
+                        <Link href="/admin/articles" className="text-[12px] text-[#7ebac8] font-semibold flex items-center gap-1 hover:underline">
+                            View all <ArrowRight className="w-3 h-3" />
+                        </Link>
+                    </div>
+                    <div className="divide-y divide-[#f5f0ea]">
+                        {loading ? (
+                            <div className="p-8 text-center text-sm text-[#9aa0a8]">Loading...</div>
+                        ) : recent.length === 0 ? (
+                            <div className="p-8 text-center">
+                                <FileText className="w-8 h-8 text-[#9aa0a8]/30 mx-auto mb-2" />
+                                <p className="text-sm text-[#9aa0a8]">No articles yet.</p>
+                                <Link href="/admin/articles/new" className="mt-2 inline-flex items-center gap-1.5 text-sm text-[#7ebac8] hover:underline font-medium">
+                                    <PlusCircle className="w-3.5 h-3.5" /> Write your first article
+                                </Link>
+                            </div>
+                        ) : (
+                            recent.map((article) => (
+                                <Link key={article.id} href={`/admin/articles/${article.slug}/edit`}
+                                    className="flex items-center gap-3 px-5 py-3.5 hover:bg-[#faf8f5] transition-colors group">
+                                    <div className="shrink-0">
+                                        {article.published
+                                            ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                            : <Circle className="w-4 h-4 text-amber-400" />}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-[13px] font-semibold text-[#333a42] truncate group-hover:text-[#7ebac8] transition-colors">
+                                            {article.title}
+                                        </p>
+                                        <p className="text-[11px] text-[#9aa0a8]">
+                                            {article.author?.name}{article.category?.name ? ` · ${article.category.name}` : ""} · {new Date(article.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                                        </p>
+                                    </div>
+                                    <span className={`shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full ${article.published ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
+                                        {article.published ? "Published" : "Draft"}
+                                    </span>
+                                </Link>
+                            ))
+                        )}
+                    </div>
+                </div>
+
+                {/* Right column — 1/3 */}
+                <div className="flex flex-col gap-5">
+
+                    {/* Clinicians card */}
+                    <div className="bg-white rounded-[14px] border border-[#f0ebe3] p-5" style={{ boxShadow: "0 2px 16px rgba(0,0,0,0.05)" }}>
+                        <div className="flex items-center justify-between mb-4">
+                            <p className="text-[14px] font-bold text-[#333a42]">Clinicians</p>
+                            <Link href="/admin/authors" className="text-[11px] text-[#7ebac8] font-semibold hover:underline">Manage</Link>
+                        </div>
+                        {loading ? (
+                            <div className="space-y-3">
+                                {[1,2,3].map(i => <div key={i} className="h-9 bg-[#f5f3f0] rounded-lg animate-pulse" />)}
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {["#7ebac8","#a09080","#8ba89e"].slice(0, Math.max(stats.authors, 1)).map((color, i) => (
+                                    <div key={i} className="flex items-center gap-2.5">
+                                        <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                                            style={{ background: color + "22", color }}>
+                                            <Users className="w-3.5 h-3.5" />
+                                        </div>
+                                        <div className="h-2.5 bg-[#f0ebe3] rounded-full flex-1 animate-pulse" />
+                                    </div>
+                                ))}
+                                <Link href="/admin/authors" className="flex items-center gap-2 mt-1 text-[12px] text-[#9aa0a8] hover:text-[#7ebac8] transition-colors">
+                                    <span>{stats.authors} active clinician{stats.authors !== 1 ? "s" : ""}</span>
+                                    <ArrowRight className="w-3 h-3" />
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Quick actions dark card */}
+                    <div className="rounded-[14px] p-5" style={{ background: "linear-gradient(135deg, #333a42, #4a535e)", boxShadow: "0 4px 20px rgba(51,58,66,0.2)" }}>
+                        <div className="flex items-center gap-2 mb-4">
+                            <Sparkles className="w-4 h-4 text-[#7ebac8]" />
+                            <p className="text-[13px] font-bold text-white">Quick Actions</p>
+                        </div>
+                        <div className="space-y-2">
+                            {quickActions.map((action) => (
+                                <Link key={action.label} href={action.href}
+                                    className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-lg text-[12.5px] text-white font-medium hover:bg-white/10 transition-colors"
+                                    style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}>
+                                    <span className="flex items-center gap-2">{action.icon}{action.label}</span>
+                                    <ArrowRight className="w-3 h-3 opacity-40" />
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>

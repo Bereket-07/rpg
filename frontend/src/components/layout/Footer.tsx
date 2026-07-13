@@ -112,12 +112,18 @@ export function Footer() {
                                 {readyText}
                             </p>
                         </div>
-                        <Link
-                            href="/contact"
-                            className="flex items-center justify-center bg-white hover:bg-white/95 text-[#4E5762] font-semibold px-7 sm:px-8 rounded-[4px] h-12 shadow-[0_4px_20px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_28px_rgba(0,0,0,0.18)] transition-all duration-300 text-[15px] sm:text-[16px] tracking-wide active:scale-[0.98]"
+                        <a
+                            href="https://reframe.clientsecure.me"
+                            data-spwidget-scope-id="64787fd5-84f6-42ba-9955-816d91404e11"
+                            data-spwidget-scope-uri="reframe"
+                            data-spwidget-application-id="7c72cb9f9a9b913654bb89d6c7b4e71a77911b30192051da35384b4d0c6d505b"
+                            data-spwidget-type="OAR"
+                            data-spwidget-scope-global
+                            data-spwidget-autobind
+                            className="flex items-center justify-center bg-white hover:bg-white/95 text-[#4E5762] font-semibold px-7 sm:px-8 rounded-[4px] h-12 shadow-[0_4px_20px_rgba(0,0,0,0.12)] hover:shadow-[0_6px_28px_rgba(0,0,0,0.18)] transition-all duration-300 text-[15px] sm:text-[16px] tracking-wide active:scale-[0.98] cursor-pointer"
                         >
                             {btnText}
-                        </Link>
+                        </a>
                     </div>
 
                 </div>

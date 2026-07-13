@@ -1,7 +1,6 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Link from "next/link";
 
 interface HeroProps {
     data?: any;
@@ -56,15 +55,21 @@ export function Hero({ data }: HeroProps) {
                         {heroDesc}
                     </p>
 
-                    {/* Button — 16px, Raleway Medium */}
+                    {/* Button — SimplePractice appointment widget */}
                     <div style={{ marginTop: "32px" }}>
-                        <Link
-                            href="/contact"
-                            className="inline-flex items-center justify-center bg-[#3d4853] hover:bg-[#2d3740] text-white font-sans font-medium transition-colors duration-200"
+                        <a
+                            href="https://reframe.clientsecure.me"
+                            data-spwidget-scope-id="64787fd5-84f6-42ba-9955-816d91404e11"
+                            data-spwidget-scope-uri="reframe"
+                            data-spwidget-application-id="7c72cb9f9a9b913654bb89d6c7b4e71a77911b30192051da35384b4d0c6d505b"
+                            data-spwidget-type="OAR"
+                            data-spwidget-scope-global
+                            data-spwidget-autobind
+                            className="inline-flex items-center justify-center bg-[#3d4853] hover:bg-[#2d3740] text-white font-sans font-medium transition-colors duration-200 cursor-pointer"
                             style={{ fontSize: "16px", height: "44px", paddingLeft: "32px", paddingRight: "32px" }}
                         >
                             {heroCtaText}
-                        </Link>
+                        </a>
                     </div>
                 </motion.div>
             </div>
