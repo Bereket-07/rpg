@@ -83,8 +83,8 @@ export default async function TherapistDetailPage({ params }: { params: { slug: 
     const rightCol = background.slice(half);
 
     return (
-        <div className="bg-[#FDF8F5] min-h-screen font-sans text-[#4a535e] pb-24">
-            <section className="bg-[#FDF8F5] pt-16 pb-24 border-b border-black/[0.03]">
+        <div className="bg-[#FFFAF5] min-h-screen font-sans text-[#4a535e] pb-24">
+            <section className="bg-[#FFFAF5] pt-16 pb-24 border-b border-black/[0.03]">
                 <div className="container mx-auto px-8 max-w-6xl">
                     <div className="w-full text-center mb-16">
                         {/* H1 — 52px Merriweather Semibold */}
@@ -93,7 +93,7 @@ export default async function TherapistDetailPage({ params }: { params: { slug: 
 
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-16 items-start">
                         <div className="md:col-span-5 space-y-4 text-left">
-                            <div className="relative w-full aspect-[3/4] rounded-[12px] overflow-hidden">
+                            <div className="relative w-full aspect-[4/5] rounded-[12px] overflow-hidden shadow-[0_10px_30px_rgba(60,50,40,0.18)]">
                                 <img
                                     src={profile.image}
                                     alt={profile.name}
@@ -143,19 +143,19 @@ export default async function TherapistDetailPage({ params }: { params: { slug: 
             )}
 
             {profile.specialties.length > 0 && (
-                <section className="bg-[#FDF8F5] py-20 border-b border-black/[0.03]">
+                <section className="bg-[#FFFAF5] py-20 border-b border-black/[0.03]">
                     <div className="container mx-auto px-8 max-w-6xl text-center">
                         {/* B3 — 35px Raleway Bold */}
                         <h2 className="font-sans font-bold text-[#333a42] mb-14" style={{ fontSize: "35px" }}>Specialty Areas of Practice</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div className={`grid grid-cols-1 md:grid-cols-2 ${profile.specialties.length > 4 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-6 ${profile.specialties.length <= 4 ? 'max-w-3xl mx-auto w-full' : ''}`}>
                             {profile.specialties.map((spec, idx) => (
-                                <div key={idx} className="bg-[#F0EAE2] p-10 flex flex-col items-center text-center min-h-[320px]">
+                                <div key={idx} className="bg-[#f0ebe1] p-10 flex flex-col items-center text-center min-h-[280px]">
                                     <div className="space-y-4 w-full">
-                                        {/* H5 — 25px Merriweather Semibold */}
-                                        <h3 className="font-serif font-semibold text-[#333a42] leading-snug" style={{ fontSize: "25px" }}>{spec.title}</h3>
+                                        {/* H5 — Merriweather Semibold */}
+                                        <h3 className="font-serif font-semibold italic text-[#333a42] leading-snug" style={{ fontSize: "24px" }}>{spec.title}</h3>
                                         <div className="w-8 h-[1.5px] bg-[#333a42]/25 mx-auto" />
-                                        {/* B2.3 — 22px Raleway Light */}
-                                        {spec.desc && <p className="font-sans font-light text-[#4a535e] leading-relaxed" style={{ fontSize: "22px" }}>{spec.desc}</p>}
+                                        {/* Body — smaller than title, per mockup */}
+                                        {spec.desc && <p className="font-sans font-light text-[#4a535e] leading-relaxed" style={{ fontSize: "18px" }}>{spec.desc}</p>}
                                     </div>
                                 </div>
                             ))}
@@ -165,13 +165,11 @@ export default async function TherapistDetailPage({ params }: { params: { slug: 
             )}
 
             {background.length > 0 && (
-                <section className="bg-[#fdf8f5] py-20">
+                <section className="bg-[#FFFAF5] py-20">
                     <div className="container mx-auto px-8 max-w-5xl">
-                        {/* Header: large icon + title, centered */}
-                        <div className="flex items-center justify-center gap-5 mb-14">
-                            <div className="w-16 h-16 rounded-full bg-[#F0EAE2] flex items-center justify-center shrink-0">
-                                <GraduationCap className="w-9 h-9 text-[#333a42]/40" strokeWidth={1.5} />
-                            </div>
+                        {/* Header: plain large icon + title, centered — per mockup, no circle */}
+                        <div className="flex items-center justify-center gap-4 mb-14">
+                            <GraduationCap className="w-12 h-12 text-[#333a42]/25 shrink-0" strokeWidth={1.5} />
                             {/* B3 — 35px Raleway Bold */}
                             <h2 className="font-sans font-bold text-[#333a42]" style={{ fontSize: "35px" }}>Background and Education</h2>
                         </div>

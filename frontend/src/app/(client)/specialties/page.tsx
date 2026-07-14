@@ -7,6 +7,7 @@ interface SpecialtyData {
     id: string;
     title: string;
     paragraphs: string[];
+    excerpt: string;
     image: string;
 }
 
@@ -23,7 +24,8 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "This isn’t about just managing symptoms, it’s about finding a new way to relate to yourself and others so you can find energy, connection, and meaning again.",
             "So instead of operating on autopilot, you begin to feel more present, more engaged, and more like yourself again, with greater clarity and emotional range."
         ],
-        image: "/assets/RPG_Images for UI/mockup-wall-in-the-children-s-room-on-wall-white-c-2026-03-24-01-09-26-utc.jpg"
+        excerpt: "It's not that your life isn't working.\nFrom the outside, it probably looks like it is. But internally, the energy isn't the same. Things that used to feel engaging and meaningful no longer bring you pleasure or joy.",
+        image: "/assets/Specialties Section_Selected Images/cards/Improving Mood and Well-being.png"
     },
     {
         id: "anxiety",
@@ -40,7 +42,8 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "Instead of being pulled into the same anxious loop of spiraling or shutting down, you'll learn to respond with more clarity, self-trust, and emotional balance.",
             "This isn't just about coping strategies. It's about changing the underlying patterns that keep you feeling \"on edge\" so you can reclaim energy, calm, and confidence."
         ],
-        image: "/assets/RPG_Images for UI/stress-theme-concept-paper-with-inscription-and-n-2026-03-24-15-36-15-utc.jpg"
+        excerpt: "You're managing a lot, your career, your relationships, your responsibilities… and yet, beneath the surface, it feels like your mind never stops racing.",
+        image: "/assets/Specialties Section_Selected Images/cards/Working Through Anxiety and Stress.png"
     },
     {
         id: "couples",
@@ -55,7 +58,8 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "This isn't simply about learning communication techniques. It's about shifting the emotional patterns that shape how you relate to each other.",
             "Over time, couples move from reactivity and disconnection to feeling more secure, more aligned, and more like a team again."
         ],
-        image: "/assets/RPG_Images for UI/modern-ceramic-vases-on-a-white-marble-table-2026-03-16-02-08-02-utc.jpg"
+        excerpt: "You may find yourselves having the same conversation over and over, one of you pushing, the other pulling away… both of you leaving feeling unheard, frustrated, or alone.",
+        image: "/assets/Specialties Section_Selected Images/cards/Couples Therapy_Rebuilding Intimacy and Connection.png"
     },
     {
         id: "infants",
@@ -70,7 +74,8 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "This isn't simply about following a rigid parenting approach or trend.",
             "It's about developing a way of responding that feels clear, grounded, and aligned with who you are and how you want to show up as a parent."
         ],
-        image: "/assets/RPG_Images for UI/portrait-of-four-young-children-in-a-row-one-cryi-2026-03-11-00-57-01-utc.jpg"
+        excerpt: "Becoming a parent can be deeply meaningful and unexpectedly disorienting. You may find yourself second-guessing decisions you once made with ease, feeling stretched thin, or unsure how to respond in the moments that matter most.",
+        image: "/assets/Specialties Section_Selected Images/cards/Parenting Infants and Young Children.png"
     },
     {
         id: "teens",
@@ -86,7 +91,8 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "It's to create a relationship that can adapt, one that allows for autonomy while staying meaningfully connected.",
             "Over time, parents feel more confident in how they show up, and more at ease in a stage that often feels uncertain."
         ],
-        image: "/assets/RPG_Images for UI/little-kid-playing-with-joystick-in-front-of-pc-2026-03-24-14-20-02-utc.jpg"
+        excerpt: "As children grow, the relationship changes, often in ways no one fully prepares you for. Conversations become more complex. Reactions feel less predictable. And the closeness you once relied on can begin to feel harder to reach.",
+        image: "/assets/Specialties Section_Selected Images/cards/Parenting Teens and Young Adults.png"
     },
     {
         id: "transitions",
@@ -97,7 +103,8 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "In therapy, we provide a structured container to slow down these shifting dynamics.",
             "We help you make sense of the gap between where you were and where you are going, deconstructing old habits that no longer fit and intentionally building a new framework that feels authentic, sustainable, and aligned with your present values."
         ],
-        image: "/assets/RPG_Images for UI/closeup-shot-of-a-beautiful-butterfly-metamorpho-2026-03-18-06-39-46-utc.jpeg"
+        excerpt: "Life transitions have a way of disrupting what used to feel clear. What once worked, how you made decisions, handled stress, or found direction, may not hold up in the same way anymore. That's often where people start to feel stuck.",
+        image: "/assets/Specialties Section_Selected Images/cards/Navigating Life Transitions.png"
     },
     {
         id: "trauma",
@@ -115,7 +122,8 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "Not by pushing you to revisit everything before you're ready, but by working with what's happening as it comes up, so you can begin to experience something different.",
             "Over time, you feel more grounded, more like yourself, and less defined by what you've been through. Instead of reacting automatically, you're able to pause, choose, and respond in ways that feel more aligned."
         ],
-        image: "/assets/RPG_Images for UI/rubber-band-ball-2026-03-19-06-59-46-utc.jpg"
+        excerpt: "Trauma doesn't always show up in obvious ways. From the outside, it may seem like you've moved on. But internally, something still feels reactive, guarded, or hard to fully settle.",
+        image: "/assets/Specialties Section_Selected Images/cards/Overcoming Adverse Life Events and Trauma.png"
     }
 ];
 
@@ -144,7 +152,9 @@ export default async function SpecialtiesPage() {
         return {
             id: staticSpec.id,
             title: cmsSpec?.title || staticSpec.title,
-            paragraphs: cmsSpec?.paragraphs && cmsSpec.paragraphs.length > 0 ? cmsSpec.paragraphs : staticSpec.paragraphs,
+            excerpt: cmsSpec?.paragraphs && cmsSpec.paragraphs.length > 0
+                ? cmsSpec.paragraphs.slice(0, 2).join(" ").replace(/\n/g, " ")
+                : staticSpec.excerpt,
             image: cmsSpec?.image || staticSpec.image
         };
     });
@@ -154,11 +164,11 @@ export default async function SpecialtiesPage() {
     const ctaBtn = cmsContent?.cta_card_button || "Book a Consultation";
 
     return (
-        <div className="bg-[#FDF8F5] min-h-screen font-sans text-[#4a535e] pb-20">
+        <div className="bg-[#FFFAF5] min-h-screen font-sans text-[#4a535e] pb-20">
 
-            {/* Page Header — H1 52px Merriweather Semibold */}
-            <div className="w-full text-center pt-24 pb-16 px-8">
-                <h1 className="font-serif font-semibold text-[#333a42]" style={{ fontSize: "52px" }}>{title}</h1>
+            {/* Page Header — H1 52px serif */}
+            <div className="w-full text-center pt-20 pb-16 px-8">
+                <h1 className="font-serif font-normal text-[#3f4a56]" style={{ fontSize: "52px" }}>{title}</h1>
             </div>
 
             {/* Card Grid */}
@@ -176,8 +186,8 @@ export default async function SpecialtiesPage() {
                                 alt={spec.title}
                                 className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                             />
-                            {/* Gradient overlay — #D6CFC2 solid left → transparent right */}
-                            <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, #D6CFC2 0%, #D6CFC2 50%, rgba(214,207,194,0.7) 72%, rgba(214,207,194,0) 100%)' }} />
+                            {/* Gradient overlay — solid beige left, image stays washed under the tint at right */}
+                            <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, #D6CFC2 0%, #D6CFC2 48%, rgba(214,207,194,0.85) 68%, rgba(214,207,194,0.4) 100%)' }} />
 
                             {/* Text content */}
                             <div className="relative z-10 space-y-5 max-w-[78%]">
@@ -185,9 +195,9 @@ export default async function SpecialtiesPage() {
                                 <h2 className="font-serif font-semibold text-[#333a42] leading-snug" style={{ fontSize: "26px" }}>
                                     {spec.title}
                                 </h2>
-                                {/* Body — Raleway Regular */}
-                                <p className="font-sans font-normal text-[#4a535e] leading-relaxed line-clamp-6" style={{ fontSize: "18px" }}>
-                                    {spec.paragraphs.slice(0, 2).join(" ")}
+                                {/* Body — justified with hyphens, per mockup */}
+                                <p className="font-sans font-normal text-[#4a535e] leading-relaxed line-clamp-[8] text-justify hyphens-auto whitespace-pre-line" style={{ fontSize: "17px" }} lang="en">
+                                    {spec.excerpt}
                                 </p>
                             </div>
 

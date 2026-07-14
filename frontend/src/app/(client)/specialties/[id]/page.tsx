@@ -17,20 +17,20 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
         title: "Improving Mood and Well-being",
         paragraphs: [
             "It's not that your life isn't working.",
-            "From the outside, it probably looks like it is. But internally, the energy isn't the same. Things that used to feel engaging and meaningful no longer bring you pleasure or joy.",
-            "Depression doesn't always look like sadness. It can feel like disconnection, exhaustion, or going through the motions without really being there.",
+            "From the outside, it probably looks like it is.\nBut internally, the energy isn't the same.\nThings that used to feel engaging and meaningful no longer bring you pleasure or joy.",
+            "Depression doesn't always look like sadness.\nIt can feel like disconnection, exhaustion, or going through the motions without really being there.",
             "You may be used to pushing through, staying productive, or overriding how you feel, but underneath, there is a heaviness you can't quite shake.",
             "In therapy, we focus on what's driving that stuckness in real time. We slow things down to notice the ways you've learned to cope with depression.",
             "This isn't about just managing symptoms, it's about finding a new way to relate to yourself and others so you can find energy, connection, and meaning again.",
             "So instead of operating on autopilot, you begin to feel more present, more engaged, and more like yourself again, with greater clarity and emotional range."
         ],
-        image: "/assets/RPG_Images for UI/mockup-wall-in-the-children-s-room-on-wall-white-c-2026-03-24-01-09-26-utc.jpg"
+        image: "/assets/Specialties Section_Selected Images/cards/Improving Mood and Well-being.png"
     },
     {
         id: "anxiety",
         title: "Working Through Anxiety And Stress",
         paragraphs: [
-            "You're managing a lot, your career, your relationships, your responsibilities..",
+            "You're managing a lot, your career, your relationships, your responsibilities…",
             "and yet, beneath the surface, it feels like your mind never stops racing.",
             "It might look like staying on top of everything, but internally, there's tension, agitation, or that constant undercurrent of worry.",
             "Sometimes your body feels it first, tight shoulders, a racing heart, restless energy, while your thoughts spin through every \"what if\" scenario.",
@@ -39,24 +39,24 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "We help you slow things down and notice that anxiety is a pattern your mind and body have learned over time. In therapy, we work with those patterns as they're happening, not just talking about them, but helping you experience something different in real time.",
             "More importantly, we help you shift it.",
             "Instead of being pulled into the same anxious loop of spiraling or shutting down, you'll learn to respond with more clarity, self-trust, and emotional balance.",
-            "This isn't just about coping strategies. It's about changing the underlying patterns that keep you feeling \"on edge\" so you can reclaim energy, calm, and confidence."
+            "This isn't just about coping strategies.\nIt's about changing the underlying patterns that keep you feeling \"on edge\" so you can reclaim energy, calm, and confidence."
         ],
-        image: "/assets/RPG_Images for UI/stress-theme-concept-paper-with-inscription-and-n-2026-03-24-15-36-15-utc.jpg"
+        image: "/assets/Specialties Section_Selected Images/cards/Working Through Anxiety and Stress.png"
     },
     {
         id: "couples",
         title: "Couples Therapy: Rebuilding Intimacy And Connections",
         paragraphs: [
-            "You may find yourselves having the same conversation over and over, one pushing, the other pulling away.. both of you leaving feeling unheard, frustrated, or alone.",
-            "At a certain point, it's no longer about the surface issue. It's the cycle you can't seem to get out of.",
+            "You may find yourselves having the same conversation over and over, one of you pushing, the other pulling away…\nboth of you leaving feeling unheard, frustrated, or alone.",
+            "At a certain point, it's no longer about the surface issue.\nIt's the cycle you can't seem to get out of.",
             "You've tried to communicate better, be more patient, give each other space, and yet, in the moments that matter, something takes over.",
-            "That's where we focus. We help you slow these moments down in real time, so you can begin to see what's actually happening underneath the conflict, and why it keeps repeating.",
+            "That's where we focus.\nWe help you slow these moments down in real time, so you can begin to see what's actually happening underneath the conflict, and why it keeps repeating.",
             "More importantly, we help you change it.",
             "Instead of getting pulled into the same familiar dynamic, you'll learn how to reach for each other in a way that creates understanding rather than distance, building trust, responsiveness, and a deeper sense of connection.",
-            "This isn't simply about learning communication techniques. It's about shifting the emotional patterns that shape how you relate to each other.",
-            "Over time, couples move from reactivity and disconnection to feeling more secure, more aligned, and more like a team again."
+            "This isn't simply about learning better communication techniques.\nIt's about shifting the emotional patterns that shape how you relate to each other.",
+            "Over time, couples move from reactivity and disconnection\nto feeling more secure, more aligned, and more like a team again."
         ],
-        image: "/assets/RPG_Images for UI/modern-ceramic-vases-on-a-white-marble-table-2026-03-16-02-08-02-utc.jpg"
+        image: "/assets/Specialties Section_Selected Images/cards/Couples Therapy_Rebuilding Intimacy and Connection.png"
     },
     {
         id: "infants",
@@ -67,11 +67,11 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "It's not just about sleep training, behavior management, or milestones.",
             "It's about how you're experiencing your child and yourself within those moments.",
             "In our work, we focus on helping you slow things down and make sense of what's happening beneath the surface: your child's needs, your emotional responses, and the patterns that begin to take shape between you.",
-            "From there, change becomes more natural. You'll feel more steady, more confident in your decisions, and more connected to your child, without losing sight of yourself in the process.",
+            "From there, change becomes more natural.\nYou'll feel more steady, more confident in your decisions, and more connected to your child, without losing sight of yourself in the process.",
             "This isn't simply about following a rigid parenting approach or trend.",
             "It's about developing a way of responding that feels clear, grounded, and aligned with who you are and how you want to show up as a parent."
         ],
-        image: "/assets/RPG_Images for UI/portrait-of-four-young-children-in-a-row-one-cryi-2026-03-11-00-57-01-utc.jpg"
+        image: "/assets/Specialties Section_Selected Images/cards/Parenting Infants and Young Children.png"
     },
     {
         id: "teens",
@@ -87,18 +87,23 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "It's to create a relationship that can adapt, one that allows for autonomy while staying meaningfully connected.",
             "Over time, parents feel more confident in how they show up, and more at ease in a stage that often feels uncertain."
         ],
-        image: "/assets/RPG_Images for UI/little-kid-playing-with-joystick-in-front-of-pc-2026-03-24-14-20-02-utc.jpg"
+        image: "/assets/Specialties Section_Selected Images/cards/Parenting Teens and Young Adults.png"
     },
     {
         id: "transitions",
         title: "Navigating Life Transitions",
         paragraphs: [
             "Life transitions have a way of disrupting what used to feel clear.",
-            "What once worked—how you made decisions, handled stress, or found direction—may not hold up in the same way anymore. That's often when people start to feel stuck.",
-            "In therapy, we provide a structured container to slow down these shifting dynamics.",
-            "We help you make sense of the gap between where you were and where you are going, deconstructing old habits that no longer fit and intentionally building a new framework that feels authentic, sustainable, and aligned with your present values."
+            "What once worked, how you made decisions, handled stress, or found direction, may not hold up in the same way anymore.",
+            "That's often where people start to feel stuck.\nA new role, a shift in identity, a change you chose, or didn't, can quietly disrupt your sense of direction. What once felt clear or manageable may now feel unsettled, even disorienting.",
+            "You may be questioning your decisions, comparing yourself to others, or noticing a pull to withdraw or avoid what feels uncertain.\nThis is often the point where people try to think their way forward, but clarity doesn't come from pressure.",
+            "It comes from understanding and adapting to what this moment is asking of you.",
+            "In therapy, we focus on how you're navigating those moments as they're happening, not just what you think you should do, but how you actually respond to uncertainty, pressure, and change.",
+            "From there, we help you shift those patterns in real time.",
+            "So instead of spinning, avoiding, or forcing clarity, you begin to feel more grounded and decisive, able to move forward in a way that feels aligned with who you are now.",
+            "Not a quick fix, but a clearer, more stable sense of direction that actually holds."
         ],
-        image: "/assets/RPG_Images for UI/closeup-shot-of-a-beautiful-butterfly-metamorpho-2026-03-18-06-39-46-utc.jpeg"
+        image: "/assets/Specialties Section_Selected Images/cards/Navigating Life Transitions.png"
     },
     {
         id: "trauma",
@@ -116,19 +121,19 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "Not by pushing you to revisit everything before you're ready, but by working with what's happening as it comes up, so you can begin to experience something different.",
             "Over time, you feel more grounded, more like yourself, and less defined by what you've been through. Instead of reacting automatically, you're able to pause, choose, and respond in ways that feel more aligned."
         ],
-        image: "/assets/RPG_Images for UI/rubber-band-ball-2026-03-19-06-59-46-utc.jpg"
+        image: "/assets/Specialties Section_Selected Images/cards/Overcoming Adverse Life Events and Trauma.png"
     }
 ];
 
-// Alternating backgrounds matching the listing page
+// Alternating backgrounds per mockup: cream pages get beige CTA box, beige pages get cream CTA box
 const BG_MAP: Record<string, { pageBg: string; ctaBg: string }> = {
-    mood:        { pageBg: "bg-white",       ctaBg: "bg-[#f2ede4]" },
-    anxiety:     { pageBg: "bg-[#f2ede4]",   ctaBg: "bg-white" },
-    couples:     { pageBg: "bg-white",       ctaBg: "bg-[#f2ede4]" },
-    infants:     { pageBg: "bg-[#f2ede4]",   ctaBg: "bg-white" },
-    teens:       { pageBg: "bg-white",       ctaBg: "bg-[#f2ede4]" },
-    transitions: { pageBg: "bg-[#f2ede4]",   ctaBg: "bg-white" },
-    trauma:      { pageBg: "bg-white",       ctaBg: "bg-[#f2ede4]" },
+    mood:        { pageBg: "bg-[#FFFAF5]",  ctaBg: "bg-[#f0ebe1]" },
+    anxiety:     { pageBg: "bg-[#f0ebe1]",  ctaBg: "bg-[#FFFAF5]" },
+    couples:     { pageBg: "bg-[#FFFAF5]",  ctaBg: "bg-[#f0ebe1]" },
+    infants:     { pageBg: "bg-[#f0ebe1]",  ctaBg: "bg-[#FFFAF5]" },
+    teens:       { pageBg: "bg-[#FFFAF5]",  ctaBg: "bg-[#f0ebe1]" },
+    transitions: { pageBg: "bg-[#f0ebe1]",  ctaBg: "bg-[#FFFAF5]" },
+    trauma:      { pageBg: "bg-[#FFFAF5]",  ctaBg: "" }, // per mockup: no CTA box on trauma
 };
 
 async function getSpecialtyData(id: string): Promise<SpecialtyData | null> {
@@ -159,42 +164,40 @@ export default async function SpecialtyDetailPage({ params }: { params: { id: st
         notFound();
     }
 
-    const { pageBg, ctaBg } = BG_MAP[specialty.id] || { pageBg: "bg-white", ctaBg: "bg-[#f2ede4]" };
+    const { pageBg, ctaBg } = BG_MAP[specialty.id] || { pageBg: "bg-[#FFFAF5]", ctaBg: "bg-[#f0ebe1]" };
 
     return (
         <div className={`${pageBg} min-h-screen font-sans text-[#4a535e]`}>
 
-            {/* Main Content — matches listing page section layout exactly */}
-            <section className={`${pageBg} py-24 border-b border-black/[0.03]`}>
-                <div className="container mx-auto px-6 max-w-6xl">
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-stretch">
+            {/* Main Content — centered container, narrow text left / wide image right */}
+            <section className={`${pageBg} pt-16 pb-24 lg:pt-20 lg:pb-28`}>
+                <div className="max-w-[1500px] mx-auto px-6 sm:px-10 xl:px-16">
+                    <div className="flex flex-col lg:flex-row items-stretch gap-10 lg:gap-20 xl:gap-28">
 
                         {/* Left Column: Text + CTA */}
-                        <div className="lg:col-span-6 space-y-8 text-left">
-                            <h1 className="text-[32px] sm:text-[38px] font-serif text-[#333a42] font-normal leading-tight">
+                        <div className="lg:w-[38%] shrink-0 space-y-10 text-left">
+                            <h1 className="text-[36px] sm:text-[48px] xl:text-[56px] font-serif text-[#3f4a56] font-normal leading-[1.2]">
                                 {specialty.title}
                             </h1>
 
-                            <div className="space-y-5 text-sm sm:text-base text-[#4a535e] leading-relaxed font-normal">
+                            <div className="space-y-7 text-[15px] sm:text-[16px] text-[#3f4a56] leading-[1.8] font-normal text-justify hyphens-auto whitespace-pre-line" lang="en">
                                 {specialty.paragraphs.map((para, idx) => (
                                     <p key={idx}>{para}</p>
                                 ))}
                             </div>
 
                             {/* CTA Card */}
-                            <div className={`${ctaBg} p-8 sm:p-10 rounded-none border border-black/[0.02] shadow-sm space-y-6`}>
-                                <div className="space-y-2">
-                                    <p className="text-[14px] font-bold text-[#333a42] tracking-wide font-sans">
-                                        When You&apos;re Ready for Something Different
-                                    </p>
-                                    <p className="text-[12px] sm:text-[13px] text-[#4a535e]/85 leading-relaxed">
-                                        If you&apos;re ready to move beyond just getting through your days and want to feel more fully present in your life again, we invite you to take the next step.
-                                    </p>
-                                </div>
-                                <div className="pt-2">
+                            <div className={`${ctaBg ? `${ctaBg} p-8 sm:p-9` : ""} rounded-none space-y-5`}>
+                                <p className="text-[16px] font-bold text-[#333a42] tracking-wide font-sans">
+                                    When You&apos;re Ready for Something Different
+                                </p>
+                                <p className="text-[14px] sm:text-[15px] text-[#4a535e]/90 leading-[1.75] text-justify hyphens-auto" lang="en">
+                                    If you&apos;re ready to move beyond just getting through your days and want to feel more fully present in your life again, we invite you to take the next step.
+                                </p>
+                                <div className="pt-1">
                                     <Link
                                         href="/contact"
-                                        className="bg-[#333a42] hover:bg-[#4a535e] text-white rounded-none font-semibold h-12 w-fit px-8 flex items-center justify-center gap-2 text-[13px] font-sans tracking-wide transition-all shadow-md hover:shadow-lg"
+                                        className="bg-[#3d4853] hover:bg-[#2d3740] text-white rounded-none font-medium h-11 w-fit px-6 flex items-center justify-center text-[14px] font-sans tracking-wide transition-all shadow-sm hover:shadow-md"
                                     >
                                         Book a Consultation
                                     </Link>
@@ -203,7 +206,7 @@ export default async function SpecialtyDetailPage({ params }: { params: { id: st
                         </div>
 
                         {/* Right Column: Full-height image */}
-                        <div className="lg:col-span-6 relative min-h-[400px]">
+                        <div className="flex-1 relative min-h-[400px] lg:min-h-[500px]">
                             <img
                                 src={specialty.image}
                                 alt={specialty.title}

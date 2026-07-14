@@ -43,6 +43,32 @@ interface Clinician {
     intake_note?: string;
 }
 
+// ── SimplePractice widget constants (same integration as team profile pages) ──
+const SP_SCOPE_ID = "64787fd5-84f6-42ba-9955-816d91404e11";
+const SP_APP_ID   = "7c72cb9f9a9b913654bb89d6c7b4e71a77911b30192051da35384b4d0c6d505b";
+const SP_BASE_URL = "https://reframe.clientsecure.me";
+
+// Per-clinician SimplePractice IDs
+const CLINICIAN_SP_IDS: Record<string, string> = {
+    "anat-cohen":      "1332279",
+    "tamara-eromo":    "1356467",
+    "wendy-eifert":    "1412589",
+    "hedieh-hakakian": "1426654",
+    "valarie-gardner": "1750330",
+};
+
+function toSlug(name: string) {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+// Match "Tamara Eromo, Psy.D." → "tamara-eromo" key
+function spIdFor(name?: string): string | undefined {
+    if (!name) return undefined;
+    const slug = toSlug(name);
+    const entry = Object.entries(CLINICIAN_SP_IDS).find(([key]) => slug.startsWith(key));
+    return entry?.[1];
+}
+
 // Static fallback — replaced dynamically when clinician + date are selected
 const FALLBACK_SLOTS = [
     "09:00 AM", "10:00 AM", "11:00 AM", "12:00 PM",
@@ -80,6 +106,75 @@ function matchClinicians(clinicians: Clinician[], concern: string): Clinician[] 
         .sort((a, b) => b.score - a.score)
         .map((item) => item.clinician);
     return matched.length > 0 ? matched : clinicians;
+}
+
+// ── SimplePractice appointment panel for the matched clinician ───────────────
+function SimplePracticePanel({ clinician, clinicianId }: { clinician: Clinician | null; clinicianId?: string }) {
+    // Re-inject the SP integration script so autobind picks up these
+    // dynamically-mounted widget buttons
+    useEffect(() => {
+        const script = document.createElement("script");
+        script.src = "https://widget-cdn.simplepractice.com/assets/integration-1.0.js";
+        script.async = true;
+        document.body.appendChild(script);
+        return () => { document.body.removeChild(script); };
+    }, [clinicianId]);
+
+    const clinicianScope = clinicianId
+        ? { "data-spwidget-clinician-id": clinicianId }
+        : { "data-spwidget-scope-global": true };
+    const firstName = clinician?.name?.split(",")[0];
+
+    return (
+        <div className="bg-white rounded-2xl border border-black/[0.07] p-8 shadow-sm text-center space-y-5">
+            {clinician?.profile_image_url && (
+                <img src={clinician.profile_image_url} alt={clinician.name} className="w-20 h-20 rounded-full object-cover object-top mx-auto border-2 border-white shadow" />
+            )}
+            <div className="space-y-1">
+                <h2 className="font-bold text-[18px] text-[#1e2328]">
+                    {firstName ? `Request an appointment with ${firstName}` : "Request an appointment"}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                    Scheduling is handled through our secure SimplePractice portal — pick a time that works for you.
+                </p>
+            </div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
+                {/* Schedule a Consultation — OAR widget, scoped to the matched clinician */}
+                <a
+                    href={SP_BASE_URL}
+                    data-spwidget-scope-id={SP_SCOPE_ID}
+                    data-spwidget-scope-uri="reframe"
+                    data-spwidget-application-id={SP_APP_ID}
+                    data-spwidget-type="OAR"
+                    {...clinicianScope}
+                    data-spwidget-autobind
+                    className="inline-flex items-center gap-2.5 bg-[#7ebac8] hover:bg-[#5aabb8] text-white font-semibold text-[14px] tracking-wide px-8 py-4 rounded-xl transition-all duration-200 cursor-pointer"
+                >
+                    <CalendarIcon className="w-4 h-4" />
+                    Schedule a Consultation
+                </a>
+                {/* Contact form widget */}
+                <a
+                    href={SP_BASE_URL}
+                    data-spwidget-scope-id={SP_SCOPE_ID}
+                    data-spwidget-scope-uri="reframe"
+                    data-spwidget-application-id={SP_APP_ID}
+                    data-spwidget-channel="embedded_widget"
+                    data-spwidget-type="Contact form"
+                    data-spwidget-contact
+                    {...clinicianScope}
+                    data-spwidget-autobind
+                    className="inline-flex items-center gap-2.5 bg-white hover:bg-black/[0.03] text-[#333a42] border border-black/[0.12] font-semibold text-[14px] tracking-wide px-8 py-4 rounded-xl transition-all duration-200 cursor-pointer"
+                >
+                    <MessageCircle className="w-4 h-4" />
+                    {firstName ? `Contact ${firstName}` : "Contact Us"}
+                </a>
+            </div>
+            <p className="text-[11px] text-muted-foreground/60">
+                Secured by SimplePractice · HIPAA-compliant · Encrypted
+            </p>
+        </div>
+    );
 }
 
 function CalendarEmbed({ type, link }: { type: string; link: string }) {
@@ -325,6 +420,33 @@ export default function BookingPage() {
 
                     {loading ? (
                         <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>
+                    ) : matched.length === 0 ? (
+                        /* No matches — offer a different concern or a general team appointment */
+                        <div className="bg-white rounded-2xl border border-black/[0.07] p-8 shadow-sm text-center space-y-5">
+                            <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                                <UsersRound className="w-7 h-7 text-primary" />
+                            </div>
+                            <div className="space-y-1">
+                                <h2 className="font-bold text-[17px] text-[#1e2328]">No specific match found</h2>
+                                <p className="text-sm text-muted-foreground max-w-md mx-auto">
+                                    We couldn&apos;t match a clinician to this concern right now. You can try a different concern, or request an appointment with our team and we&apos;ll route you to the right clinician.
+                                </p>
+                            </div>
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                                <button
+                                    onClick={() => setStep(1)}
+                                    className="inline-flex items-center gap-2 bg-white hover:bg-black/[0.03] text-[#333a42] border border-black/[0.12] font-semibold text-[14px] px-6 py-3.5 rounded-xl transition-all"
+                                >
+                                    <ChevronLeft className="w-4 h-4" /> Choose a different concern
+                                </button>
+                                <button
+                                    onClick={() => { setSelected(null); setStep(3); }}
+                                    className="inline-flex items-center gap-2 bg-[#7ebac8] hover:bg-[#5aabb8] text-white font-semibold text-[14px] px-6 py-3.5 rounded-xl transition-all"
+                                >
+                                    Book with our team <ChevronRight className="w-4 h-4" />
+                                </button>
+                            </div>
+                        </div>
                     ) : (
                         <div className="space-y-3">
                             {matched.map((clinician) => (
@@ -398,97 +520,8 @@ export default function BookingPage() {
                         </div>
                     </div>
 
-                    {selected?.booking_link ? (
-                        <CalendarEmbed type={selected.calendar_type || "other"} link={selected.booking_link} />
-                    ) : (
-                        <div className="bg-white rounded-2xl border border-black/[0.07] p-6 shadow-sm">
-                            <form onSubmit={handleFormSubmit} className="space-y-5">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Field label="First Name" value={firstName} onChange={setFirstName} placeholder="Jane" required />
-                                    <Field label="Last Name" value={lastName} onChange={setLastName} placeholder="Doe" required />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <Field label="Email" value={email} onChange={setEmail} placeholder="jane@email.com" type="email" required />
-                                    <Field label="Phone (optional)" value={phone} onChange={setPhone} placeholder="+1 555 000 0000" type="tel" />
-                                </div>
-                                <div className="grid gap-5 md:grid-cols-2">
-                                    <div className="space-y-2">
-                                        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                                            <CalendarIcon className="w-3.5 h-3.5" /> Preferred Date
-                                        </label>
-                                        <div className="rounded-xl border border-black/[0.08] p-2.5 flex justify-center">
-                                            <Calendar mode="single" selected={date} onSelect={setDate} disabled={isDateUnavailable} />
-                                        </div>
-                                        {date && <p className="text-xs text-center text-primary font-semibold">{format(date, "EEEE, MMMM d, yyyy")}</p>}
-                                        <p className="text-[11px] text-muted-foreground text-center">
-                                            {selected?.availability_timezone || "America/Los_Angeles"}
-                                        </p>
-                                    </div>
-                                    <div className="space-y-3">
-                                        <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                                            <Clock className="w-3.5 h-3.5" /> Preferred Time
-                                        </label>
-                                        {!date ? (
-                                            <p className="text-[12px] text-muted-foreground italic py-2">← Pick a date first to see available times</p>
-                                        ) : slotsLoading ? (
-                                            <div className="flex items-center gap-2 py-3 text-muted-foreground">
-                                                <Loader2 className="w-4 h-4 animate-spin" />
-                                                <span className="text-[13px]">Checking availability…</span>
-                                            </div>
-                                        ) : liveSlots.length > 0 && liveSlots.every(s => !s.available) ? (
-                                            <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-[13px] text-amber-800 font-medium">
-                                                No availability on this date — please select a different day.
-                                            </div>
-                                        ) : (
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {(liveSlots.length > 0 ? liveSlots : FALLBACK_SLOTS.map(t => ({ time: t, available: true, reason: null }))).map((slot) => (
-                                                    <button
-                                                        key={slot.time}
-                                                        type="button"
-                                                        disabled={!slot.available}
-                                                        onClick={() => slot.available && setTime(slot.time)}
-                                                        title={!slot.available ? (slot.reason || "Not available") : ""}
-                                                        className={`py-2 px-3 rounded-xl border text-sm font-semibold transition-all relative
-                                                            ${!slot.available
-                                                                ? "border-black/[0.05] bg-[#f7f5f2] text-muted-foreground/40 cursor-not-allowed line-through"
-                                                                : time === slot.time
-                                                                    ? "border-primary bg-primary/10 text-primary"
-                                                                    : "border-black/[0.08] hover:border-primary/40 text-muted-foreground hover:text-primary"
-                                                            }`}
-                                                    >
-                                                        {slot.time}
-                                                        {!slot.available && (
-                                                            <span className="absolute top-0.5 right-1 text-[8px] font-bold text-rose-400">✕</span>
-                                                        )}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        )}
-                                        <SelectField label="Timing" value={urgency} onChange={setUrgency} options={URGENCY_OPTIONS} />
-                                        <SelectField label="Preferred Contact" value={contactMethod} onChange={setContactMethod} options={CONTACT_OPTIONS} />
-                                        <div className="space-y-1.5">
-                                            <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Notes (optional)</label>
-                                            <textarea
-                                                value={notes}
-                                                onChange={(event) => setNotes(event.target.value)}
-                                                rows={3}
-                                                placeholder="Anything you'd like us to know beforehand..."
-                                                className="w-full border border-black/[0.1] rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                                {submitError && <p className="text-sm text-red-500 font-medium">{submitError}</p>}
-                                <button
-                                    type="submit"
-                                    disabled={submitting || !date || !time}
-                                    className="w-full flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-white rounded-xl py-3 text-sm font-semibold transition-colors disabled:opacity-50"
-                                >
-                                    {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Submitting...</> : <><ChevronRight className="w-4 h-4" /> Request Appointment</>}
-                                </button>
-                            </form>
-                        </div>
-                    )}
+                    {/* Always SimplePractice — scoped to the matched clinician, global scope otherwise */}
+                    <SimplePracticePanel clinician={selected} clinicianId={spIdFor(selected?.name)} />
                 </div>
             )}
         </div>

@@ -68,8 +68,10 @@ export const STATIC_TEAM_MEMBERS: TherapistData[] = [
             "As a clinical professor at Pepperdine University's Graduate School of Education and Psychology, Dr. Cohen has served as the director of the Pepperdine Community Counseling Center in Encino since 2002. The center, which has transformed into a telehealth clinic, benefits from her proven track record as an experienced clinical supervisor and leader in the field of clinical training in psychology. Dr. Cohen is passionate about community outreach and has developed pro bono parent-education workshops for local schools. She talks to parents about how they can protect their children from bullying and address various mental health challenges impacting their children and teens."
         ],
         specialties: [
-            { title: "Individual Therapy", desc: "Personalized support for anxiety, depression, and life transitions." },
-            { title: "Parenting Support", desc: "Helping parents navigate parenting challenges and family dynamics." },
+            { title: "Functional Anxiety", desc: "Perfectionism, overthinking, burnout, and high-achievement stress." },
+            { title: "Functional Depression", desc: "Grief and loss, midlife dissatisfaction, emotional numbness, and relational disconnection." },
+            { title: "Adjustment & Stress Rebuilding after change", desc: "Divorce or breakup recovery, career stress, parenting transitions (empty nest), caregiver overwhelm." },
+            { title: "Women's Issues Across the Lifespan", desc: "Role and identity shift at various stages of womanhood (e.g., motherhood, perimenopause and menopause transitions, divorce or breakup)." },
         ]
     },
     {
