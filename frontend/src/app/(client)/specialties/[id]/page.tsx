@@ -24,7 +24,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "This isn't about just managing symptoms, it's about finding a new way to relate to yourself and others so you can find energy, connection, and meaning again.",
             "So instead of operating on autopilot, you begin to feel more present, more engaged, and more like yourself again, with greater clarity and emotional range."
         ],
-        image: "/assets/Specialties Section_Selected Images/cards/Improving Mood and Well-being.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Improving Mood and Well-being.png"
     },
     {
         id: "anxiety",
@@ -41,7 +41,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "Instead of being pulled into the same anxious loop of spiraling or shutting down, you'll learn to respond with more clarity, self-trust, and emotional balance.",
             "This isn't just about coping strategies.\nIt's about changing the underlying patterns that keep you feeling \"on edge\" so you can reclaim energy, calm, and confidence."
         ],
-        image: "/assets/Specialties Section_Selected Images/cards/Working Through Anxiety and Stress.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Working Through Anxiety and Stress.png"
     },
     {
         id: "couples",
@@ -56,7 +56,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "This isn't simply about learning better communication techniques.\nIt's about shifting the emotional patterns that shape how you relate to each other.",
             "Over time, couples move from reactivity and disconnection\nto feeling more secure, more aligned, and more like a team again."
         ],
-        image: "/assets/Specialties Section_Selected Images/cards/Couples Therapy_Rebuilding Intimacy and Connection.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Couples Therapy_Rebuilding Intimacy and Connection.png"
     },
     {
         id: "infants",
@@ -71,7 +71,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "This isn't simply about following a rigid parenting approach or trend.",
             "It's about developing a way of responding that feels clear, grounded, and aligned with who you are and how you want to show up as a parent."
         ],
-        image: "/assets/Specialties Section_Selected Images/cards/Parenting Infants and Young Children.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Parenting Infants and Young Children.png"
     },
     {
         id: "teens",
@@ -87,7 +87,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "It's to create a relationship that can adapt, one that allows for autonomy while staying meaningfully connected.",
             "Over time, parents feel more confident in how they show up, and more at ease in a stage that often feels uncertain."
         ],
-        image: "/assets/Specialties Section_Selected Images/cards/Parenting Teens and Young Adults.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Parenting Teens and Young Adults.png"
     },
     {
         id: "transitions",
@@ -103,7 +103,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "So instead of spinning, avoiding, or forcing clarity, you begin to feel more grounded and decisive, able to move forward in a way that feels aligned with who you are now.",
             "Not a quick fix, but a clearer, more stable sense of direction that actually holds."
         ],
-        image: "/assets/Specialties Section_Selected Images/cards/Navigating Life Transitions.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Navigating Life Transitions.png"
     },
     {
         id: "trauma",
@@ -121,7 +121,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "Not by pushing you to revisit everything before you're ready, but by working with what's happening as it comes up, so you can begin to experience something different.",
             "Over time, you feel more grounded, more like yourself, and less defined by what you've been through. Instead of reacting automatically, you're able to pause, choose, and respond in ways that feel more aligned."
         ],
-        image: "/assets/Specialties Section_Selected Images/cards/Overcoming Adverse Life Events and Trauma.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Overcoming Adverse Life Events and Trauma.png"
     }
 ];
 

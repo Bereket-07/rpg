@@ -25,7 +25,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "So instead of operating on autopilot, you begin to feel more present, more engaged, and more like yourself again, with greater clarity and emotional range."
         ],
         excerpt: "It's not that your life isn't working.\nFrom the outside, it probably looks like it is. But internally, the energy isn't the same. Things that used to feel engaging and meaningful no longer bring you pleasure or joy.",
-        image: "/assets/Specialties Section_Selected Images/cards/Improving Mood and Well-being.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Improving Mood and Well-being.png"
     },
     {
         id: "anxiety",
@@ -43,7 +43,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "This isn't just about coping strategies. It's about changing the underlying patterns that keep you feeling \"on edge\" so you can reclaim energy, calm, and confidence."
         ],
         excerpt: "You're managing a lot, your career, your relationships, your responsibilities… and yet, beneath the surface, it feels like your mind never stops racing.",
-        image: "/assets/Specialties Section_Selected Images/cards/Working Through Anxiety and Stress.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Working Through Anxiety and Stress.png"
     },
     {
         id: "couples",
@@ -59,7 +59,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "Over time, couples move from reactivity and disconnection to feeling more secure, more aligned, and more like a team again."
         ],
         excerpt: "You may find yourselves having the same conversation over and over, one of you pushing, the other pulling away… both of you leaving feeling unheard, frustrated, or alone.",
-        image: "/assets/Specialties Section_Selected Images/cards/Couples Therapy_Rebuilding Intimacy and Connection.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Couples Therapy_Rebuilding Intimacy and Connection.png"
     },
     {
         id: "infants",
@@ -75,7 +75,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "It's about developing a way of responding that feels clear, grounded, and aligned with who you are and how you want to show up as a parent."
         ],
         excerpt: "Becoming a parent can be deeply meaningful and unexpectedly disorienting. You may find yourself second-guessing decisions you once made with ease, feeling stretched thin, or unsure how to respond in the moments that matter most.",
-        image: "/assets/Specialties Section_Selected Images/cards/Parenting Infants and Young Children.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Parenting Infants and Young Children.png"
     },
     {
         id: "teens",
@@ -92,7 +92,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "Over time, parents feel more confident in how they show up, and more at ease in a stage that often feels uncertain."
         ],
         excerpt: "As children grow, the relationship changes, often in ways no one fully prepares you for. Conversations become more complex. Reactions feel less predictable. And the closeness you once relied on can begin to feel harder to reach.",
-        image: "/assets/Specialties Section_Selected Images/cards/Parenting Teens and Young Adults.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Parenting Teens and Young Adults.png"
     },
     {
         id: "transitions",
@@ -104,7 +104,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "We help you make sense of the gap between where you were and where you are going, deconstructing old habits that no longer fit and intentionally building a new framework that feels authentic, sustainable, and aligned with your present values."
         ],
         excerpt: "Life transitions have a way of disrupting what used to feel clear. What once worked, how you made decisions, handled stress, or found direction, may not hold up in the same way anymore. That's often where people start to feel stuck.",
-        image: "/assets/Specialties Section_Selected Images/cards/Navigating Life Transitions.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Navigating Life Transitions.png"
     },
     {
         id: "trauma",
@@ -123,7 +123,7 @@ const STATIC_SPECIALTIES: SpecialtyData[] = [
             "Over time, you feel more grounded, more like yourself, and less defined by what you've been through. Instead of reacting automatically, you're able to pause, choose, and respond in ways that feel more aligned."
         ],
         excerpt: "Trauma doesn't always show up in obvious ways. From the outside, it may seem like you've moved on. But internally, something still feels reactive, guarded, or hard to fully settle.",
-        image: "/assets/Specialties Section_Selected Images/cards/Overcoming Adverse Life Events and Trauma.png"
+        image: "/assets/Specialties Section_Selected Images/Cards/Overcoming Adverse Life Events and Trauma.png"
     }
 ];
 
