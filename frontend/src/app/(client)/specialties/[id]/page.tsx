@@ -176,7 +176,7 @@ export default async function SpecialtyDetailPage({ params }: { params: { id: st
 
                         {/* Left Column: Text + CTA */}
                         <div className="lg:w-[38%] shrink-0 space-y-10 text-left">
-                            <h1 className="text-[36px] sm:text-[48px] xl:text-[56px] font-serif text-[#3f4a56] font-normal leading-[1.2]">
+                            <h1 className="text-[22px] sm:text-[29px] lg:text-[36px] sm:text-[48px] xl:text-[56px] font-serif text-[#3f4a56] font-normal leading-[1.2]">
                                 {specialty.title}
                             </h1>
 

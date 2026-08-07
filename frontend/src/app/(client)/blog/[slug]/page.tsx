@@ -53,7 +53,7 @@ const MOCK_ARTICLES: Record<string, FullArticle> = {
         author: {
             name: "Dr. Tamara Eromo, Psy.D.",
             bio: "Clinical Psychologist, Co-Founder. Dr. Eromo specializes in attachment science and relational systems, helping couples navigate complex relational patterns.",
-            profile_image_url: "/assets/RPG_Images for UI/Tamara copy.jpg"
+            profile_image_url: "/assets/teams photo/Tamara-8.png"
         }
     },
     "dogs-for-therapy": {
@@ -78,7 +78,7 @@ const MOCK_ARTICLES: Record<string, FullArticle> = {
         author: {
             name: "Dr. Anat Cohen, Ph.D.",
             bio: "Clinical Psychologist, Co-Founder. Dr. Cohen has over two decades of clinical experience in helping individuals manage life stress, functional anxiety, and emotional regulation.",
-            profile_image_url: "/assets/RPG_Images for UI/Anat copy.jpg"
+            profile_image_url: "/assets/teams photo/Anat-8.png"
         }
     },
     "fitness-and-mental-health": {
@@ -103,7 +103,7 @@ const MOCK_ARTICLES: Record<string, FullArticle> = {
         author: {
             name: "Dr. Wendy Eifert, Psy.D.",
             bio: "Clinical Psychologist. Dr. Eifert works with high-achieving professionals and medical providers navigating burnout, perfectionism, and somatic wellness.",
-            profile_image_url: "/assets/RPG_Images for UI/Wendy copy.jpg"
+            profile_image_url: "/assets/teams photo/Wendy-8.png"
         }
     },
     "leave-the-past-where-it-belongs": {
@@ -133,7 +133,7 @@ const MOCK_ARTICLES: Record<string, FullArticle> = {
         author: {
             name: "Dr. Tamara Eromo, Psy.D.",
             bio: "Clinical Psychologist, Co-Founder. Dr. Eromo specializes in attachment science and relational systems, helping couples navigate complex relational patterns.",
-            profile_image_url: "/assets/RPG_Images for UI/Tamara copy.jpg"
+            profile_image_url: "/assets/teams photo/Tamara-8.png"
         }
     }
 };
@@ -214,7 +214,7 @@ export default async function DynamicArticlePage({ params }: { params: { slug: s
                     <span className="text-[10px] tracking-[0.2em] font-bold text-[#7ebac8] uppercase">
                         {article.category?.name || "Therapy"}
                     </span>
-                    <h1 className="text-[30px] sm:text-[40px] font-serif text-[#333a42] font-normal leading-tight">
+                    <h1 className="text-[21px] sm:text-[26px] lg:text-[30px] sm:text-[40px] font-serif text-[#333a42] font-normal leading-tight">
                         {article.title}
                     </h1>
                     <p className="text-[17px] sm:text-[18px] text-[#4a535e]/80 italic font-sans leading-relaxed">

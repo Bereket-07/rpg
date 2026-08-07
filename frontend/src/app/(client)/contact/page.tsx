@@ -74,7 +74,7 @@ export default function ContactPage() {
             {/* ── Hero ───────────────────────────────────────────────────── */}
             <section className="bg-white border-b border-black/[0.05] pt-20 pb-16 px-6 text-center">
                 <p className="text-[11px] tracking-[0.28em] uppercase font-bold text-[#7ebac8] mb-4">{intakeTagline}</p>
-                <h1 className="text-[38px] sm:text-[52px] font-serif text-[#333a42] font-normal tracking-tight leading-tight">
+                <h1 className="text-[24px] sm:text-[30px] lg:text-[38px] sm:text-[52px] font-serif text-[#333a42] font-normal tracking-tight leading-tight">
                     {pageTitle}
                 </h1>
                 <p className="text-[15px] sm:text-[17px] text-[#5c6670]/80 mt-4 max-w-md mx-auto leading-relaxed">
@@ -90,7 +90,7 @@ export default function ContactPage() {
 
                     {/* Description */}
                     <div className="space-y-3">
-                        <h2 className="text-[26px] sm:text-[30px] font-serif text-[#333a42] font-normal leading-snug">
+                        <h2 className="text-[21px] sm:text-[23px] lg:text-[26px] sm:text-[30px] font-serif text-[#333a42] font-normal leading-snug">
                             {infoTitle}
                         </h2>
                         <div className="w-10 h-[1.5px] bg-[#7ebac8]" />
@@ -160,7 +160,7 @@ export default function ContactPage() {
 
                         {/* Header */}
                         <div className="space-y-2 pb-6 border-b border-black/[0.05]">
-                            <h2 className="text-[24px] sm:text-[28px] font-serif text-[#333a42] font-normal">
+                            <h2 className="text-[19px] sm:text-[22px] lg:text-[24px] sm:text-[28px] font-serif text-[#333a42] font-normal">
                                 {formTitle}
                             </h2>
                             <p className="text-[13px] text-[#5c6670]/75 leading-relaxed">

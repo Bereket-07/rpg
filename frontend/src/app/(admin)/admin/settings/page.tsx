@@ -871,11 +871,11 @@ export default function SiteCustomizerPage() {
                             ) : <TeamShowcaseTitleBar title={homeShowcaseTitle} />}
 
                             {/* Individual team member cards — exact client-side replica */}
-                            <section className="bg-[#fdf8f5] pb-28 lg:pb-36 font-sans text-[#333a42]">
-                                <div className="container mx-auto px-4 max-w-6xl">
-                                    <div className="space-y-24">
+                            <section className="bg-[#fdf8f5] pb-[170px] font-sans text-[#333a42]">
+                                <div className="container mx-auto px-6 max-w-[1440px]">
+                                    <div className="space-y-[82px]">
                                         {/* Row 1 */}
-                                        <div className="flex flex-wrap justify-center gap-x-8 gap-y-28 lg:gap-x-12">
+                                        <div className="flex flex-wrap justify-center gap-x-8 lg:gap-x-[30px] gap-y-[110px]">
                                             {teamMembers.slice(0, 3).map((member) => (
                                                 showEditMode ? (
                                                     <Editable key={member.slug} label={`Edit ${member.name.split(",")[0]}`} onClick={() => openEdit({
@@ -895,7 +895,7 @@ export default function SiteCustomizerPage() {
                                         </div>
                                         {/* Row 2 */}
                                         {teamMembers.length > 3 && (
-                                            <div className="flex flex-wrap justify-center gap-x-8 gap-y-28 lg:gap-x-12">
+                                            <div className="flex flex-wrap justify-center gap-x-8 lg:gap-x-[38px] gap-y-[110px]">
                                                 {teamMembers.slice(3).map((member) => (
                                                     showEditMode ? (
                                                         <Editable key={member.slug} label={`Edit ${member.name.split(",")[0]}`} onClick={() => openEdit({
@@ -1488,8 +1488,8 @@ function CaliforniaBannerSection({ bannerTitle, bannerDesc }: any) {
 /* ── TeamShowcaseTitleBar: just the heading row ── */
 function TeamShowcaseTitleBar({ title }: { title: string }) {
     return (
-        <div className="bg-[#fdf8f5] pt-28 lg:pt-36 pb-0 text-center">
-            <h2 className="text-[44px] md:text-[48px] font-serif text-[#333a42] font-normal tracking-wide leading-tight">
+        <div className="bg-[#fdf8f5] pt-[78px] pb-0 text-center">
+            <h2 className="font-serif font-semibold text-[#333a42]" style={{ fontSize: "52px", lineHeight: "1.2" }}>
                 {title || "Meet the Team"}
             </h2>
         </div>
@@ -1499,26 +1499,45 @@ function TeamShowcaseTitleBar({ title }: { title: string }) {
 /* ── TeamMemberCard: exact replica of the client-side card ── */
 function TeamMemberCard({ member }: { member: TeamMember }) {
     return (
-        <div className="w-[320px] sm:w-[340px] h-[330px] sm:h-[345px] bg-[#d2c9b7] border border-[#c4b9a3]/40 rounded-[16px] shadow-[0_24px_48px_rgba(30,28,24,0.14)] p-6 pt-[110px] sm:pt-[120px] relative flex flex-col items-center text-center pb-6">
+        <div className="relative w-full max-w-[460px] lg:w-[460px] lg:shrink-0 group" style={{ height: "544px" }}>
             {/* Circular overlapping photo — exact match to client side */}
-            <div className="w-[185px] h-[185px] sm:w-[200px] sm:h-[200px] rounded-full border-[8px] border-white shadow-[0_8px_20px_rgba(0,0,0,0.12)] absolute top-[-92px] sm:top-[-100px] left-1/2 -translate-x-1/2 overflow-hidden bg-muted">
+            <div
+                className="absolute left-1/2 -translate-x-1/2 z-10 rounded-full overflow-hidden bg-transparent transition-all duration-300"
+                style={{
+                    width: "230px",
+                    height: "230px",
+                    top: "0px",
+                    border: "8px solid white",
+                    boxShadow: "0 8px 18px rgba(0,0,0,0.10)",
+                }}
+            >
                 <img
                     src={member.image}
                     alt={member.name}
-                    className="w-full h-full object-cover scale-[1.3] origin-center"
+                    className="w-full h-full object-cover object-top rounded-full"
                 />
             </div>
             {/* Card body */}
-            <div className="flex-grow flex flex-col justify-between w-full h-full pb-1">
+            <div
+                className="absolute bottom-0 left-0 right-0 rounded-[10px] flex flex-col items-center text-center shadow-[0_10px_14px_rgba(30,28,24,0.16)] transition-all duration-300"
+                style={{
+                    top: "115px",
+                    background: "#D6CFC2",
+                    border: "1px solid rgba(51,58,66,0.55)",
+                    padding: "150px 32px 38px 32px",
+                }}
+            >
+                <div className="flex-grow flex flex-col justify-between w-full h-full pb-1">
                 <div className="flex flex-col items-center">
-                    <h3 className="text-[20px] sm:text-[21px] md:text-[22px] font-sans font-extrabold text-[#333a42] leading-tight tracking-wide">{member.name}</h3>
-                    <div className="w-10 h-[1.5px] bg-[#333a42]/30 my-2.5" />
-                    <p className="text-[13px] font-sans font-semibold text-[#4a535e] leading-snug tracking-wide">{member.role}</p>
-                    <p className="text-[12px] font-sans text-[#4a535e]/90 leading-relaxed max-w-[270px] pt-1 font-medium tracking-wide">{member.specialties}</p>
+                    <h3 className="font-sans font-bold text-[#333a42] leading-tight" style={{ fontSize: "30px" }}>{member.name}</h3>
+                    <div className="w-[52px] h-[1.5px] bg-[#333a42]/45 my-[16px]" />
+                    <p className="font-sans font-medium text-[#333a42]/85 leading-snug" style={{ fontSize: "22px" }}>{member.role}</p>
+                    <p className="font-sans font-light text-[#4a535e] leading-snug max-w-[390px] pt-[14px]" style={{ fontSize: "20px" }}>{member.specialties}</p>
                 </div>
                 <div className="pt-2">
-                    <span className="font-serif italic text-[14px] sm:text-[15px] text-[#333a42]">Read More</span>
+                    <span className="font-serif italic text-[#333a42]" style={{ fontSize: "14px" }}>Read More</span>
                 </div>
+            </div>
             </div>
         </div>
     );

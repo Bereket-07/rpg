@@ -15,48 +15,49 @@ export function Hero({ data }: HeroProps) {
 
     return (
         <section
-            className="relative w-full flex items-center justify-center bg-cover bg-center"
+            className="home-hero relative w-full bg-cover bg-top"
             style={{
                 backgroundImage: `url('${heroImage}')`,
-                minHeight: "calc(100vh - 72px)",
             }}
         >
             {/* Very light overlay */}
             <div className="absolute inset-0 bg-white/10" />
 
-            <div className="relative z-10 mx-auto px-6 w-full max-w-[860px] text-center">
+            {/* 760px keeps the H1 breaking after "You’re" at 44px, as in the design
+                (needs >=690px for that line, <831px or "Doing" pulls up onto line 1) */}
+            <div className="home-hero-copy relative z-10 mx-auto px-6 w-full max-w-[760px] text-center">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1.1, ease: "easeOut" }}
                     className="flex flex-col items-center"
                 >
-                    {/* H1 — 52px, Merriweather Semibold Italic, 120% line-height */}
+                    {/* H1 — 44px, Merriweather Semibold, 120% line-height */}
                     <h1
-                        className="font-serif italic text-[#333a42]"
-                        style={{ fontSize: "52px", lineHeight: "1.2", fontWeight: 600 }}
+                        className="font-serif text-[#4B5563]"
+                        style={{ fontSize: "clamp(25px, 4.4vw, 44px)", lineHeight: "1.2", fontWeight: 600 }}
                     >
                         {heroTitle}
                     </h1>
 
-                    {/* H3 — 28px, Merriweather Italic */}
+                    {/* H3 — 22px, Merriweather Italic */}
                     <h3
-                        className="font-serif italic font-normal text-[#333a42]"
-                        style={{ fontSize: "28px", lineHeight: "1.2", marginTop: "24px" }}
+                        className="mt-8 lg:mt-[18px] font-serif italic font-normal text-[#4B5563]"
+                        style={{ fontSize: "clamp(16px, 2.2vw, 22px)", lineHeight: "1.2" }}
                     >
                         {heroSubheading}
                     </h3>
 
                     {/* B2 body — 25px, Raleway Medium */}
                     <p
-                        className="font-sans font-medium text-[#333a42] max-w-[420px]"
-                        style={{ fontSize: "25px", lineHeight: "1.5", marginTop: "40px" }}
+                        className="mt-12 lg:mt-[60px] font-sans font-medium text-[#333a42] max-w-[420px]"
+                        style={{ fontSize: "clamp(16px, 2.5vw, 25px)", lineHeight: "1.5" }}
                     >
                         {heroDesc}
                     </p>
 
                     {/* Button — SimplePractice appointment widget */}
-                    <div style={{ marginTop: "32px" }}>
+                    <div className="mt-8 lg:mt-[30px]">
                         <a
                             href="https://reframe.clientsecure.me"
                             data-spwidget-scope-id="64787fd5-84f6-42ba-9955-816d91404e11"
@@ -65,8 +66,8 @@ export function Hero({ data }: HeroProps) {
                             data-spwidget-type="OAR"
                             data-spwidget-scope-global
                             data-spwidget-autobind
-                            className="inline-flex items-center justify-center bg-[#3d4853] hover:bg-[#2d3740] text-white font-sans font-medium transition-colors duration-200 cursor-pointer"
-                            style={{ fontSize: "16px", height: "44px", paddingLeft: "32px", paddingRight: "32px" }}
+                            className="inline-flex items-center justify-center bg-[#3d4853] hover:bg-[#2d3740] text-white font-sans font-medium transition-colors duration-200 cursor-pointer shadow-[0_4px_12px_rgba(30,40,50,0.22)]"
+                            style={{ fontSize: "14.5px", height: "40px", paddingLeft: "28px", paddingRight: "28px" }}
                         >
                             {heroCtaText}
                         </a>

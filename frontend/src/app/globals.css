@@ -127,6 +127,44 @@ img {
   transition: opacity 0.3s ease;
 }
 
+.site-header-inner {
+  height: 84px;
+}
+
+.home-hero {
+  min-height: calc(100vh - 84px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-hero-copy {
+  margin-top: 40px;
+}
+
+@media (min-width: 1024px) {
+  .site-header-inner {
+    height: 112px;
+  }
+
+  .home-hero {
+    /* Aspect tracks width (1.706:1) so background-size:cover is always width-driven.
+       The source is 1440x890 (1.618) — a fixed pixel height crops the sides on
+       narrower windows (losing the right-hand window) and the top/bottom on wider ones. */
+    aspect-ratio: 1.706;
+    min-height: 700px;
+    display: block;
+  }
+
+  .home-hero-copy {
+    position: absolute;
+    top: 220px;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 0;
+  }
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,

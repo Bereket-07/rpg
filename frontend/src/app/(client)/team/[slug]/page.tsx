@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { GraduationCap } from "lucide-react";
 import { getApiUrl } from "@/lib/api";
 import { STATIC_TEAM_MEMBERS } from "../page";
 
@@ -33,6 +32,30 @@ interface TherapistData {
 
 function toSlug(name: string) {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+function QuoteMark({ className }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 60 44" aria-hidden="true" className={className} fill="currentColor">
+            <path d="M0 44V22C0 9.85 8.5 1.1 24 0v9.5c-7.7 1-11.5 5-11.6 12.5H24V44H0Z" />
+            <path d="M34 44V22C34 9.85 42.5 1.1 58 0v9.5c-7.7 1-11.5 5-11.6 12.5H58V44H34Z" />
+        </svg>
+    );
+}
+
+function GraduationCapIcon() {
+    return (
+        <svg
+            viewBox="0 0 64 44"
+            aria-hidden="true"
+            className="h-[44px] w-[64px] shrink-0 text-[#EEEAE0]"
+            fill="currentColor"
+        >
+            <path d="M32 0 0 13l32 13 26-10.6V30h4V13L32 0Z" />
+            <path d="M12 21.5V32c0 4.6 9 8 20 8s20-3.4 20-8V21.5L32 30 12 21.5Z" />
+            <path d="M56.6 30.5h2.8L61 43h-6l1.6-12.5Z" />
+        </svg>
+    );
 }
 
 async function getProfile(slug: string): Promise<TherapistData | null> {
@@ -78,86 +101,110 @@ export default async function TherapistDetailPage({ params }: { params: { slug: 
 
     const approach = profile.approach.length ? profile.approach : ["Profile details will appear here after they are added in the CMS."];
     const background = profile.background.length ? profile.background : [];
-    const half = Math.ceil(background.length / 2);
-    const leftCol = background.slice(0, half);
-    const rightCol = background.slice(half);
+
+    // Height of the two-column flow. Raleway 22px in a 544px column fits ~53.7 chars/line,
+    // at 30px leading with 26px between paragraphs. Taking 58% of the total puts roughly
+    // that share in the left column, so it fills first and one paragraph splits across —
+    // the design's behaviour, rather than CSS's default balanced columns.
+    const CHARS_PER_LINE = 53.7;
+    const backgroundFlowHeight = Math.round(
+        (background.reduce((n, p) => n + Math.max(1, Math.ceil(p.length / CHARS_PER_LINE)), 0) * 30
+            + Math.max(0, background.length - 1) * 26) * 0.58
+    );
 
     return (
-        <div className="bg-[#FFFAF5] min-h-screen font-sans text-[#4a535e] pb-24">
-            <section className="bg-[#FFFAF5] pt-16 pb-24 border-b border-black/[0.03]">
-                <div className="container mx-auto px-8 max-w-6xl">
-                    <div className="w-full text-center mb-16">
-                        {/* H1 — 52px Merriweather Semibold */}
-                        <h1 className="font-serif font-semibold text-[#333a42]" style={{ fontSize: "52px", lineHeight: "1.2" }}>Meet the Team</h1>
+        <div className="bg-[#FFFAF5] min-h-screen font-sans text-[#4a535e]">
+            {/* ── Approach ─────────────────────────────────────────────── */}
+            <section className="bg-[#FFFAF5] pb-[92px] pt-[18px]">
+                <h1 className="text-center font-serif font-semibold text-[29px] sm:text-[39px] lg:text-[52px] leading-[1.1] tracking-[-0.015em] text-[#333a42]">
+                    Meet the Team
+                </h1>
+                <div className="mx-auto mt-[86px] grid w-full max-w-[1194px] grid-cols-1 gap-x-[105px] gap-y-[48px] px-8 md:grid-cols-[minmax(0,460px)_minmax(0,1fr)]">
+                    <div>
+                        {profile.image ? (
+                            <img
+                                src={profile.image}
+                                alt={profile.name}
+                                loading="lazy"
+                                className="aspect-[5/6] w-full rounded-[16px] object-cover object-top shadow-[0_10px_24px_-16px_rgba(0,0,0,0.4)]"
+                            />
+                        ) : (
+                            <div className="aspect-[5/6] w-full rounded-[16px] bg-[#EEEAE0]" />
+                        )}
+                        <h2 className="mt-[34px] font-serif font-semibold text-[21px] sm:text-[26px] lg:text-[30px] leading-[1.2] text-[#333a42]">
+                            {profile.name}
+                        </h2>
+                        <p className="mt-[16px] font-sans text-[20px] text-[#4a535e]">{profile.role}</p>
+                        <div className="mt-[34px] ml-[36px] h-px w-[88px] bg-[#333a42]/40" />
                     </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-16 items-start">
-                        <div className="md:col-span-5 space-y-4 text-left">
-                            <div className="relative w-full aspect-[4/5] rounded-[12px] overflow-hidden shadow-[0_10px_30px_rgba(60,50,40,0.18)]">
-                                <img
-                                    src={profile.image}
-                                    alt={profile.name}
-                                    className="w-full h-full object-cover object-top"
-                                />
-                            </div>
-                            <div className="pb-4">
-                                {/* H4 — 28px Merriweather Semibold */}
-                                <h2 className="font-serif font-semibold text-[#333a42] leading-tight" style={{ fontSize: "28px" }}>{profile.name}</h2>
-                                {/* Role — 17px Raleway Regular */}
-                                <p className="font-sans font-normal text-[#4a535e] mt-1" style={{ fontSize: "17px" }}>{profile.role}</p>
-                                <div className="w-10 h-[1.5px] bg-[#333a42]/30 mt-4" />
-                            </div>
-                        </div>
-
-                        <div className="md:col-span-7 space-y-6 text-left pr-10 lg:pr-16">
-                            {/* B3 — 35px Raleway Bold */}
-                            <h2 className="font-sans font-bold text-[#333a42]" style={{ fontSize: "35px" }}>Approach</h2>
-                            {/* B2.2 — 25px Raleway Regular */}
-                            <div className="space-y-4 font-sans font-normal text-[#4a535e] leading-[1.55] text-justify hyphens-auto" style={{ fontSize: "20px" }} lang="en">
-                                {approach.map((para, idx) => <p key={idx}>{para}</p>)}
-                            </div>
+                    <div>
+                        <h3 className="font-sans text-[21px] sm:text-[27px] lg:text-[34px] font-bold leading-[1.2] text-[#333a42]">
+                            Approach
+                        </h3>
+                        <div className="mt-[30px] space-y-[26px]">
+                            {approach.map((text, idx) => (
+                                <p
+                                    key={idx}
+                                    className="text-justify font-sans text-[21px] leading-[30px] text-[#4a535e] hyphens-auto [hyphens:auto] [-webkit-hyphens:auto]"
+                                    lang="en"
+                                >
+                                    {text}
+                                </p>
+                            ))}
                         </div>
                     </div>
                 </div>
             </section>
 
             {profile.beyondTherapy && (
-                <section className="bg-[#D7DBCE] py-16 border-t border-b border-black/[0.02]">
-                    <div className="container mx-auto px-8 max-w-5xl space-y-8">
-                        {/* B3 — 35px Raleway Bold */}
-                        <h2 className="font-sans font-bold text-[#333a42] text-center" style={{ fontSize: "35px" }}>Beyond Therapy</h2>
-                        <div className="relative px-16">
-                            {/* Opening quote */}
-                            <span className="font-sans font-bold text-[#424c56] leading-none select-none absolute left-0 top-0" style={{ fontSize: "96px", lineHeight: 1 }}>&ldquo;</span>
-                            {/* B2.2 — 25px Raleway Regular, justified with hyphens */}
-                            <div className="space-y-5 font-sans font-normal text-[#4a535e] leading-[1.55] text-justify hyphens-auto" style={{ fontSize: "20px" }} lang="en">
-                                {profile.beyondTherapy.split('\n\n').filter(p => p.trim()).map((para, idx) => (
-                                    <p key={idx}>{para.trim()}</p>
+                <section className="bg-[#D7DBCE] py-[62px]">
+                    <div className="mx-auto w-full max-w-[1160px] px-8">
+                        <h2 className="text-center font-sans text-[21px] sm:text-[27px] lg:text-[34px] font-bold leading-[1.2] text-[#333a42]">
+                            Beyond Therapy
+                        </h2>
+                        <div className="mt-[46px] grid grid-cols-[26px_minmax(0,1fr)_26px] gap-x-[10px] sm:grid-cols-[40px_minmax(0,1fr)_40px] sm:gap-x-[24px] lg:grid-cols-[60px_minmax(0,1fr)_60px] lg:gap-x-[45px]">
+                            <QuoteMark className="mt-[6px] h-[22px] w-[26px] sm:h-[32px] sm:w-[38px] lg:h-[44px] lg:w-[52px] text-[#333a42]" />
+                            <div className="space-y-[26px]">
+                                {profile.beyondTherapy.split("\n\n").filter(p => p.trim()).map((para, idx) => (
+                                    <p
+                                        key={idx}
+                                        lang="en"
+                                        className="text-justify font-sans text-[21px] leading-[30px] text-[#4a535e] hyphens-auto [hyphens:auto] [-webkit-hyphens:auto]"
+                                    >
+                                        {para.trim()}
+                                    </p>
                                 ))}
                             </div>
-                            {/* Closing quote */}
-                            <span className="font-sans font-bold text-[#424c56] leading-none select-none absolute right-0 bottom-0" style={{ fontSize: "96px", lineHeight: 1 }}>&rdquo;</span>
+                            <QuoteMark className="mt-auto h-[22px] w-[26px] sm:h-[32px] sm:w-[38px] lg:h-[44px] lg:w-[52px] rotate-180 text-[#333a42]" />
                         </div>
                     </div>
                 </section>
             )}
 
             {profile.specialties.length > 0 && (
-                <section className="bg-[#FFFAF5] py-20 border-b border-black/[0.03]">
-                    <div className="container mx-auto px-8 max-w-6xl text-center">
-                        {/* B3 — 35px Raleway Bold */}
-                        <h2 className="font-sans font-bold text-[#333a42] mb-14" style={{ fontSize: "35px" }}>Specialty Areas of Practice</h2>
-                        <div className={`grid grid-cols-1 md:grid-cols-2 ${profile.specialties.length > 4 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'} gap-6 ${profile.specialties.length <= 4 ? 'max-w-3xl mx-auto w-full' : ''}`}>
+                <section className="bg-[#FFFAF5] pt-[92px] pb-[56px]">
+                    {/* <=4 cards sit 2-up in a narrow container; 5+ go 3-up with any
+                        remainder row centred (flex-wrap, not grid, so 5 renders 3 + 2 centred). */}
+                    <div className={`mx-auto w-full px-8 ${profile.specialties.length > 4 ? "max-w-[1159px]" : "max-w-[790px]"}`}>
+                        <h2 className="text-center font-sans font-bold text-[#333a42] text-[21px] sm:text-[27px] lg:text-[34px] leading-[1.2] mb-[42px]">
+                            Specialty Areas of Practice
+                        </h2>
+                        <div className="flex flex-wrap justify-center gap-[12px] items-stretch">
                             {profile.specialties.map((spec, idx) => (
-                                <div key={idx} className="bg-[#f0ebe1] p-10 flex flex-col items-center text-center min-h-[280px]">
-                                    <div className="space-y-4 w-full">
-                                        {/* H5 — Merriweather Semibold */}
-                                        <h3 className="font-serif font-semibold italic text-[#333a42] leading-snug" style={{ fontSize: "24px" }}>{spec.title}</h3>
-                                        <div className="w-8 h-[1.5px] bg-[#333a42]/25 mx-auto" />
-                                        {/* Body — smaller than title, per mockup */}
-                                        {spec.desc && <p className="font-sans font-light text-[#4a535e] leading-relaxed" style={{ fontSize: "18px" }}>{spec.desc}</p>}
-                                    </div>
-                                </div>
+                                <article
+                                    key={idx}
+                                    className={`bg-[#EEEAE0] px-[23px] pt-[34px] pb-[30px] text-center flex flex-col w-full sm:w-[calc((100%-12px)/2)] ${profile.specialties.length > 4 ? "lg:w-[calc((100%-24px)/3)]" : ""}`}
+                                >
+                                    <h3 className="font-serif font-normal text-[#333a42] text-[20px] leading-[1.37] whitespace-pre-line">
+                                        {spec.title}
+                                    </h3>
+                                    <div className="w-[36px] h-px bg-[#333a42]/30 mx-auto mt-[18px] mb-[20px]" />
+                                    {spec.desc && (
+                                        <p className="font-sans font-light text-[#4a535e] text-[20px] leading-[1.5] whitespace-pre-line">
+                                            {spec.desc}
+                                        </p>
+                                    )}
+                                </article>
                             ))}
                         </div>
                     </div>
@@ -165,18 +212,30 @@ export default async function TherapistDetailPage({ params }: { params: { slug: 
             )}
 
             {background.length > 0 && (
-                <section className="bg-[#FFFAF5] py-20">
-                    <div className="container mx-auto px-8 max-w-5xl">
-                        {/* Header: plain large icon + title, centered — per mockup, no circle */}
-                        <div className="flex items-center justify-center gap-4 mb-14">
-                            <GraduationCap className="w-12 h-12 text-[#333a42]/25 shrink-0" strokeWidth={1.5} />
-                            {/* B3 — 35px Raleway Bold */}
-                            <h2 className="font-sans font-bold text-[#333a42]" style={{ fontSize: "35px" }}>Background and Education</h2>
+                <section className="bg-[#FFFAF5] pt-[64px] pb-[110px]">
+                    <div className="mx-auto w-full max-w-[1226px] px-8">
+                        <div className="flex items-center justify-center gap-[26px]">
+                            <GraduationCapIcon />
+                            <h2 className="font-sans font-bold text-[#333a42] text-[21px] sm:text-[27px] lg:text-[34px] leading-[1.2]">
+                                Background and Education
+                            </h2>
                         </div>
-                        {/* Raleway Regular, justified with hyphens */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 text-left font-sans font-normal text-[#4a535e] leading-[1.6] text-justify hyphens-auto" style={{ fontSize: "20px" }} lang="en">
-                            <div className="space-y-5">{leftCol.map((para, idx) => <p key={idx}>{para}</p>)}</div>
-                            <div className="space-y-5">{rightCol.map((para, idx) => <p key={idx}>{para}</p>)}</div>
+                        {/* column-fill:auto (not the default "balance") so the left column fills
+                            first and a paragraph breaks across the boundary, as in the design.
+                            Height is estimated from the copy so the left column carries ~58%. */}
+                        <div
+                            lang="en"
+                            className="mt-[70px] columns-1 gap-x-[75px] text-justify hyphens-auto md:columns-2 md:h-[var(--bg-flow-h)] md:[column-fill:auto] [hyphens:auto] [-webkit-hyphens:auto]"
+                            style={{ ["--bg-flow-h" as string]: `${backgroundFlowHeight}px` }}
+                        >
+                            {background.map((para, idx) => (
+                                <p
+                                    key={idx}
+                                    className="mb-[26px] font-sans font-normal text-[#4a535e] text-[22px] leading-[30px]"
+                                >
+                                    {para}
+                                </p>
+                            ))}
                         </div>
                     </div>
                 </section>
@@ -188,7 +247,7 @@ export default async function TherapistDetailPage({ params }: { params: { slug: 
                 return (
                     <section className="bg-[#333a42] py-16">
                         <div className="container mx-auto px-8 max-w-3xl text-center space-y-6">
-                            <h2 className="font-sans font-bold text-white" style={{ fontSize: "28px" }}>
+                            <h2 className="font-sans font-bold text-white" style={{ fontSize: "clamp(16px, 2.8vw, 28px)" }}>
                                 Ready to Work with {profile.name.split(",")[0]}?
                             </h2>
                             <p className="font-sans font-normal text-white/70" style={{ fontSize: "16px" }}>

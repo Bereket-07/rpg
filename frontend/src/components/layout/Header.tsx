@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
-import { X, Menu, ArrowRight, ChevronDown } from "lucide-react";
+import { X, ArrowRight } from "lucide-react";
 import { getApiUrl } from "@/lib/api";
 
 
@@ -34,11 +34,11 @@ const STATIC_SPECIALTIES_NAV = [
 ];
 
 const STATIC_TEAM_NAV: TeamNavProfile[] = [
-    { slug: "anat-cohen",        name: "Anat Cohen, Ph.D.",          role: "Clinical Psychologist, Co-Founder",       image: "/assets/RPG_Images for UI/Anat copy.jpg" },
-    { slug: "tamara-eromo",      name: "Tamara Eromo, Psy.D.",       role: "Clinical Psychologist, Co-Founder",       image: "/assets/RPG_Images for UI/Tamara copy.jpg" },
-    { slug: "wendy-eifert",      name: "Wendy Eifert, Psy.D.",       role: "Clinical Psychologist",                   image: "/assets/RPG_Images for UI/Wendy copy.jpg" },
-    { slug: "hedieh-hakakian",   name: "Hedieh Hakakian, Psy.D.",    role: "Clinical Psychologist",                   image: "/assets/RPG_Images for UI/Hedieh copy.jpg" },
-    { slug: "valarie-gardner",   name: "Valarie Gardner, M.A., AMFT",role: "Marriage and Family Therapy Associate",   image: "/assets/RPG_Images for UI/Valarie copy.jpg" },
+    { slug: "anat-cohen",        name: "Anat Cohen, Ph.D.",          role: "Clinical Psychologist, Co-Founder",       image: "/assets/teams photo/Anat-8.png" },
+    { slug: "tamara-eromo",      name: "Tamara Eromo, Psy.D.",       role: "Clinical Psychologist, Co-Founder",       image: "/assets/teams photo/Tamara-8.png" },
+    { slug: "wendy-eifert",      name: "Wendy Eifert, Psy.D.",       role: "Clinical Psychologist",                   image: "/assets/teams photo/Wendy-8.png" },
+    { slug: "hedieh-hakakian",   name: "Hedieh Hakakian, Psy.D.",    role: "Clinical Psychologist",                   image: "/assets/teams photo/Hedieh-8.png" },
+    { slug: "valarie-gardner",   name: "Valarie Gardner, M.A., AMFT",role: "Marriage and Family Therapy Associate",   image: "/assets/teams photo/Valarie-8.png" },
 ];
 
 export function Header() {
@@ -47,7 +47,6 @@ export function Header() {
     const [btnText, setBtnText] = useState("Contact Us");
     const [teamProfiles, setTeamProfiles] = useState<TeamNavProfile[]>(STATIC_TEAM_NAV);
     const [menuOpen, setMenuOpen] = useState(false);
-    const [scrolled, setScrolled] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
 
     // Fetch dynamic settings
@@ -90,13 +89,6 @@ export function Header() {
         fetchTeamProfiles();
     }, []);
 
-    // Scroll shadow effect
-    useEffect(() => {
-        const handleScroll = () => setScrolled(window.scrollY > 12);
-        window.addEventListener("scroll", handleScroll, { passive: true });
-        return () => window.removeEventListener("scroll", handleScroll);
-    }, []);
-
     // Close menu when route changes
     useEffect(() => {
         setMenuOpen(false);
@@ -115,26 +107,22 @@ export function Header() {
     return (
         <>
             {/* ── Main header bar ── */}
-            <header
-                className={`w-full bg-[#FFFAF5] border-b border-black/[0.06] fixed top-0 left-0 right-0 z-[9999] font-sans transition-all duration-300 ${
-                    scrolled ? "shadow-[0_1px_16px_rgba(0,0,0,0.06)]" : ""
-                }`}
-            >
-                <div className="w-full px-8 xl:px-14 h-[72px] flex items-center justify-between">
+            <header className="relative z-50 w-full bg-[#FEF8F4] font-sans">
+                <div className="site-header-inner w-full px-6 md:px-10 lg:px-16 xl:px-[64px] flex items-center justify-between">
 
                     {/* Logo */}
                     <Link href="/" className="flex items-center flex-shrink-0 relative z-10">
                         <img
                             src={logoUrl}
                             alt="Reframe Psychology Group Logo"
-                            style={{ width: "175px" }}
+                            style={{ width: "188px" }}
                             className="object-contain h-auto"
                         />
                     </Link>
 
                     {/* Desktop navigation */}
-                    <div className="hidden lg:flex items-center gap-10">
-                        <nav className="flex items-center gap-9">
+                    <div className="hidden lg:flex items-center gap-10 xl:gap-[44px] shrink-0">
+                        <nav className="flex items-center gap-7 xl:gap-9">
                             {navItems.map((item) => {
                                 const isActive = pathname === item.href;
                                 const isTeam = item.href === "/team";
@@ -145,7 +133,7 @@ export function Header() {
                                         <div key={item.href} className="relative py-2 group">
                                             <Link
                                                 href={item.href}
-                                                className={`text-[18px] font-semibold text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 flex items-center gap-1.5 ${
+                                                className={`text-[18px] font-semibold text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                                                     isActive ? "text-[#333a42]" : ""
                                                 }`}
                                             >
@@ -192,7 +180,7 @@ export function Header() {
                                         <div key={item.href} className="relative py-2 group">
                                             <Link
                                                 href={item.href}
-                                                className={`text-[18px] font-semibold text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 flex items-center gap-1.5 ${
+                                                className={`text-[18px] font-semibold text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 flex items-center gap-1.5 whitespace-nowrap shrink-0 ${
                                                     isActive ? "text-[#333a42]" : ""
                                                 }`}
                                             >
@@ -233,7 +221,7 @@ export function Header() {
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className={`text-[18px] font-semibold text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 group ${
+                                        className={`text-[18px] font-semibold text-[#5c6670] hover:text-[#333a42] transition-all duration-200 relative py-1.5 group whitespace-nowrap shrink-0 ${
                                             isActive ? "text-[#333a42]" : ""
                                         }`}
                                     >
@@ -248,7 +236,7 @@ export function Header() {
                         </nav>
                         <Link
                             href="/contact"
-                            className="bg-[#3d4853] hover:bg-[#2d3740] text-white rounded-[6px] font-sans font-medium text-[16px] h-[44px] px-7 flex items-center transition-colors duration-200"
+                            className="bg-[#4B5563] hover:bg-[#3d4853] text-white font-sans font-medium text-[16px] h-[50px] px-[26px] flex items-center whitespace-nowrap shrink-0 transition-colors duration-200"
                         >
                             {btnText}
                         </Link>
@@ -281,9 +269,6 @@ export function Header() {
                 </div>
             </header>
 
-            {/* ── Spacer so content isn't hidden behind fixed header ── */}
-            <div className="h-[72px] bg-[#FFFAF5]" />
-
             {/* ── Mobile full-screen overlay menu ── */}
             {/* Backdrop blur */}
             <div
@@ -296,7 +281,7 @@ export function Header() {
             {/* Slide-in drawer from right */}
             <div
                 ref={menuRef}
-                className={`fixed top-0 right-0 h-full w-[85vw] max-w-[360px] bg-white z-50 lg:hidden flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] shadow-[-12px_0_48px_rgba(0,0,0,0.12)] ${
+                className={`fixed top-0 right-0 h-full w-[85vw] max-w-[360px] bg-white z-50 lg:hidden flex flex-col transition-transform duration-500 ease-drawer shadow-[-12px_0_48px_rgba(0,0,0,0.12)] ${
                     menuOpen ? "translate-x-0" : "translate-x-full"
                 }`}
             >

@@ -28,55 +28,59 @@ export default async function ServicesPage() {
     const reimbursementInfo = pageData?.content?.reimbursement_info || "Your insurance company and your particular coverage determine if and how you can be reimbursed. At your request, we will do our best to provide information that will support your claim.";
 
     return (
-        <div className="bg-[#f2ede4] min-h-screen font-sans text-[#4a535e] pb-0">
+        <div className="min-h-screen bg-[#F0EAE2] font-sans text-[#3E4753]">
 
-            {/* Section 1: Telehealth Services Hero Banner */}
-            <section
-                className="relative w-full min-h-[45vh] lg:min-h-[50vh] flex items-center bg-cover bg-center"
-                style={{ backgroundImage: `url('${heroImg}')` }}
-            >
-                <div className="absolute inset-0 bg-white/20 lg:bg-gradient-to-r lg:from-white/55 lg:via-white/25 lg:to-transparent" />
-
-                <div className="container mx-auto px-6 sm:px-12 lg:px-20 relative z-10 max-w-6xl w-full text-left py-24">
-                    <div className="max-w-2xl space-y-5">
-                        <h1 className="text-[42px] sm:text-[54px] font-serif text-[#333a42] font-bold leading-tight tracking-tight">
+            {/* Hero — photo layer washed back over the #D6CFC2 veil */}
+            <section className="relative isolate overflow-hidden bg-[#D6CFC2]">
+                <img
+                    src={heroImg}
+                    alt="Older woman in a bright kitchen having a telehealth video session with her doctor"
+                    width={1920}
+                    height={1088}
+                    className="absolute inset-0 h-full w-full object-cover opacity-[0.6]"
+                />
+                <div
+                    aria-hidden
+                    className="absolute inset-0"
+                    style={{
+                        background:
+                            "linear-gradient(90deg, #D6CFC2 0%, rgba(214,207,194,0) 100%)",
+                    }}
+                />
+                <div className="relative mx-auto flex min-h-[34.5vw] max-w-[1600px] items-center px-8 py-24 md:px-[9vw]">
+                    {/* measure is 60% of the content box — matches the design's ~61 chars per line */}
+                    <div className="w-full max-w-[60%]">
+                        {/* H1 — Merriweather Semibold, 3.21vw */}
+                        <h1 className="font-serif text-[clamp(2rem,3.21vw,60px)] font-semibold leading-[1.15]">
                             {heroTitle}
                         </h1>
-                        <p className="text-[16px] sm:text-[18px] text-[#4a535e] leading-relaxed font-normal">
-                            Reframe Psychology Group provides all services online via our HIPAA compliant, encrypted video platform called{" "}
-                            <strong className="font-bold text-[#333a42]">SimplePractice.</strong>{" "}
-                            All you will need is a private place to meet, an internet connection, and a computer or mobile device. Online sessions are secure, confidential, and allow for more ease and flexibility in scheduling.
+                        {/* B2.2 — Raleway Regular, 1.6vw / 1.33 */}
+                        <p className="mt-[30px] text-justify font-normal text-[clamp(1rem,1.6vw,30px)] leading-[1.33]">
+                            Reframe Psychology Group provides all services online via our HIPAA compliant,
+                            encrypted video platform called <strong className="font-semibold">SimplePractice</strong>.
+                            All you will need is a private place to meet, an internet connection, and a computer
+                            or mobile device. Online sessions are secure, confidential, and allow for more ease
+                            and flexibility in scheduling.
                         </p>
                     </div>
                 </div>
             </section>
 
-            {/* Section 2: Fees Centered Content */}
-            <section className="bg-[#f2ede4] py-24 sm:py-28 px-6">
-                <div className="container mx-auto max-w-4xl text-center space-y-8 sm:space-y-10 text-[#4a535e]">
-
-                    <h2 className="text-[34px] sm:text-[42px] font-serif text-[#333a42] font-normal tracking-tight">
+            {/* Fees */}
+            <section className="bg-[#F0EAE2]">
+                {/* measure is ~79% of viewport (px-[10.5vw]) — matches the design's ~104 chars per line */}
+                <div className="mx-auto w-full max-w-[1600px] px-8 pt-[58px] pb-[150px] text-center md:px-[10.5vw]">
+                    {/* H1 — Merriweather Semibold, 3.21vw */}
+                    <h2 className="font-serif text-[clamp(2rem,3.21vw,60px)] font-semibold leading-none">
                         {feesTitle}
                     </h2>
-
-                    <div className="text-[15px] sm:text-[16px] md:text-[17px] leading-relaxed space-y-8 font-normal max-w-3xl mx-auto">
-                        <p className="whitespace-pre-line">
-                            {feesSubtitle}
-                        </p>
-
-                        <p>
-                            {oonPara1}
-                        </p>
-
-                        <p>
-                            {oonPara2}
-                        </p>
-
-                        <p>
-                            {reimbursementInfo}
-                        </p>
+                    {/* B2.2 — Raleway Regular, 1.6vw / 1.33 */}
+                    <div className="mt-[44px] space-y-[26px] font-normal text-[clamp(1rem,1.6vw,30px)] leading-[1.33]">
+                        <p className="whitespace-pre-line">{feesSubtitle}</p>
+                        <p>{oonPara1}</p>
+                        <p>{oonPara2}</p>
+                        <p>{reimbursementInfo}</p>
                     </div>
-
                 </div>
             </section>
 

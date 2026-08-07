@@ -78,7 +78,7 @@ export default async function BlogListingPage() {
 
             {/* Header */}
             <div className="w-full text-center mt-20 mb-16 px-4">
-                <h1 className="text-[34px] sm:text-[42px] font-serif text-[#333a42] font-normal tracking-tight">
+                <h1 className="text-[21px] sm:text-[27px] lg:text-[34px] sm:text-[42px] font-serif text-[#333a42] font-normal tracking-tight">
                     Blogs & Articles
                 </h1>
             </div>

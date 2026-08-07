@@ -168,16 +168,17 @@ export default async function SpecialtiesPage() {
 
             {/* Page Header — H1 52px serif */}
             <div className="w-full text-center pt-20 pb-16 px-8">
-                <h1 className="font-serif font-normal text-[#3f4a56]" style={{ fontSize: "52px" }}>{title}</h1>
+                {/* H1 — Merriweather Semibold */}
+                <h1 className="font-serif font-semibold text-[#3f4a56]" style={{ fontSize: "clamp(25px, 4.4vw, 44px)" }}>{title}</h1>
             </div>
 
             {/* Card Grid */}
-            <div className="container mx-auto px-10 max-w-6xl">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+            <div className="mx-auto w-full px-10 max-w-6xl">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-[46px] gap-y-[56px]">
                     {specialtiesList.map((spec) => (                        <Link
                             key={spec.id}
                             href={`/specialties/${spec.id}`}
-                            className="group relative overflow-hidden flex flex-col justify-between p-10 transition-all duration-300 aspect-[4/3]"
+                            className="group relative overflow-hidden flex flex-col justify-between p-8 transition-all duration-300 aspect-[1.57/1]"
                             style={{ boxShadow: "0 20px 60px rgba(60,50,40,0.18), 0 6px 20px rgba(60,50,40,0.10)" }}
                         >
                             {/* Background image */}
@@ -190,20 +191,20 @@ export default async function SpecialtiesPage() {
                             <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, #D6CFC2 0%, #D6CFC2 48%, rgba(214,207,194,0.85) 68%, rgba(214,207,194,0.4) 100%)' }} />
 
                             {/* Text content */}
-                            <div className="relative z-10 space-y-5 max-w-[78%]">
+                            <div className="relative z-10 space-y-5 max-w-[88%]">
                                 {/* H4 — Merriweather Semibold */}
-                                <h2 className="font-serif font-semibold text-[#333a42] leading-snug" style={{ fontSize: "26px" }}>
+                                <h2 className="font-serif font-bold text-[#333a42] leading-[1.8]" style={{ fontSize: "clamp(16px, 2.05vw, 20.5px)" }}>
                                     {spec.title}
                                 </h2>
-                                {/* Body — justified with hyphens, per mockup */}
-                                <p className="font-sans font-normal text-[#4a535e] leading-relaxed line-clamp-[8] text-justify hyphens-auto whitespace-pre-line" style={{ fontSize: "17px" }} lang="en">
+                                {/* B2.1 — Raleway Regular, justified with hyphens */}
+                                <p className="font-sans font-medium text-[#4a535e] leading-[1.32] line-clamp-[8] text-justify hyphens-auto whitespace-pre-line" style={{ fontSize: "18.6px" }} lang="en">
                                     {spec.excerpt}
                                 </p>
                             </div>
 
                             {/* READ MORE */}
                             <div className="relative z-10">
-                                <span className="font-sans font-normal text-[#4a535e] uppercase tracking-[0.18em] group-hover:text-[#333a42] transition-colors duration-200" style={{ fontSize: "13px" }}>
+                                <span className="font-sans font-medium text-[#4a535e] uppercase tracking-[0.18em] group-hover:text-[#333a42] transition-colors duration-200" style={{ fontSize: "13.5px" }}>
                                     Read More
                                 </span>
                             </div>
